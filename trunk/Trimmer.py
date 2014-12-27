@@ -131,6 +131,27 @@ class TrimmerMain (wx.Frame):
 if __name__ == "__main__":
     if not os.path.isdir(TrimmerConfig.get('FilePaths', 'LogPath')):
         os.makedirs(TrimmerConfig.get('FilePaths', 'LogPath'))
+        # Put a temp init file in
+        with open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'),'Trimmer.ini'),'wt') as f:
+            f.write("""
+#Trimmer Ini File
+#
+#[FilePaths]
+#SourcePath = D:\PRIVATE\AVCHD\BDMV\STREAM
+#DestPath = C:\Documents and Settings\AndynDeanna\My Documents\Sandbox
+#AutoStart = True
+#
+#[Segment4]
+#Name = Before Prayer
+#EncodeString = ffmpeg -report -nostdin -i "$InFile$"
+# -vf "crop=(in_h*4/3),fade=in:st=$FadeInStart$:d=$FadeLength$,fade=out:st=$FadeOutStart$:d=$FadeLength$"
+# -vcodec libx264 -profile:v baseline -x264opts keyint=123:min-keyint=25:crf=19 -vsync cfr
+# -af "afade=in:st=$FadeInStart$:d=$FadeLength$,afade=out:st=$FadeOutStart$:d=$FadeLength$"
+# -acodec libvo_aacenc -ac 2 -ab 320k -profile:a aac_low
+# -ss $OutputStart$ -t $OutputLength$ "$OutFileName$.mp4"
+#DefaultOutFileName = $InFileName$_without_prayer
+#Completion = None            
+            """)
         
     try:
         log = open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "stdout_log.txt"), "w")
