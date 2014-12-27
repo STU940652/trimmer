@@ -24,6 +24,7 @@ TrimmerConfig.add_section('FilePaths')
 TrimmerConfig.set('FilePaths', 'SourcePath', '.')
 TrimmerConfig.set('FilePaths', 'DestPath', '.')
 TrimmerConfig.set('FilePaths', 'AutoStart', 'false')
+TrimmerConfig.set('FilePaths', 'FileCopy', 'true')
 
 if "APPDATA" in os.environ:
     # For Windows

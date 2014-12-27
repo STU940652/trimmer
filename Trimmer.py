@@ -77,8 +77,9 @@ class TrimmerMain (wx.Frame):
         self.tabs = wx.Notebook(self)
         
         # File Copy Tab
-        self.copypanel = FileCopy(self.tabs, self.StatusBar, self.CopyDoneCallback)
-        self.tabs.AddPage(self.copypanel,"Copy Files")
+        if (TrimmerConfig.get('FilePaths', 'FileCopy').lower()=="true"):
+            self.copypanel = FileCopy(self.tabs, self.StatusBar, self.CopyDoneCallback)
+            self.tabs.AddPage(self.copypanel,"Copy Files")
         
         # Setup the player panel
         self.playerpanel = Player(self.tabs, self.SubmitJobCallback, self.StatusBar)
@@ -140,6 +141,7 @@ if __name__ == "__main__":
 #SourcePath = D:\PRIVATE\AVCHD\BDMV\STREAM
 #DestPath = C:\Documents and Settings\AndynDeanna\My Documents\Sandbox
 #AutoStart = True
+#FileCopy = True
 #
 #[Segment4]
 #Name = Before Prayer
