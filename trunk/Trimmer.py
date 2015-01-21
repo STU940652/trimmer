@@ -30,7 +30,7 @@ Date: 23-11-2010
 import wx 
 import sys
 import os
-import Queue
+import queue
 import subprocess
 
 # import external libraries
@@ -66,9 +66,9 @@ class TrimmerMain (wx.Frame):
         self.StatusBar = self.CreateStatusBar(2)
         
         # Start the Encode thread
-        self.commandQueue = Queue.Queue()
-        self.responseQueue = Queue.Queue()
-        self.cancelQueue = Queue.Queue()
+        self.commandQueue = queue.Queue()
+        self.responseQueue = queue.Queue()
+        self.cancelQueue = queue.Queue()
         self.EncodeThread = EncodeThread(self.commandQueue, self.responseQueue, self.cancelQueue)
         self.EncodeThread.start()
         self.Bind(wx.EVT_CLOSE, self.CloseEvent, self)

@@ -103,7 +103,7 @@ class FileCopy(wx.Panel):
         if (os.path.exists(self.DestFilename)):
             d = wx.MessageDialog(self, "File %s exists.\nDo you want to overwrite?" % self.DestFilename, \
                 caption = "Destination File Exists", style=wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
-            if (d.ShowModal() <> wx.ID_YES):
+            if (d.ShowModal() != wx.ID_YES):
                 # Bail out
                 self.StatusBar.SetStatusText("")
                 self.NotificationCheck.Enable()
@@ -129,15 +129,15 @@ class FileCopy(wx.Panel):
     def OnTimer (self, evt):
         if self.CopySubProcess:
             # Copy is in progress.  Let's check the status
-            if (self.CopySubProcess.poll() <> None):
+            if (self.CopySubProcess.poll() != None):
                 # Copy is done.  Cleanup
                 self.NotificationCheck.Enable()
                 self.StartButton.Enable()        
                 self.DestName.Enable()
                 self.CancelButton.Hide()
-                if (self.CopySubProcess.returncode <> 0):
+                if (self.CopySubProcess.returncode != 0):
                     # Finished with errors
-                    print self.CopySubProcess.communicate()
+                    print(self.CopySubProcess.communicate())
                     self.StatusBar.SetStatusText("Error while copying.")
                     self.CopySubProcess = None
                 else:

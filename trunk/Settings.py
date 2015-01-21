@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import os
 
 # #Sample ini file
@@ -17,7 +17,7 @@ import os
 # Seg2_EncodeString = 'ffmpeg ....'
 # Seg2_Completion = "VimeoUpload();AudioFTP()"
 
-TrimmerConfig=ConfigParser.SafeConfigParser()
+TrimmerConfig=configparser.SafeConfigParser()
 
 # Put in some default values
 TrimmerConfig.add_section('FilePaths')
