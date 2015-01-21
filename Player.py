@@ -1,6 +1,5 @@
 import wx # 2.8
 import vlc
-import user
 import os
 from Settings import *
 
@@ -200,14 +199,14 @@ class Player(wx.Panel):
                     .replace("$OutFileName$", self.OutputFileName.GetValue())
                     
         self.SubmitJobCallback("Encode %s" % TrimmerConfig.get(section,'Name') , cmd)
-        print cmd
+        print(cmd)
         
     def OpenFile (self, MediaFileName, Play = True):
         # if a file is already running, then stop it.
         self.OnStop(None)
 
         self.MediaFileName=MediaFileName
-        self.Media = self.Instance.media_new(unicode(self.MediaFileName))
+        self.Media = self.Instance.media_new(str(self.MediaFileName))
         self.player.set_media(self.Media)
         # Report the title of the file chosen
         title = self.player.get_title()
@@ -243,7 +242,7 @@ class Player(wx.Panel):
 
         # Create a file dialog opened in the current home directory, where
         # you can display all kind of files, having as title "Choose a file".
-        dlg = wx.FileDialog(self, "Choose a file", user.home, "",
+        dlg = wx.FileDialog(self, "Choose a file", os.path.expanduser('~'), "",
                             "*.*", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             dirname = dlg.GetDirectory()

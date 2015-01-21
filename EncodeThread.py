@@ -39,8 +39,8 @@ class EncodeThread (threading.Thread):
                             except:
                                 sp = None
                                 self.responseQueue.put ( (cName, "Exception: " + traceback.format_exc()) )
-                                print traceback.format_exc()
-                if (sp <> None) and (sp.poll() == None):
+                                print(traceback.format_exc())
+                if (sp != None) and (sp.poll() == None):
                     # Get any output
                     c = sp.stdout.read(1)
                     if len(c) > 0:
@@ -52,7 +52,7 @@ class EncodeThread (threading.Thread):
                 else:
                     time.sleep(0.5)
                     
-                if (sp <> None) and (sp.poll() <> None):
+                if (sp != None) and (sp.poll() != None):
                     o = sp.stdout.read()
                     self.responseQueue.put ( (cName, o) )
                     if sp.returncode == 0:
@@ -74,7 +74,7 @@ class EncodeThread (threading.Thread):
                         self.cancelList.append(cancelName)
                         
                 
-            if sp <> None:
+            if sp != None:
                 sp.terminate()
                 sp.wait()
 
