@@ -4,8 +4,7 @@ from cx_Freeze import setup, Executable
 # fine tuning.
 buildOptions = dict(packages = [], 
                     excludes = [], 
-                    include_files = ['ffmpeg.exe', 'Trimmer.ini', 'Format for EW.cmd'],
-                    build_exe = "dist/Trimmer"
+                    include_files = ['ffmpeg.exe', 'Trimmer.ini', 'Format for EW.cmd']
                     )
 
 import sys
