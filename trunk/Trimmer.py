@@ -83,7 +83,7 @@ class TrimmerMain (wx.Frame):
         
         # Setup the player panel
         self.playerpanel = Player(self.tabs, self.SubmitJobCallback, self.StatusBar)
-        self.tabs.AddPage(self.playerpanel, "Trimmer")
+        self.tabs.AddPage(self.playerpanel, "Player")
         
         self.jobmessagepanel = JobList(self.tabs, self.responseQueue, self.CancelJobCallback)
         self.tabs.AddPage(self.jobmessagepanel, "Messages")
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     except:
         pass
     # Create a wx.App(), which handles the windowing system event loop
-    app = wx.PySimpleApp()
+    app = wx.App()
     # Create the window containing our small media player
     player = TrimmerMain("Trimmer")
     # show the player window centred and run the application
