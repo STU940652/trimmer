@@ -1380,7 +1380,7 @@ class Instance(_Ctype):
         if not args and plugin_path is not None:
              # no parameters passed, for win32 and MacOS,
              # specify the plugin_path if detected earlier
-            args = ['vlc', '--plugin-path=' + plugin_path]
+            args = ['vlc']
         if PYTHON3:
             args = [ str_to_bytes(a) for a in args ]
         return libvlc_new(len(args), args)
