@@ -34,8 +34,8 @@ class JobList(wx.Panel):
 
     def AddJob (self, cName):
         row = self.MessageList.GetItemCount()
-        self.MessageList.InsertStringItem(row, cName)
-        self.MessageList.SetStringItem(row,1, 'Pending...')
+        self.MessageList.InsertItem(row, cName)
+        self.MessageList.SetItem(row,1, 'Pending...')
 
     def OnRightClick(self, event):
         self.ItemIndexRightClicked = event.GetIndex()
@@ -58,7 +58,7 @@ class JobList(wx.Panel):
         """
         if (self.menuItems[event.GetId()] == 'Cancel'):
             self.CancelJobCallback(self.MessageList.GetItemText(self.ItemIndexRightClicked))
-            self.MessageList.SetStringItem(self.ItemIndexRightClicked,1 , "Cancelling...")
+            self.MessageList.SetItem(self.ItemIndexRightClicked,1 , "Cancelling...")
 
     def OnTimer (self, evt):
         while not self.responseQueue.empty():
@@ -66,11 +66,11 @@ class JobList(wx.Panel):
             found = False
             for row in range(self.MessageList.GetItemCount()):
                 if cName==self.MessageList.GetItemText(row):
-                    self.MessageList.SetStringItem(row,1, message)
+                    self.MessageList.SetItem(row,1, message)
                     found = True
                     break
             if not found:
                 row = self.MessageList.GetItemCount()
                 self.MessageList.InsertStringItem(row, cName)
-                self.MessageList.SetStringItem(row,1, message)
+                self.MessageList.SetItem(row,1, message)
             
