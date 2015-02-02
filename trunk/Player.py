@@ -38,7 +38,9 @@ class Player(wx.Panel):
         ctrlpanel = wx.Panel(self, -1 )
         
         # Crop Slider
-        #self.cropslider = wx.ScrollBar(ctrlpanel, -1, style = wx.SB_HORIZONTAL )
+        self.cropslider = wx.ScrollBar(ctrlpanel, -1, style = wx.SB_HORIZONTAL )
+        self.cropslider.Disable()
+        self.cropCheckbox = wx.CheckBox(ctrlpanel, -1, "Adjust Crop Position")
         
         # Time Slider
         self.timeslider = wx.Slider(ctrlpanel, -1, 0, 0, 1000)
@@ -66,7 +68,10 @@ class Player(wx.Panel):
         box4 = wx.FlexGridSizer(cols = 7)
         box4.AddGrowableCol(0,1)
         
-        #ctrlbox.Add(self.cropslider, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+        # Reset Video size
+        (self.width, self.height) = (0,0)
+        ctrlbox.Add(self.cropslider, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+        ctrlbox.Add(self.cropCheckbox, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
 
         # box1 contains the timeslider
         box1.Add(self.timeslider, 2)
@@ -143,6 +148,7 @@ class Player(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnStartPlayTo, self.StartPlayTo)
         self.Bind(wx.EVT_BUTTON, self.OnStartFill, StartFill)
         self.Bind(wx.EVT_TEXT, self.OnChangeSelection, self.SectionSelect)
+        self.Bind(wx.EVT_CHECKBOX, self.OnCropCheckbox, self.cropCheckbox)
 
         # Put everything together
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -164,6 +170,10 @@ class Player(wx.Panel):
         
         self.OnChangeSelection()
 
+    def OnCropCheckbox(self, evt=None):
+        self.cropslider.Show(self.cropCheckbox.IsChecked())
+        self.cropslider.Enable(self.cropCheckbox.IsChecked())
+        
     def OnChangeSelection(self, evt=None):
         section = self.SectionSelect.GetClientData(self.SectionSelect.GetSelection())
         self.OutputFileName.SetValue(TrimmerConfig.get(section,'DefaultOutFileName').replace('$InFileName$',self.MediaFileName.rsplit('.',1)[0]))
@@ -186,8 +196,14 @@ class Player(wx.Panel):
         FadeOutStart = ClipOfInterestStop - FadeLength
         OutputLength = ClipOfInterestStop - ClipOfInterestStart + 5.0 + FadeLength + 10.0
         OutputLengthNoHT = FadeOutStart + 0.5 - FadeInStart
+        
+        CropXString = ''
+        if (self.cropCheckbox.IsChecked()):
+            CropXString = ":x=%i" % self.cropslider.GetThumbPosition()
+        
     
         cmd = EncodeString\
+                    .replace("$CropX$",  CropXString)\
                     .replace("$OutputStart$",  str(OutputStart))\
                     .replace("$OutputLength$", str(OutputLength))\
                     .replace("$OutputLengthNoHT$", str(OutputLengthNoHT))\
@@ -226,12 +242,9 @@ class Player(wx.Panel):
         #self.player.audio_set_volume(0)
         self.volslider.SetValue(self.player.audio_get_volume() / 2)
         
-        # Set Crop bar
-        #(width, height) = self.player.video_get_size()
-        #print (width, height)
-        #self.cropslider.SetScrollbar(width/2, height*4/3, width, 20)
-        #print (width/2, height*4/3, width, 20)
 
+        # Reset Video size
+        (self.width, self.height) = (0,0)
         self.OnChangeSelection()
     
     def OnOpen(self, evt):
@@ -243,7 +256,7 @@ class Player(wx.Panel):
         # Create a file dialog opened in the current home directory, where
         # you can display all kind of files, having as title "Choose a file".
         dlg = wx.FileDialog(self, "Choose a file", os.path.expanduser('~'), "",
-                            "*.*", wx.OPEN)
+                            "*.*", wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             dirname = dlg.GetDirectory()
             filename = dlg.GetFilename()
@@ -355,6 +368,14 @@ class Player(wx.Panel):
         # re-set the timeslider to the correct range.
         length = self.player.get_length()
         self.timeslider.SetRange(-1, length)
+        
+        # Set Crop bar
+        (width, height) = self.player.video_get_size()
+        if (width, height) != (self.width, self.height):
+            (self.width, self.height) = (width, height)
+            print (width, height)
+            self.cropslider.SetScrollbar((width-height*4/3)/2, height*4/3, width, 20)
+            print (width/2, height*4/3, width, 20)
 
         # update the time on the slider
         CurrentTime = self.player.get_time()

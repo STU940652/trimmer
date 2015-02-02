@@ -48,7 +48,9 @@ class EncodeThread (threading.Thread):
                             self.responseQueue.put ( (cName, o) )
                             o=""
                         else:
-                            o += c
+                            #print (len(c), c, ord(c))
+                            #o += str(ord(c))
+                            o += c.decode(encoding='ASCII', errors='replace')
                 else:
                     time.sleep(0.5)
                     
