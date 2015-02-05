@@ -77,7 +77,7 @@ class TrimmerMain (wx.Frame):
         self.tabs = wx.Notebook(self)
         
         # File Copy Tab
-        if (TrimmerConfig.get('FilePaths', 'FileCopy').lower()=="true"):
+        if (TrimmerConfig.get('GlobalSettings', 'FileCopy').lower()=="true"):
             self.copypanel = FileCopy(self.tabs, self.StatusBar, self.CopyDoneCallback)
             self.tabs.AddPage(self.copypanel,"Copy Files")
         
@@ -141,7 +141,10 @@ if __name__ == "__main__":
 #SourcePath = D:\PRIVATE\AVCHD\BDMV\STREAM
 #DestPath = C:\Documents and Settings\AndynDeanna\My Documents\Sandbox
 #AutoStart = True
+#
+#[GlobalSettings]
 #FileCopy = True
+#NameTemplate = %m_%d_%Y
 #
 #[Segment4]
 #Name = Before Prayer
