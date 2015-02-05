@@ -55,7 +55,8 @@ class FileCopy(wx.Panel):
         # Filename
         PathLabel = wx.StaticText(self, -1, "Destination Filename")
         Sizer.Add(PathLabel)
-        self.DestName = wx.TextCtrl(self, value=os.path.join(TrimmerConfig.get('FilePaths','DestPath'), datetime.datetime.now().strftime("%m_%d_%Y.mts")))
+        self.DestName = wx.TextCtrl(self, value=os.path.join(TrimmerConfig.get('FilePaths','DestPath'), 
+                                    datetime.datetime.now().strftime("%s.mts" % (TrimmerConfig.get('GlobalSettings', 'NameTemplate')))))
         self.DestButton = wx.Button(self, label='...', size=(20,-1))
         self.Bind(wx.EVT_BUTTON, self.ChangeDestFile, self.DestButton)
         destSizer = wx.BoxSizer(wx.HORIZONTAL)

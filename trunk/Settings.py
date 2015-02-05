@@ -7,6 +7,10 @@ import os
 # DestPath = r"C:\Documents and Settings\AndynDeanna\My Documents\Sandbox"
 # AutoStart = True
 #
+# [GlobalSettings]
+# FileCopy = True
+# NameTemplate = %m_%d_%Y
+#
 # [Segment1]
 # Seg1_Name = "Before Prayer"
 # Seg1_EncodeString = 'ffmpeg ....'
@@ -24,7 +28,10 @@ TrimmerConfig.add_section('FilePaths')
 TrimmerConfig.set('FilePaths', 'SourcePath', '.')
 TrimmerConfig.set('FilePaths', 'DestPath', '.')
 TrimmerConfig.set('FilePaths', 'AutoStart', 'false')
-TrimmerConfig.set('FilePaths', 'FileCopy', 'true')
+
+TrimmerConfig.add_section('GlobalSettings')
+TrimmerConfig.set('GlobalSettings', 'FileCopy', 'true')
+TrimmerConfig.set('GlobalSettings', 'NameTemplate', '%%Y%%m%%d')
 
 if "APPDATA" in os.environ:
     # For Windows
