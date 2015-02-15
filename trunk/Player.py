@@ -24,6 +24,8 @@ def hms_to_ms (s):
 class Player(wx.Panel):
     """The main window has to deal with events.
     """
+    TagNames = ["Title", "Series", "Speaker", "Date", "Comment"]
+    
     def __init__(self, parent, SubmitJobCallback, StatusBar):
         wx.Panel.__init__(self, parent)
 
@@ -136,17 +138,22 @@ class Player(wx.Panel):
         ctrlpanel.SetSizer(ctrlbox)
         
         # Info for MP3 tags
+        tag_line = wx.StaticLine(ctrlpanel)
+        ctrlbox.Add(tag_line, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
         self.Tags = {}
-        temp_box = wx.GridSizer(cols=4)
-        for label in ["Title", "Series", "Speaker", "Date", "Comment"]:
+        temp_box = wx.FlexGridSizer(cols=4)
+        temp_box.AddGrowableCol(1,1)
+        temp_box.AddGrowableCol(3,1)
+        for label in self.TagNames:
             temp_label = wx.StaticText(ctrlpanel, label=label, size=(60, -1), style = wx.TE_RIGHT)
-            temp_box.Add(temp_label, 0, flag=wx.ALIGN_RIGHT)
+            temp_box.Add(temp_label, 0, flag=wx.ALIGN_RIGHT | wx.ALL, border=5)
             self.Tags[label] = wx.TextCtrl(ctrlpanel, size=(120, -1))
             temp_box.Add(self.Tags[label], 1, flag=wx.EXPAND)
 
         # Import Tags button
         import_tag = wx.Button(ctrlpanel, label="Import from CMS")
-        temp_box.Add(import_tag, 0, wx.BOTTOM | wx.TOP)
+        temp_box.AddStretchSpacer()
+        temp_box.Add(import_tag, 0,  flag=wx.ALIGN_RIGHT | wx.BOTTOM | wx.TOP)
 
         ctrlbox.Add(temp_box, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
         
@@ -211,11 +218,7 @@ class Player(wx.Panel):
         section = self.SectionSelect.GetClientData(self.SectionSelect.GetSelection())
         self.OutputFileName.SetValue(TrimmerConfig.get(section,'DefaultOutFileName').replace('$InFileName$',self.MediaFileName.rsplit('.',1)[0]))
         
-    def OnEncode(self, evt):
-        section = self.SectionSelect.GetClientData(self.SectionSelect.GetSelection())
-             
-        EncodeString = TrimmerConfig.get(section,'EncodeString').replace('\n',' ').replace('\r',' ')
-            
+    def Substitute (self, s):
         ClipOfInterestStart = hms_to_ms(self.StartTime.GetValue())/1000.0
         ClipOfInterestStop  = hms_to_ms(self.StopTime.GetValue() )/1000.0
         
@@ -234,8 +237,12 @@ class Player(wx.Panel):
         if (self.cropCheckbox.IsChecked()):
             CropXString = ":x=%i" % self.cropslider.GetThumbPosition()
         
-    
-        cmd = EncodeString\
+        # Substitute Tags
+        for tag in self.TagNames:
+            s = s.replace("$%s$" % (tag), self.Tags[tag].GetValue())
+        
+        # Substitute other variables
+        s = s\
                     .replace("$CropX$",  CropXString)\
                     .replace("$OutputStart$",  str(OutputStart))\
                     .replace("$OutputLength$", str(OutputLength))\
@@ -246,7 +253,15 @@ class Player(wx.Panel):
                     .replace("$InFile$", self.MediaFileName)\
                     .replace("$InFileName$", self.MediaFileName.rsplit('.',1)[0])\
                     .replace("$OutFileName$", self.OutputFileName.GetValue())
-                    
+        return s
+    
+    def OnEncode(self, evt):
+        section = self.SectionSelect.GetClientData(self.SectionSelect.GetSelection())
+             
+        EncodeString = TrimmerConfig.get(section,'EncodeString').replace('\n',' ').replace('\r',' ')
+            
+        # Substitute other variables
+        cmd = self.Substitute(EncodeString)   
         self.SubmitJobCallback("Encode %s" % TrimmerConfig.get(section,'Name') , cmd)
         print(cmd)
         

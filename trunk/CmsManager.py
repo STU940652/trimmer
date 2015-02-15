@@ -64,8 +64,8 @@ class CmsManager ():
             if i.get_attribute("selected"):
                 self.EventInfo["comment"] = i.text
                 break
-        passage1chaper = self.driver.find_element_by_name("passage1chapter").get_attribute("value")
-        self.EventInfo["comment"] += " " + passage1chaper
+        passage1chapter = self.driver.find_element_by_name("passage1chapter").get_attribute("value")
+        self.EventInfo["comment"] += " " + passage1chapter
         self.EventInfo["comment"] += ":" + self.driver.find_element_by_name("passage1verse").get_attribute("value")
         passage1chapter2 = self.driver.find_element_by_name("passage1chapter2").get_attribute("value")
         if passage1chapter2 != "":
