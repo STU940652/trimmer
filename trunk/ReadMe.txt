@@ -14,6 +14,9 @@ DEPENDENCIES
   Running the Python
     - Python 3.x
     - wxPython
+    - Boto (Amazon S3 client)
+    - Selenium (automated web client)
+    
 
   Building the binary
     - cx_freeze 2.x
