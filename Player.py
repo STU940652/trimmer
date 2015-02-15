@@ -2,6 +2,7 @@ import wx # 2.8
 import vlc
 import os
 from Settings import *
+from CmsManager import *
 
 def ms_to_hms (ms):
     h = int(ms/(60*60*1000))
@@ -133,7 +134,22 @@ class Player(wx.Panel):
         ctrlbox.Add(box5, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
         
         ctrlpanel.SetSizer(ctrlbox)
+        
+        # Info for MP3 tags
+        self.Tags = {}
+        temp_box = wx.GridSizer(cols=4)
+        for label in ["Title", "Series", "Speaker", "Date", "Comment"]:
+            temp_label = wx.StaticText(ctrlpanel, label=label, size=(60, -1), style = wx.TE_RIGHT)
+            temp_box.Add(temp_label, 0, flag=wx.ALIGN_RIGHT)
+            self.Tags[label] = wx.TextCtrl(ctrlpanel, size=(120, -1))
+            temp_box.Add(self.Tags[label], 1, flag=wx.EXPAND)
 
+        # Import Tags button
+        import_tag = wx.Button(ctrlpanel, label="Import from CMS")
+        temp_box.Add(import_tag, 0, wx.BOTTOM | wx.TOP)
+
+        ctrlbox.Add(temp_box, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+        
         # Bind controls to events
         self.Bind(wx.EVT_BUTTON, self.OnPlay, play)
         self.Bind(wx.EVT_BUTTON, self.OnPause, pause)
@@ -142,6 +158,7 @@ class Player(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnToggleVolume, volume)
         self.Bind(wx.EVT_SLIDER, self.OnSetVolume, self.volslider)
         self.Bind(wx.EVT_SLIDER, self.OnSetTime, self.timeslider)
+        self.Bind(wx.EVT_BUTTON, self.OnImportFromCMS, import_tag)
         
         # Bind stuff
         self.Bind(wx.EVT_BUTTON, self.OnStartPlayFrom, self.StartPlayFrom)
@@ -170,6 +187,22 @@ class Player(wx.Panel):
         
         self.OnChangeSelection()
 
+    def OnImportFromCMS(self, evt=None):
+        with CmsManager() as c:
+            info = c.GetEventInfo()
+            
+        for key in info:            
+            if key == "title":
+                self.Tags["Title"].SetValue(info[key])
+            if key == "series":
+                self.Tags["Series"].SetValue(info[key])
+            if key == "speaker":
+                self.Tags["Speaker"].SetValue(info[key])
+            if key == "date":
+                self.Tags["Date"].SetValue(info[key])
+            if key == "comment":
+                self.Tags["Comment"].SetValue(info[key])
+        
     def OnCropCheckbox(self, evt=None):
         self.cropslider.Show(self.cropCheckbox.IsChecked())
         self.cropslider.Enable(self.cropCheckbox.IsChecked())

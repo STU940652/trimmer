@@ -12,6 +12,7 @@ class CmsManager ():
     def Login(self):
         if not self.IsLoggedIn:
             if self.driver == None:
+                #self.driver = webdriver.PhantomJS()
                 self.driver = webdriver.Firefox()
             self.driver.get("http://my.ekklesia360.com/Login")
             self.driver.switch_to_frame('_monkIdXdm')
@@ -55,6 +56,23 @@ class CmsManager ():
         self.EventInfo["date"] = self.driver.find_element_by_id("sermondate").get_attribute("value")
 
         self.EventInfo["speaker"] = self.driver.find_element_by_id("selection").find_elements_by_tag_name('span')[0].text
+        
+        # Get passage info
+        self.EventInfo["comment"] = ""
+        l = self.driver.find_element_by_id("passage")
+        for i in l.find_elements_by_tag_name('option'):
+            if i.get_attribute("selected"):
+                self.EventInfo["comment"] = i.text
+                break
+        passage1chaper = self.driver.find_element_by_name("passage1chapter").get_attribute("value")
+        self.EventInfo["comment"] += " " + passage1chaper
+        self.EventInfo["comment"] += ":" + self.driver.find_element_by_name("passage1verse").get_attribute("value")
+        passage1chapter2 = self.driver.find_element_by_name("passage1chapter2").get_attribute("value")
+        if passage1chapter2 != "":
+            self.EventInfo["comment"] += "-"
+            if passage1chapter != passage1chapter2:
+                self.EventInfo["comment"] += passage1chapter2 + ":"
+            self.EventInfo["comment"] += self.driver.find_element_by_name("passage1verse2").get_attribute("value")
         
         return self.EventInfo
 
