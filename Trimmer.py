@@ -44,7 +44,7 @@ from Settings import *
 
 class TrimmerMain (wx.Frame):
     def __init__ (self, title):
-        minsize = (600,500)
+        minsize = (800,600)
         wx.Frame.__init__(self, None, -1, title,
                           pos=wx.DefaultPosition, size=minsize)
         # Menu Bar
