@@ -24,10 +24,10 @@ class EncodeThread (threading.Thread):
                 if sp == None:
                     # Check for a new command
                     if not self.commandQueue.empty():
-                        cName, command = self.commandQueue.get()
+                        cName, command, completion = self.commandQueue.get()
                         if cName in self.cancelList:
                             # Cancel job and move on
-                            self.responseQueue.put( (cName, "Cancelled") )
+                            self.responseQueue.put( (cName, "Canceled", None) )
                         else:
                             # ok to start this job
                             try:
@@ -41,14 +41,14 @@ class EncodeThread (threading.Thread):
                                                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                             except:
                                 sp = None
-                                self.responseQueue.put ( (cName, "Exception: " + traceback.format_exc()) )
+                                self.responseQueue.put ( (cName, "Exception: " + traceback.format_exc(), None) )
                                 print(traceback.format_exc())
                 if (sp != None) and (sp.poll() == None):
                     # Get any output
                     c = sp.stdout.read(1)
                     if len(c) > 0:
                         if (ord(c) == 0x0D) or (ord(c) == 0x0A):                        
-                            self.responseQueue.put ( (cName, o) )
+                            self.responseQueue.put ( (cName, o, None) )
                             o=""
                         else:
                             o += c
@@ -57,11 +57,11 @@ class EncodeThread (threading.Thread):
                     
                 if (sp != None) and (sp.poll() != None):
                     o = sp.stdout.read()
-                    self.responseQueue.put ( (cName, o) )
+                    self.responseQueue.put ( (cName, o, None) )
                     if sp.returncode == 0:
-                        self.responseQueue.put( (cName, "Finished successfully") )
+                        self.responseQueue.put( (cName, "Finished successfully", completion) )
                     else:
-                        self.responseQueue.put( (cName, "Error: %d" % sp.returncode) )
+                        self.responseQueue.put( (cName, "Error: %d" % sp.returncode, None) )
                     sp = None
                         
                 if not self.cancelQueue.empty():
@@ -71,7 +71,7 @@ class EncodeThread (threading.Thread):
                     if cancelName == cName:
                         sp.terminate()
                         sp = None
-                        self.responseQueue.put( (cName, "Cancelled") )
+                        self.responseQueue.put( (cName, "Canceled", None) )
                     else:
                         # Save job name for when it comes up
                         self.cancelList.append(cancelName)

@@ -40,6 +40,7 @@ from EncodeThread import EncodeThread
 from Player import Player
 from JobList import JobList
 from Settings import *
+from UploadTab import UploadTab
 
 
 class TrimmerMain (wx.Frame):
@@ -88,6 +89,11 @@ class TrimmerMain (wx.Frame):
         self.jobmessagepanel = JobList(self.tabs, self.responseQueue, self.CancelJobCallback)
         self.tabs.AddPage(self.jobmessagepanel, "Messages")
         
+        self.uploadpanel = UploadTab(self.tabs)
+        self.tabs.AddPage(self.uploadpanel, "Upload")
+        
+        self.jobmessagepanel.SetCompletionCallback(self.uploadpanel.OnCompletion)
+        
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.tabs, 1, flag=wx.EXPAND)
         self.SetSizer(sizer)
@@ -95,9 +101,9 @@ class TrimmerMain (wx.Frame):
         
         self.JobCounter = 0
         
-    def SubmitJobCallback (self, commandName, command):
+    def SubmitJobCallback (self, commandName, command, completion = None):
         cName = "%2i: %s" % (self.JobCounter, str(commandName))
-        self.commandQueue.put( (cName, command) )      
+        self.commandQueue.put( (cName, command, completion) )      
         self.jobmessagepanel.AddJob(cName)
         self.StatusBar.SetStatusText("Started job %s" % cName)
         self.JobCounter += 1
