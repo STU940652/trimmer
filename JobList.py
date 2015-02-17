@@ -14,6 +14,7 @@ class JobList(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.responseQueue = responseQueue
         self.CancelJobCallback = CancelJobCallback
+        self.CompletionCallback = None
         
         #Main Sizer
         Sizer=wx.BoxSizer(wx.VERTICAL)
@@ -58,11 +59,14 @@ class JobList(wx.Panel):
         """
         if (self.menuItems[event.GetId()] == 'Cancel'):
             self.CancelJobCallback(self.MessageList.GetItemText(self.ItemIndexRightClicked))
-            self.MessageList.SetItem(self.ItemIndexRightClicked,1 , "Cancelling...")
+            self.MessageList.SetItem(self.ItemIndexRightClicked,1 , "Canceling...")
+
+    def SetCompletionCallback(self, CompletionCallback):
+        self.CompletionCallback = CompletionCallback
 
     def OnTimer (self, evt):
-        while not self.responseQueue.empty():
-            cName, message = self.responseQueue.get ()
+        while not self.responseQueue.empty(): 
+            cName, message, completion = self.responseQueue.get ()
             found = False
             for row in range(self.MessageList.GetItemCount()):
                 if cName==self.MessageList.GetItemText(row):
@@ -73,4 +77,8 @@ class JobList(wx.Panel):
                 row = self.MessageList.GetItemCount()
                 self.MessageList.InsertStringItem(row, cName)
                 self.MessageList.SetItem(row,1, message)
+                
+            if completion:
+                # We have a completed job, report it to the Upload tab
+                self.CompletionCallback(completion)
             

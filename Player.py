@@ -262,7 +262,9 @@ class Player(wx.Panel):
             
         # Substitute other variables
         cmd = self.Substitute(EncodeString)   
-        self.SubmitJobCallback("Encode %s" % TrimmerConfig.get(section,'Name') , cmd)
+        
+        completion = self.Substitute(TrimmerConfig.get(section,'Completion', fallback='')).replace('\\', "\\\\")
+        self.SubmitJobCallback("Encode %s" % TrimmerConfig.get(section,'Name') , cmd, completion)
         print(cmd)
         
     def OpenFile (self, MediaFileName, Play = True):
