@@ -263,7 +263,7 @@ class Player(wx.Panel):
         # Substitute other variables
         cmd = self.Substitute(EncodeString)   
         
-        completion = self.Substitute(TrimmerConfig.get(section,'Completion', fallback='')).replace('\\', "\\\\")
+        completion = self.Substitute(TrimmerConfig.get(section,'Completion', fallback='{}')).replace('\\', "\\\\")
         self.SubmitJobCallback("Encode %s" % TrimmerConfig.get(section,'Name') , cmd, completion)
         print(cmd)
         
