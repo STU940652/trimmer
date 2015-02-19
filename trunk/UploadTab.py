@@ -1,6 +1,15 @@
 import wx 
 import traceback
 import json
+from credentials import *
+import boto 
+from boto.s3.key import Key 
+import os
+import os.path
+import datetime
+from Settings import *
+
+
 
 class UploadTab(wx.Panel):
     def __init__ (self, parent):
@@ -80,7 +89,32 @@ class UploadTab(wx.Panel):
             self.CmsEnable.SetValue(True)
     
     def OnUpload (self, evt):
-        pass
+    
+        if self.Mp3Enable.GetValue():
+            self.UploadMP3()
+        
+    def UploadMP3 (self):
+        sourceFilename = self.Mp3Path.GetValue()
+        
+        if sourceFilename != "":
+            try:
+                # connect to the bucket 
+                conn = boto.connect_s3(AWS_ACCESS_KEY_ID, 
+                                        AWS_SECRET_ACCESS_KEY) 
+                bucket = conn.get_bucket(BUCKET_NAME) 
+
+                # create a key to keep track of our file in the storage  
+                k = Key(bucket) 
+                #k.key = 'sermons/2015/Andy_Martin_Temp_File.txt' 
+                k.key = os.path.join(datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')),
+                                os.path.basename(sourceFilename))
+                k.set_contents_from_filename(sourceFilename) 
+                #k.set_acl('public-read')
+                
+                self.Mp3Enable.SetValue(False)
+            except:
+                print (traceback.format_exc())
+                return
  
 
             
