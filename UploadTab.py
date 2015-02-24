@@ -7,6 +7,9 @@ from boto.s3.key import Key
 import os
 import os.path
 import datetime
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import time
 from Settings import *
 
 
@@ -116,6 +119,34 @@ class UploadTab(wx.Panel):
                 print (traceback.format_exc())
                 return
  
+    def UploadMP4 (self):
+        sourceFilename = self.Mp4Path.GetValue()
+        browser = webdriver.Firefox()
+        # Visit URL
+        url = "http://www.vimeo.com/log_in"
+        browser.get(url)
+        login_form = browser.find_element_by_id('login_form')
+        login_form.find_element_by_id('email').send_keys(VIMEO_USERNAME)
+        login_form.find_element_by_id('password').send_keys(VIMEO_PASSWORD)
+        login_form.find_element_by_class_name('btn').click()
+        browser.find_element_by_id('btn_upload').click()
+        browser.find_element_by_name('file_data').send_keys (sourceFilename)
+        browser.find_element_by_id('submit_button').click()
 
-            
- 
+        # Fill in some info
+        print ("Waiting...")
+        time.sleep(5)
+        browser.find_element_by_id('title').clear()
+        browser.find_element_by_id('title').send_keys('This is a title')
+        browser.find_element_by_id('description').clear()
+        browser.find_element_by_id('description').send_keys('This is a description')
+        browser.find_element_by_id('tags').clear()
+        browser.find_element_by_id('tags').send_keys('some tags')
+
+        browser.find_element_by_id('tags').submit()
+        print ("Done...")
+        time.sleep(5)
+        # This is the link for the video
+        print (browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1])
+           
+         
