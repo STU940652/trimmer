@@ -1,6 +1,7 @@
 import wx # 2.8
 import vlc
 import os
+import threading
 from Settings import *
 from CmsManager import *
 
@@ -138,25 +139,34 @@ class Player(wx.Panel):
         ctrlpanel.SetSizer(ctrlbox)
         
         # Info for MP3 tags
-        tag_line = wx.StaticLine(ctrlpanel)
-        ctrlbox.Add(tag_line, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+        tagpanel = wx.Panel(self, -1 )
+        temp_box = wx.BoxSizer(wx.VERTICAL)
         self.Tags = {}
-        temp_box = wx.FlexGridSizer(cols=4)
-        temp_box.AddGrowableCol(1,1)
-        temp_box.AddGrowableCol(3,1)
         for label in self.TagNames:
-            temp_label = wx.StaticText(ctrlpanel, label=label, size=(60, -1), style = wx.TE_RIGHT)
-            temp_box.Add(temp_label, 0, flag=wx.ALIGN_RIGHT | wx.ALL, border=5)
-            self.Tags[label] = wx.TextCtrl(ctrlpanel, size=(120, -1))
-            temp_box.Add(self.Tags[label], 1, flag=wx.EXPAND)
+            temp_label = wx.StaticText(tagpanel, label=label, size=(60, -1), style = wx.TE_LEFT)
+            temp_box.Add(temp_label, 0, flag=wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, border=5)
+            self.Tags[label] = wx.TextCtrl(tagpanel, size=(120, -1))
+            temp_box.Add(self.Tags[label], 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border = 5)
 
         # Import Tags button
-        import_tag = wx.Button(ctrlpanel, label="Import from CMS")
-        temp_box.AddStretchSpacer()
-        temp_box.Add(import_tag, 0,  flag=wx.ALIGN_RIGHT | wx.BOTTOM | wx.TOP)
+        self.import_tag = wx.Button(tagpanel, label="Import from CMS")
+        #temp_box.AddStretchSpacer()
+        temp_box.Add(self.import_tag, 0,  flag=wx.ALIGN_RIGHT | wx.BOTTOM | wx.TOP)
+        tagpanel.SetSizer(temp_box)
 
-        ctrlbox.Add(temp_box, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+        # Put everything together
+        sizer2 = wx.BoxSizer(wx.VERTICAL)
+        sizer2.Add(self.videopanel, 1, flag=wx.EXPAND)
+        sizer2.Add(ctrlpanel, flag=wx.EXPAND | wx.BOTTOM | wx.TOP)
         
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(sizer2, 2, flag=wx.EXPAND)
+        sizer.Add(wx.StaticLine(self, style=wx.LI_VERTICAL), 0, flag=wx.EXPAND)
+        sizer.Add(tagpanel, 1, flag=wx.EXPAND)
+        sizer.Layout()
+        self.SetSizer(sizer)
+        self.SetMinSize((500, 300))
+
         # Bind controls to events
         self.Bind(wx.EVT_BUTTON, self.OnPlay, play)
         self.Bind(wx.EVT_BUTTON, self.OnPause, pause)
@@ -165,7 +175,7 @@ class Player(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnToggleVolume, volume)
         self.Bind(wx.EVT_SLIDER, self.OnSetVolume, self.volslider)
         self.Bind(wx.EVT_SLIDER, self.OnSetTime, self.timeslider)
-        self.Bind(wx.EVT_BUTTON, self.OnImportFromCMS, import_tag)
+        self.Bind(wx.EVT_BUTTON, self.OnImportFromCMS, self.import_tag)
         
         # Bind stuff
         self.Bind(wx.EVT_BUTTON, self.OnStartPlayFrom, self.StartPlayFrom)
@@ -173,13 +183,6 @@ class Player(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnStartFill, StartFill)
         self.Bind(wx.EVT_TEXT, self.OnChangeSelection, self.SectionSelect)
         self.Bind(wx.EVT_CHECKBOX, self.OnCropCheckbox, self.cropCheckbox)
-
-        # Put everything together
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.videopanel, 1, flag=wx.EXPAND)
-        sizer.Add(ctrlpanel, flag=wx.EXPAND | wx.BOTTOM | wx.TOP)
-        self.SetSizer(sizer)
-        self.SetMinSize((500, 300))
 
         # finally create the timer, which updates the timeslider
         self.timer = wx.Timer(self)
@@ -195,6 +198,10 @@ class Player(wx.Panel):
         self.OnChangeSelection()
 
     def OnImportFromCMS(self, evt=None):
+        self.import_tag.Enable(False)
+        threading.Thread(target=self.ImportFromCMSThread())
+    
+    def ImportFromCMSThread(self):
         with CmsManager() as c:
             info = c.GetEventInfo()
             
@@ -209,6 +216,8 @@ class Player(wx.Panel):
                 self.Tags["Date"].SetValue(info[key])
             if key == "comment":
                 self.Tags["Comment"].SetValue(info[key])
+                
+        self.import_tag.Enable(True)
         
     def OnCropCheckbox(self, evt=None):
         self.cropslider.Show(self.cropCheckbox.IsChecked())
