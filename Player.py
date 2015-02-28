@@ -1,7 +1,6 @@
 import wx # 2.8
 import vlc
 import os
-import threading
 from Settings import *
 from CmsManager import *
 
@@ -21,11 +20,13 @@ def hms_to_ms (s):
         ms = ms + float(d.pop(-1))*mult
         mult = mult * 60.0
     return int(ms)
+
     
 class Player(wx.Panel):
     """The main window has to deal with events.
     """
-    TagNames = ["Title", "Series", "Speaker", "Date", "Comment"]
+    TagNames = ["Title", "Series", "Speaker", "Date", "Comment", "Summary", "Keywords"]
+    MultiLineTags = ["Summary", "Keywords"]
     
     def __init__(self, parent, SubmitJobCallback, StatusBar):
         wx.Panel.__init__(self, parent)
@@ -145,8 +146,12 @@ class Player(wx.Panel):
         for label in self.TagNames:
             temp_label = wx.StaticText(tagpanel, label=label, size=(60, -1), style = wx.TE_LEFT)
             temp_box.Add(temp_label, 0, flag=wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, border=5)
-            self.Tags[label] = wx.TextCtrl(tagpanel, size=(120, -1))
-            temp_box.Add(self.Tags[label], 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border = 5)
+            if label in self.MultiLineTags:
+                self.Tags[label] = wx.TextCtrl(tagpanel, size=(120, -1), style = wx.TE_MULTILINE)
+                temp_box.Add(self.Tags[label], 1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border = 5)
+            else:
+                self.Tags[label] = wx.TextCtrl(tagpanel, size=(120, -1))
+                temp_box.Add(self.Tags[label], 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border = 5)
 
         # Import Tags button
         self.import_tag = wx.Button(tagpanel, label="Import from CMS")
@@ -199,23 +204,14 @@ class Player(wx.Panel):
 
     def OnImportFromCMS(self, evt=None):
         self.import_tag.Enable(False)
-        threading.Thread(target=self.ImportFromCMSThread())
+        self.CMSThread = ImportFromCMSThread(self, self.ImportFromCMSCallback)
+        self.CMSThread.start()
     
-    def ImportFromCMSThread(self):
-        with CmsManager() as c:
-            info = c.GetEventInfo()
-            
-        for key in info:            
-            if key == "title":
-                self.Tags["Title"].SetValue(info[key])
-            if key == "series":
-                self.Tags["Series"].SetValue(info[key])
-            if key == "speaker":
-                self.Tags["Speaker"].SetValue(info[key])
-            if key == "date":
-                self.Tags["Date"].SetValue(info[key])
-            if key == "comment":
-                self.Tags["Comment"].SetValue(info[key])
+    def ImportFromCMSCallback(thread, self, info):
+        for key in info:
+            for textBox in self.Tags:                
+                if key.lower() == textBox.lower():
+                    self.Tags[textBox].SetValue(info[key])
                 
         self.import_tag.Enable(True)
         
