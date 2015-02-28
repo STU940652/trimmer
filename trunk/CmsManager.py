@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
+import threading
 from credentials import *
 
 class CmsManager ():
@@ -74,6 +75,11 @@ class CmsManager ():
                 self.EventInfo["comment"] += passage1chapter2 + ":"
             self.EventInfo["comment"] += self.driver.find_element_by_name("passage1verse2").get_attribute("value")
         
+        # More Content Info
+        self.driver.find_element_by_link_text('Content').click()
+        self.EventInfo["summary"] = self.driver.find_element_by_id("summary").text
+        self.EventInfo["keywords"] = self.driver.find_element_by_id("audio").get_attribute("value")
+        
         return self.EventInfo
 
     def Close( self):
@@ -92,5 +98,18 @@ class CmsManager ():
         
         return False
 
+class ImportFromCMSThread(threading.Thread):
+    def __init__(self, parent, callback):
+        threading.Thread.__init__(self)
+        self.callback = callback
+        self.parent = parent
+        
+    def run (self):
+        with CmsManager() as c:
+            info = c.GetEventInfo()
+            
+        if self.callback and self.parent:
+            self.callback(self.parent, info)
+        
             
         
