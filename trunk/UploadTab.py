@@ -1,7 +1,6 @@
 import wx 
 import traceback
 import json
-from credentials import *
 import boto 
 from boto.s3.key import Key 
 import os
@@ -12,8 +11,16 @@ from selenium.webdriver.common.keys import Keys
 import time
 from Settings import *
 
-
-
+try:
+    from credentials import *
+except:
+    VIMEO_USERNAME = ""
+    VIMEO_PASSWORD = ""
+    AWS_ACCESS_KEY_ID = ""
+    AWS_SECRET_ACCESS_KEY = ""
+    BUCKET_NAME = ""
+    
+    
 class UploadTab(wx.Panel):
     def __init__ (self, parent):
         wx.Panel.__init__(self, parent)

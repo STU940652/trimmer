@@ -2,7 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 import threading
-from credentials import *
+try:
+    from credentials import *
+except:
+    cms_username = ""
+    cms_password = ""
 
 class CmsManager ():
     def __init__ (self):
