@@ -291,6 +291,8 @@ class Player(wx.Panel):
         # set the window id where to render VLC's video output
         if platform.system() == 'Windows':
             self.player.set_hwnd(self.videopanel.GetHandle())
+        elif platform.system() == 'Darwin':
+            self.player.set_nsobject(self.videopanel.GetHandle())
         else:
             self.player.set_xwindow(self.videopanel.GetHandle())
 
