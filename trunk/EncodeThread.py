@@ -3,6 +3,7 @@ import time
 import subprocess
 import traceback
 import os
+import platform
 
 from Settings import *
 
@@ -33,12 +34,19 @@ class EncodeThread (threading.Thread):
                             try:
                                 os.environ["FFREPORT"]= "file='" + os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "ffmpeg-%s-%s.log'" % \
                                     (cName.rsplit(":",1)[-1].strip(), time.strftime("%Y%m%d-%H%M%S")))
-                                sp = subprocess.Popen(command, 
-                                                        #shell=True, 
+                                if platform.system() == 'Windows':    
+                                    sp = subprocess.Popen(command,  
                                                         bufsize=0, 
                                                         universal_newlines=True, 
                                                         creationflags=0x08000000, # CREATE_NO_WINDOW
                                                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                else:    
+                                    sp = subprocess.Popen(command, 
+                                                        shell=True, 
+                                                        bufsize=0, 
+                                                        universal_newlines=True, 
+                                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                                        
                             except:
                                 sp = None
                                 self.responseQueue.put ( (cName, "Exception: " + traceback.format_exc(), None) )
