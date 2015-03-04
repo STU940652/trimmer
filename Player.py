@@ -1,6 +1,7 @@
 import wx # 2.8
 import vlc
 import os
+import platform
 from Settings import *
 from CmsManager import *
 
@@ -288,8 +289,11 @@ class Player(wx.Panel):
         self.StatusBar.SetStatusText("%s - wxVLCplayer" % title)
 
         # set the window id where to render VLC's video output
-        self.player.set_hwnd(self.videopanel.GetHandle())
-        # FIXME: this should be made cross-platform
+        if platform.system() == 'Windows':
+            self.player.set_hwnd(self.videopanel.GetHandle())
+        else:
+            self.player.set_xwindow(self.videopanel.GetHandle())
+
         if Play:
             self.OnPlay(None)
 
