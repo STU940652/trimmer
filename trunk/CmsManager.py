@@ -2,11 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 import threading
-try:
-    from credentials import *
-except:
-    cms_username = ""
-    cms_password = ""
+from PasswordDialog import Credentials
 
 class CmsManager ():
     def __init__ (self):
@@ -26,9 +22,9 @@ class CmsManager ():
             time.sleep(5)
             self.driver.switch_to_window(self.driver.window_handles[1])
             b = self.driver.find_element_by_id('user_email')
-            b.send_keys(cms_username)
+            b.send_keys(Credentials["CMS_Username"])
             b = self.driver.find_element_by_id('user_password')
-            b.send_keys(cms_password)
+            b.send_keys(Credentials["CMS_Password"])
             b = self.driver.find_element_by_name('button')
             b.click()
             time.sleep(5)

@@ -10,16 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 from Settings import *
-
-try:
-    from credentials import *
-except:
-    VIMEO_USERNAME = ""
-    VIMEO_PASSWORD = ""
-    AWS_ACCESS_KEY_ID = ""
-    AWS_SECRET_ACCESS_KEY = ""
-    BUCKET_NAME = ""
-    
+from PasswordDialog import Credentials
     
 class UploadTab(wx.Panel):
     def __init__ (self, parent):
@@ -103,15 +94,18 @@ class UploadTab(wx.Panel):
         if self.Mp3Enable.GetValue():
             self.UploadMP3()
         
+        if self.Mp4Enable.GetValue():
+            self.UploadMP4()
+        
     def UploadMP3 (self):
         sourceFilename = self.Mp3Path.GetValue()
         
         if sourceFilename != "":
             try:
                 # connect to the bucket 
-                conn = boto.connect_s3(AWS_ACCESS_KEY_ID, 
-                                        AWS_SECRET_ACCESS_KEY) 
-                bucket = conn.get_bucket(BUCKET_NAME) 
+                conn = boto.connect_s3(Credentials["AWS_ACCESS_KEY_ID"], 
+                                        Credentials["AWS_SECRET_ACCESS_KEY"]) 
+                bucket = conn.get_bucket(Credentials["BUCKET_NAME"]) 
 
                 # create a key to keep track of our file in the storage  
                 k = Key(bucket) 
@@ -133,8 +127,8 @@ class UploadTab(wx.Panel):
         url = "http://www.vimeo.com/log_in"
         browser.get(url)
         login_form = browser.find_element_by_id('login_form')
-        login_form.find_element_by_id('email').send_keys(VIMEO_USERNAME)
-        login_form.find_element_by_id('password').send_keys(VIMEO_PASSWORD)
+        login_form.find_element_by_id('email').send_keys(Credentials["Vimeo_Username"])
+        login_form.find_element_by_id('password').send_keys(Credentials["Vimeo_Password"])
         login_form.find_element_by_class_name('btn').click()
         browser.find_element_by_id('btn_upload').click()
         browser.find_element_by_name('file_data').send_keys (sourceFilename)
