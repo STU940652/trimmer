@@ -41,6 +41,7 @@ from Player import Player
 from JobList import JobList
 from Settings import *
 from UploadTab import UploadTab
+from PasswordDialog import PasswordDialog
 
 
 class TrimmerMain (wx.Frame):
@@ -56,10 +57,13 @@ class TrimmerMain (wx.Frame):
         self.file_menu.AppendSeparator()
         self.file_menu.Append(2, "&View Logs", "View Log File Directory")
         self.file_menu.AppendSeparator()
-        self.file_menu.Append(3, "&Close", "Quit")
+        self.file_menu.Append(3, "&Update Passwords", "Update user names and passwords")
+        self.file_menu.AppendSeparator()
+        self.file_menu.Append(4, "&Close", "Quit")
         self.Bind(wx.EVT_MENU, self.OnOpen, id=1)
         self.Bind(wx.EVT_MENU, self.OnViewLogDir, id=2)
-        self.Bind(wx.EVT_MENU, self.OnExit, id=3)
+        self.Bind(wx.EVT_MENU, self.OnUpdatePasswords, id=3)
+        self.Bind(wx.EVT_MENU, self.OnExit, id=4)
         self.frame_menubar.Append(self.file_menu, "File")
         self.SetMenuBar(self.frame_menubar)
         
@@ -125,10 +129,14 @@ class TrimmerMain (wx.Frame):
 
     def OnViewLogDir(self, evt):
         subprocess.call('explorer "%s"' % TrimmerConfig.get('FilePaths', 'LogPath') )
-
+ 
     def OnOpen(self, evt):
         self.tabs.SetSelection(1)
         self.playerpanel.OnOpen(None)
+        
+    def OnUpdatePasswords (self, evt):
+        p = PasswordDialog()
+        p.ShowModal()
         
     def OnExit(self, evt):
         """Closes the window.
@@ -164,12 +172,12 @@ if __name__ == "__main__":
 #Completion = None            
             """)
         
-    try:
-        log = open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "stdout_log.txt"), "w")
-        sys.stdout = log
-        sys.stderr = log
-    except:
-        pass
+    #try:
+    #    log = open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "stdout_log.txt"), "w")
+    #    sys.stdout = log
+    #    sys.stderr = log
+    #except:
+    #    pass
     # Create a wx.App(), which handles the windowing system event loop
     app = wx.App()
     # Create the window containing our small media player
