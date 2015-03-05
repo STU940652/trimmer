@@ -11,6 +11,7 @@ from selenium.webdriver.common.keys import Keys
 import time
 from Settings import *
 from PasswordDialog import Credentials
+import threading
     
 class UploadTab(wx.Panel):
     def __init__ (self, parent):
@@ -92,10 +93,14 @@ class UploadTab(wx.Panel):
     def OnUpload (self, evt):
     
         if self.Mp3Enable.GetValue():
-            self.UploadMP3()
+            #self.UploadMP3()
+            self.Mp3Thread = threading.Thread(target=self.UploadMP3)
+            self.Mp3Thread.start()
         
         if self.Mp4Enable.GetValue():
-            self.UploadMP4()
+            #self.UploadMP4()
+            self.Mp4Thread = threading.Thread(target=self.UploadMP4)
+            self.Mp4Thread.start()
         
     def UploadMP3 (self):
         sourceFilename = self.Mp3Path.GetValue()
