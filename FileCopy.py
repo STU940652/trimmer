@@ -120,16 +120,16 @@ class FileCopy(wx.Panel):
                 si = os.stat(os.path.join(self.PathName.GetValue(),self.FileList.GetItemText(row)))
                 self.DestSize += si.st_size
         if len(sources) > 0:
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW # Tell subprocess not to open terminal window
             if platform.system() == 'Windows':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW # Tell subprocess not to open terminal window
                 c = 'cmd /c copy /b /y %s "%s"' % ('+'.join(sources), self.DestFilename)
                 self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             else:
                 #Mac, Linux
                 c = "cat %s > '%s'" % (' '.join(sources), self.DestFilename)
-                self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo, shell = True
+                self.CopySubProcess = subprocess.Popen(c, shell = True,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             self.CancelButton.Show(True)
             self.Layout()
