@@ -3,6 +3,7 @@ import os
 import datetime
 import time
 import subprocess
+import platform
 
 from CheckListCtrl import CheckListCtrl
 from Settings import *
@@ -121,8 +122,15 @@ class FileCopy(wx.Panel):
         if len(sources) > 0:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW # Tell subprocess not to open terminal window
-            c = 'cmd /c copy /b /y %s "%s"' % ('+'.join(sources), self.DestFilename)
-            self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            if platform.system() == 'Windows':
+                c = 'cmd /c copy /b /y %s "%s"' % ('+'.join(sources), self.DestFilename)
+                self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            else:
+                #Mac, Linux
+                c = "cat %s > '%s'" % (' '.join(sources), self.DestFilename)
+                self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo, shell = True
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             self.CancelButton.Show(True)
             self.Layout()
             self.StatusBar.SetStatusText("Copying...")
