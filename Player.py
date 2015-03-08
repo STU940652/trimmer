@@ -22,6 +22,7 @@ def hms_to_ms (s):
         mult = mult * 60.0
     return int(ms)
 
+Tags = {}
     
 class Player(wx.Panel):
     """The main window has to deal with events.
@@ -209,6 +210,8 @@ class Player(wx.Panel):
         self.CMSThread.start()
     
     def ImportFromCMSCallback(thread, self, info):
+        global Tags
+        Tags.update(info)
         for key in info:
             for textBox in self.Tags:                
                 if key.lower() == textBox.lower():

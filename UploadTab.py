@@ -12,6 +12,7 @@ import time
 from Settings import *
 from PasswordDialog import Credentials
 import threading
+from Player import Tags
     
 class UploadTab(wx.Panel):
     def __init__ (self, parent):
@@ -127,7 +128,7 @@ class UploadTab(wx.Panel):
  
     def UploadMP4 (self):
         sourceFilename = self.Mp4Path.GetValue()
-        browser = webdriver.Firefox()
+        browser = webdriver.Chrome()
         # Visit URL
         url = "http://www.vimeo.com/log_in"
         browser.get(url)
@@ -142,13 +143,16 @@ class UploadTab(wx.Panel):
         # Fill in some info
         print ("Waiting...")
         time.sleep(5)
-        browser.find_element_by_id('title').clear()
-        browser.find_element_by_id('title').send_keys('This is a title')
-        browser.find_element_by_id('description').clear()
-        browser.find_element_by_id('description').send_keys('This is a description')
-        browser.find_element_by_id('tags').clear()
-        browser.find_element_by_id('tags').send_keys('some tags')
-
+        try:
+            title = "%s - %s (%s)" % (Tags["speaker"], Tags["title"], Tags["date"].replace("/","."))
+            browser.find_element_by_id('title').clear()
+            browser.find_element_by_id('title').send_keys(title)
+            browser.find_element_by_id('description').clear()
+            browser.find_element_by_id('description').send_keys(Tags["summary"])
+            browser.find_element_by_id('tags').clear()
+            browser.find_element_by_id('tags').send_keys(Tags["keywords"])
+        except:
+            pass
         browser.find_element_by_id('tags').submit()
         print ("Done...")
         time.sleep(5)
