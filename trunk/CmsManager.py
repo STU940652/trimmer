@@ -14,7 +14,7 @@ class CmsManager ():
         if not self.IsLoggedIn:
             if self.driver == None:
                 #self.driver = webdriver.PhantomJS()
-                self.driver = webdriver.Firefox()
+                self.driver = webdriver.Chrome()
             self.driver.get("http://my.ekklesia360.com/Login")
             self.driver.switch_to_frame('_monkIdXdm')
             b = self.driver.find_element_by_id('button')
