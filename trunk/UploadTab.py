@@ -78,7 +78,7 @@ class UploadTab(wx.Panel):
             CompletionDict = json.loads(completion)
             
         except:
-            print (traceback.format_exc())
+            #print (traceback.format_exc())
             return
             
         if "MP3" in CompletionDict:
