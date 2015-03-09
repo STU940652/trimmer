@@ -180,7 +180,7 @@ class FileCopy(wx.Panel):
             self.PathName.SetValue(dd.GetPath())
             
     def ChangeDestFile (self, evt):
-        dd = wx.FileDialog(self, defaultFile = self.DestName.GetValue())
+        dd = wx.FileDialog(self, defaultFile = self.DestName.GetValue(), style=wx.FD_SAVE)
         if (dd.ShowModal() == wx.ID_OK):
             self.DestName.SetValue(dd.GetPath())
             
