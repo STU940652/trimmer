@@ -188,7 +188,7 @@ class Player(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnStartPlayFrom, self.StartPlayFrom)
         self.Bind(wx.EVT_BUTTON, self.OnStartPlayTo, self.StartPlayTo)
         self.Bind(wx.EVT_BUTTON, self.OnStartFill, StartFill)
-        self.Bind(wx.EVT_TEXT, self.OnChangeSelection, self.SectionSelect)
+        self.Bind(wx.EVT_COMBOBOX, self.OnChangeSelection, self.SectionSelect)
         self.Bind(wx.EVT_CHECKBOX, self.OnCropCheckbox, self.cropCheckbox)
 
         # finally create the timer, which updates the timeslider
