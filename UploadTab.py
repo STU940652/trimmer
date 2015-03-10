@@ -8,6 +8,9 @@ import os.path
 import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 from Settings import *
 from PasswordDialog import Credentials
@@ -51,12 +54,17 @@ class UploadTab(wx.Panel):
         
         # Web page CMS
         self.CmsEnable = wx.CheckBox(self, -1, "Update Web Page")
-        Sizer.Add(self.CmsEnable, 0, flag=wx.TOP|wx.LEFT, border = 10)        
+        Sizer.Add(self.CmsEnable, 0, flag=wx.TOP|wx.LEFT, border = 10)
+        self.CmsEnable.Enable(False)
 
         # Upload Button
         self.StartButton = wx.Button (self, label='Upload')      
         self.Bind(wx.EVT_BUTTON, self.OnUpload, self.StartButton)
         Sizer.Add(self.StartButton, flag=wx.ALL|wx.ALIGN_RIGHT, border = 5)
+        
+        # Messages
+        self.Messages = wx.TextCtrl (self, style=wx.TE_MULTILINE|wx.TE_READONLY)
+        Sizer.Add(self.Messages, 1, flag=wx.ALL|wx.EXPAND, border = 5)
         
         self.SetSizer(Sizer)
 
@@ -104,7 +112,9 @@ class UploadTab(wx.Panel):
             self.Mp4Thread.start()
         
     def UploadMP3 (self):
-        sourceFilename = self.Mp3Path.GetValue()
+        sourceFilename = os.path.abspath(self.Mp3Path.GetValue())
+        
+        self.Messages.AppendText("Uploading %s to Amazon S3\n" %(sourceFilename))
         
         if sourceFilename != "":
             try:
@@ -116,47 +126,66 @@ class UploadTab(wx.Panel):
                 # create a key to keep track of our file in the storage  
                 k = Key(bucket) 
                 #k.key = 'sermons/2015/Andy_Martin_Temp_File.txt' 
-                k.key = os.path.join(datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')),
-                                os.path.basename(sourceFilename))
+                k.key = '/'.join([datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')),
+                                os.path.basename(sourceFilename)]).replace('\\','/')
+                self.Messages.AppendText("... to %s\n" %(k.key))                
                 k.set_contents_from_filename(sourceFilename) 
                 #k.set_acl('public-read')
                 
                 self.Mp3Enable.SetValue(False)
+                self.Messages.AppendText("Done uploading %s\n" %(sourceFilename))
             except:
-                print (traceback.format_exc())
+                self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
                 return
  
     def UploadMP4 (self):
-        sourceFilename = self.Mp4Path.GetValue()
-        browser = webdriver.Chrome()
-        # Visit URL
-        url = "http://www.vimeo.com/log_in"
-        browser.get(url)
-        login_form = browser.find_element_by_id('login_form')
-        login_form.find_element_by_id('email').send_keys(Credentials["Vimeo_Username"])
-        login_form.find_element_by_id('password').send_keys(Credentials["Vimeo_Password"])
-        login_form.find_element_by_class_name('btn').click()
-        browser.find_element_by_id('btn_upload').click()
-        browser.find_element_by_name('file_data').send_keys (sourceFilename)
-        browser.find_element_by_id('submit_button').click()
-
-        # Fill in some info
-        print ("Waiting...")
-        time.sleep(5)
+        global Tags
+        sourceFilename = os.path.abspath(self.Mp4Path.GetValue())
+        self.Messages.AppendText("Uploading %s to Vimeo\n" %(sourceFilename))
+        
         try:
-            title = "%s - %s (%s)" % (Tags["speaker"], Tags["title"], Tags["date"].replace("/","."))
-            browser.find_element_by_id('title').clear()
-            browser.find_element_by_id('title').send_keys(title)
-            browser.find_element_by_id('description').clear()
-            browser.find_element_by_id('description').send_keys(Tags["summary"])
-            browser.find_element_by_id('tags').clear()
-            browser.find_element_by_id('tags').send_keys(Tags["keywords"])
+            browser = webdriver.Chrome()
+            # Visit URL
+            browser.implicitly_wait(10) # seconds
+            url = "http://www.vimeo.com/log_in"
+            browser.get(url)
+            login_form = browser.find_element_by_id('login_form')
+            login_form.find_element_by_id('email').send_keys(Credentials["Vimeo_Username"])
+            login_form.find_element_by_id('password').send_keys(Credentials["Vimeo_Password"])
+            login_form.find_element_by_class_name('btn').click()
+            #time.sleep(5)
+            browser.find_element_by_id('btn_upload').click()
+            #time.sleep(5)
+            browser.find_element_by_name('file_data').send_keys (sourceFilename)
+            time.sleep(5)
+            browser.find_element_by_id('submit_button').click()
+            time.sleep(5)
+
+            # Fill in some info
+            try:
+                title = "%s - %s (%s)" % (Tags["speaker"], Tags["title"], Tags["date"].replace("/","."))
+                browser.find_element_by_id('title').clear()
+                browser.find_element_by_id('title').send_keys(title)
+                browser.find_element_by_id('description').clear()
+                browser.find_element_by_id('description').send_keys(Tags["summary"])
+                browser.find_element_by_id('tags').clear()
+                browser.find_element_by_id('tags').send_keys(Tags["keywords"])
+            except:
+                pass
+            browser.find_element_by_id('tags').submit()
+            #time.sleep(5)
+            # Wait for upload 
+            browser.implicitly_wait(30*60) # seconds
+
+            #WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "myDynamicElement"))
+            # This is the link for the video
+            Tags["vimeo_url"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
+            self.Messages.AppendText (Tags["vimeo_url"] + '\n')
+
+            self.Messages.AppendText("Done uploading %s\n" %(sourceFilename))
         except:
-            pass
-        browser.find_element_by_id('tags').submit()
-        print ("Done...")
-        time.sleep(5)
-        # This is the link for the video
-        print (browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1])
+            self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
+            
+        browser.close()
            
          
