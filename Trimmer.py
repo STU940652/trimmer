@@ -174,12 +174,12 @@ if __name__ == "__main__":
 #Completion = None            
             """)
         
-    #try:
-    #    log = open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "stdout_log.txt"), "w")
-    #    sys.stdout = log
-    #    sys.stderr = log
-    #except:
-    #    pass
+    try:
+        log = open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "stdout_log.txt"), "w")
+        sys.stdout = log
+        sys.stderr = log
+    except:
+        pass
     # Create a wx.App(), which handles the windowing system event loop
     app = wx.App()
     # Create the window containing our small media player
