@@ -72,13 +72,13 @@ class UploadTab(wx.Panel):
         openFileDialog = wx.FileDialog(self, "Select MP3 Audio File", "", "",
                                        "MP3 (*.mp3)|*.mp3", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         if (openFileDialog.ShowModal() == wx.ID_OK):
-            self.Mp3Path.SetValue(openFileDialog.GetFilename())
+            self.Mp3Path.SetValue(openFileDialog.GetPath())
             
     def SelectMP4 (self, evt):
         openFileDialog = wx.FileDialog(self, "Select MP4 Video File", "", "",
                                        "MP4 (*.mp4)|*.mp4|All Files (*.*)", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         if (openFileDialog.ShowModal() == wx.ID_OK):
-            self.Mp4Path.SetValue(openFileDialog.GetFilename())
+            self.Mp4Path.SetValue(openFileDialog.GetPath())
 
     def OnCompletion (self, completion):
         print (completion)
