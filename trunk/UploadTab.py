@@ -112,12 +112,16 @@ class UploadTab(wx.Panel):
             self.Mp4Thread.start()
         
     def UploadMP3 (self):
+        global Tags
         sourceFilename = os.path.abspath(self.Mp3Path.GetValue())
         
         self.Messages.AppendText("Uploading %s to Amazon S3\n" %(sourceFilename))
         
         if sourceFilename != "":
             try:
+                # Target filename
+                Tags["mp3_url"] = '/'.join([datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')), os.path.basename(sourceFilename)]).replace('\\','/')
+
                 # connect to the bucket 
                 conn = boto.connect_s3(Credentials["AWS_ACCESS_KEY_ID"], 
                                         Credentials["AWS_SECRET_ACCESS_KEY"]) 
@@ -125,10 +129,8 @@ class UploadTab(wx.Panel):
 
                 # create a key to keep track of our file in the storage  
                 k = Key(bucket) 
-                #k.key = 'sermons/2015/Andy_Martin_Temp_File.txt' 
-                k.key = '/'.join([datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')),
-                                os.path.basename(sourceFilename)]).replace('\\','/')
-                self.Messages.AppendText("... to %s\n" %(k.key))                
+                k.key = Tags["mp3_url"]
+                self.Messages.AppendText("... to %s\n" %(Tags["mp3_url"]))                
                 k.set_contents_from_filename(sourceFilename) 
                 #k.set_acl('public-read')
                 
@@ -179,8 +181,8 @@ class UploadTab(wx.Panel):
 
             #WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "myDynamicElement"))
             # This is the link for the video
-            Tags["vimeo_url"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
-            self.Messages.AppendText (Tags["vimeo_url"] + '\n')
+            Tags["vimeo_number"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
+            self.Messages.AppendText (Tags["vimeo_number"] + '\n')
 
             self.Messages.AppendText("Done uploading %s\n" %(sourceFilename))
         except:
