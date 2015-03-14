@@ -100,16 +100,15 @@ class UploadTab(wx.Panel):
             self.CmsEnable.SetValue(True)
     
     def OnUpload (self, evt):
+        self.UploadThread = threading.Thread(target=self.UploadFiles)
+        self.UploadThread.start()
     
+    def UploadFiles (self):    
         if self.Mp3Enable.GetValue():
-            #self.UploadMP3()
-            self.Mp3Thread = threading.Thread(target=self.UploadMP3)
-            self.Mp3Thread.start()
+            self.UploadMP3()
         
         if self.Mp4Enable.GetValue():
-            #self.UploadMP4()
-            self.Mp4Thread = threading.Thread(target=self.UploadMP4)
-            self.Mp4Thread.start()
+            self.UploadMP4()
         
     def UploadMP3 (self):
         global Tags
