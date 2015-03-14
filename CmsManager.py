@@ -15,11 +15,11 @@ class CmsManager ():
             if self.driver == None:
                 #self.driver = webdriver.PhantomJS()
                 self.driver = webdriver.Chrome()
+            self.driver.implicitly_wait(10) # seconds
             self.driver.get("http://my.ekklesia360.com/Login")
             self.driver.switch_to_frame('_monkIdXdm')
             b = self.driver.find_element_by_id('button')
             b.click()
-            time.sleep(5)
             self.driver.switch_to_window(self.driver.window_handles[1])
             b = self.driver.find_element_by_id('user_email')
             b.send_keys(Credentials["CMS_Username"])
@@ -27,12 +27,12 @@ class CmsManager ():
             b.send_keys(Credentials["CMS_Password"])
             b = self.driver.find_element_by_name('button')
             b.click()
-            time.sleep(5)
 
             # We are now logged in
             self.driver.switch_to_window(self.driver.window_handles[0])
             
             # We have succeeded to log in
+            self.IsLoggedIn = True
             return True
             
     def GetEventInfo (self):
@@ -45,7 +45,7 @@ class CmsManager ():
 
         l=self.driver.find_element_by_id('listOutput')
         l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
-        time.sleep(5)
+        time.sleep(1)
 
         self.EventInfo["title"] = self.driver.find_element_by_id("title").get_attribute("value")
 
@@ -82,6 +82,53 @@ class CmsManager ():
         
         return self.EventInfo
 
+    def SetVimeoVideo (self, Tags, MessageCallback):
+        if not self.IsLoggedIn:
+            if not self.Login():
+                return False
+
+        self.driver.get("https://my.ekklesia360.com/Sermon/list")
+
+        l=self.driver.find_element_by_id('listOutput')
+        l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
+        
+        # Enter the Vimeo Video link
+        if "vimeo_number" in Tags:
+            vimeo_video_link = self.driver.find_element_by_name("custom_vimeovideolink")
+            if vimeo_video_link.get_attribute("value") == "":
+                vimeo_video_link.send_keys("player.vimeo.com/video/" + Tags["vimeo_number"])
+                vimeo_video_link.submit()
+                pass
+            else:
+                print ("Skipping Vimeo Video link because it is not blank")
+        
+        # Go to media tab
+        self.driver.find_element_by_link_text('Media').click()
+        
+        # Audio
+        if "mp3_url" in Tags:
+            media_form=self.driver.find_element_by_id('mediaForm')
+            media_form.find_element_by_id('name').send_keys("Sermon Audio: %s: %s: %s: %s" % (Tags["speaker"], Tags["series"], Tags["title"], Tags["date"]))
+            media_form.find_element_by_id('description').send_keys(Tags["summary"])
+            media_form.find_element_by_id('tags').send_keys(Tags["keywords"])
+            
+            media_form.find_element_by_id("tabExternalLink").click()
+            media_form.find_element_by_id("urlFile").send_keys("http://media.calvarysc.org/" + Tags["mp3_url"])
+            media_form.submit()
+
+        # Video
+        if "vimeo_number" in Tags:
+            media_form=self.driver.find_element_by_id('mediaForm')
+            media_form.find_element_by_id('name').send_keys("Sermon Video: %s: %s: %s: %s" % (Tags["speaker"], Tags["series"], Tags["title"], Tags["date"]))
+            media_form.find_element_by_id('description').send_keys(Tags["summary"])
+            media_form.find_element_by_id('tags').send_keys(Tags["keywords"])
+
+            media_form.find_element_by_id("tabEmbedCode").click()
+            media_form.find_element_by_id("embedCode").send_keys("embed this" + Tags["vimeo_number"])
+            media_form.submit()
+        
+        return True
+    
     def Close( self):
         self.__exit__ (None, None, None)
     
