@@ -1,25 +1,34 @@
+# Python imports
 import wx 
 import traceback
 import json
 import boto 
-from boto.s3.key import Key 
 import os
 import os.path
 import datetime
+import threading
+import time
+
+# Boto = Amazon S3
+from boto.s3.key import Key 
+
+# Selenium for Vimeo
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
+
+# Import other classes from this project
 from Settings import *
 from PasswordDialog import Credentials
-import threading
-from Player import Tags
+from CmsManager import CmsManager
     
 class UploadTab(wx.Panel):
-    def __init__ (self, parent):
+    Tags = {}
+    def __init__ (self, parent, GetTags):
         wx.Panel.__init__(self, parent)
+        self.GetTags = GetTags
         
         #Main Sizer
         Sizer=wx.BoxSizer(wx.VERTICAL)
@@ -55,7 +64,6 @@ class UploadTab(wx.Panel):
         # Web page CMS
         self.CmsEnable = wx.CheckBox(self, -1, "Update Web Page")
         Sizer.Add(self.CmsEnable, 0, flag=wx.TOP|wx.LEFT, border = 10)
-        self.CmsEnable.Enable(False)
 
         # Upload Button
         self.StartButton = wx.Button (self, label='Upload')      
@@ -104,14 +112,19 @@ class UploadTab(wx.Panel):
         self.UploadThread.start()
     
     def UploadFiles (self):    
+        self.Tags.update(self.GetTags())
+
         if self.Mp3Enable.GetValue():
             self.UploadMP3()
         
         if self.Mp4Enable.GetValue():
             self.UploadMP4()
+            
+        if self.CmsEnable.GetValue():
+            c = CmsManager()
+            c.SetMedia (self.Tags, self.Messages.AppendText)
         
     def UploadMP3 (self):
-        global Tags
         sourceFilename = os.path.abspath(self.Mp3Path.GetValue())
         
         self.Messages.AppendText("Uploading %s to Amazon S3\n" %(sourceFilename))
@@ -119,7 +132,7 @@ class UploadTab(wx.Panel):
         if sourceFilename != "":
             try:
                 # Target filename
-                Tags["mp3_url"] = '/'.join([datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')), os.path.basename(sourceFilename)]).replace('\\','/')
+                self.Tags["mp3_url"] = '/'.join([datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')), os.path.basename(sourceFilename)]).replace('\\','/')
 
                 # connect to the bucket 
                 conn = boto.connect_s3(Credentials["AWS_ACCESS_KEY_ID"], 
@@ -128,8 +141,8 @@ class UploadTab(wx.Panel):
 
                 # create a key to keep track of our file in the storage  
                 k = Key(bucket) 
-                k.key = Tags["mp3_url"]
-                self.Messages.AppendText("... to %s\n" %(Tags["mp3_url"]))                
+                k.key = self.Tags["mp3_url"]
+                self.Messages.AppendText("... to %s\n" %(self.Tags["mp3_url"]))                
                 k.set_contents_from_filename(sourceFilename) 
                 #k.set_acl('public-read')
                 
@@ -140,7 +153,6 @@ class UploadTab(wx.Panel):
                 return
  
     def UploadMP4 (self):
-        global Tags
         sourceFilename = os.path.abspath(self.Mp4Path.GetValue())
         self.Messages.AppendText("Uploading %s to Vimeo\n" %(sourceFilename))
         
@@ -162,26 +174,27 @@ class UploadTab(wx.Panel):
             browser.find_element_by_id('submit_button').click()
             time.sleep(5)
 
+            # Wait for upload 
+            browser.implicitly_wait(30*60) # seconds
+            
             # Fill in some info
             try:
-                title = "%s - %s (%s)" % (Tags["speaker"], Tags["title"], Tags["date"].replace("/","."))
+                title = "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
+                self.Tags["vimeo_title"] = title
                 browser.find_element_by_id('title').clear()
                 browser.find_element_by_id('title').send_keys(title)
                 browser.find_element_by_id('description').clear()
-                browser.find_element_by_id('description').send_keys(Tags["summary"])
+                browser.find_element_by_id('description').send_keys(self.Tags["Summary"])
                 browser.find_element_by_id('tags').clear()
-                browser.find_element_by_id('tags').send_keys(Tags["keywords"])
+                browser.find_element_by_id('tags').send_keys(self.Tags["Keywords"])
             except:
-                pass
+                self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
             browser.find_element_by_id('tags').submit()
             #time.sleep(5)
-            # Wait for upload 
-            browser.implicitly_wait(30*60) # seconds
 
-            #WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "myDynamicElement"))
             # This is the link for the video
-            Tags["vimeo_number"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
-            self.Messages.AppendText (Tags["vimeo_number"] + '\n')
+            self.Tags["vimeo_number"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
+            self.Messages.AppendText (self.Tags["vimeo_number"] + '\n')
 
             self.Messages.AppendText("Done uploading %s\n" %(sourceFilename))
         except:

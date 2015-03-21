@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 import threading
+import html
+import traceback
 from PasswordDialog import Credentials
 
 class CmsManager ():
@@ -82,50 +84,79 @@ class CmsManager ():
         
         return self.EventInfo
 
-    def SetVimeoVideo (self, Tags, MessageCallback):
+    def SetMedia (self, Tags, MessageCallback):    
         if not self.IsLoggedIn:
+            MessageCallback("Logging-in to CMS.\n")
             if not self.Login():
+                MessageCallback("CMS Log-in failed.\n")
                 return False
+                
+            MessageCallback("CMS Log-in OK.\n")
 
-        self.driver.get("https://my.ekklesia360.com/Sermon/list")
+        MessageCallback("Updating website.\n")
+        
+        try:
+            self.driver.get("https://my.ekklesia360.com/Sermon/list")
 
-        l=self.driver.find_element_by_id('listOutput')
-        l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
-        
-        # Enter the Vimeo Video link
-        if "vimeo_number" in Tags:
-            vimeo_video_link = self.driver.find_element_by_name("custom_vimeovideolink")
-            if vimeo_video_link.get_attribute("value") == "":
-                vimeo_video_link.send_keys("player.vimeo.com/video/" + Tags["vimeo_number"])
-                vimeo_video_link.submit()
-                pass
-            else:
-                print ("Skipping Vimeo Video link because it is not blank")
-        
-        # Go to media tab
-        self.driver.find_element_by_link_text('Media').click()
-        
-        # Audio
-        if "mp3_url" in Tags:
-            media_form=self.driver.find_element_by_id('mediaForm')
-            media_form.find_element_by_id('name').send_keys("Sermon Audio: %s: %s: %s: %s" % (Tags["speaker"], Tags["series"], Tags["title"], Tags["date"]))
-            media_form.find_element_by_id('description').send_keys(Tags["summary"])
-            media_form.find_element_by_id('tags').send_keys(Tags["keywords"])
+            l=self.driver.find_element_by_id('listOutput')
+            l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
             
-            media_form.find_element_by_id("tabExternalLink").click()
-            media_form.find_element_by_id("urlFile").send_keys("http://media.calvarysc.org/" + Tags["mp3_url"])
-            media_form.submit()
+            # Enter the Vimeo Video link
+            if "vimeo_number" in Tags:
+                vimeo_video_link = self.driver.find_element_by_name("custom_vimeovideolink")
+                if vimeo_video_link.get_attribute("value") == "":
+                    vimeo_video_link.send_keys("player.vimeo.com/video/" + Tags["vimeo_number"])
+                    vimeo_video_link.submit()
+                    pass
+                else:
+                    MessageCallback ("Skipping Vimeo Video link because it is not blank\n")
+            
+            # Go to media tab
+            self.driver.find_element_by_link_text('Media').click()
+            
+            # Audio
+            if "mp3_url" in Tags:
+                MessageCallback("...adding Audio\n")
+                media_form=self.driver.find_element_by_id('mediaForm')
+                media_form.find_element_by_id('name').send_keys("Sermon Audio: %s: %s: %s: %s" % (Tags["Speaker"], Tags["Series"], Tags["Title"], Tags["Date"]))
+                media_form.find_element_by_id('description').send_keys(Tags["Summary"])
+                media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
+                
+                media_form.find_element_by_id("tabExternalLink").click()
+                media_form.find_element_by_id("urlFile").send_keys("http://media.calvarysc.org/" + Tags["mp3_url"])
+                media_form.submit()
 
-        # Video
-        if "vimeo_number" in Tags:
-            media_form=self.driver.find_element_by_id('mediaForm')
-            media_form.find_element_by_id('name').send_keys("Sermon Video: %s: %s: %s: %s" % (Tags["speaker"], Tags["series"], Tags["title"], Tags["date"]))
-            media_form.find_element_by_id('description').send_keys(Tags["summary"])
-            media_form.find_element_by_id('tags').send_keys(Tags["keywords"])
+            # Video
+            if "vimeo_number" in Tags:
+                MessageCallback("...adding Video\n")
+                media_form=self.driver.find_element_by_id('mediaForm')
+                media_form.find_element_by_id('name').send_keys("Sermon Video: %s: %s: %s: %s" % (Tags["Speaker"], Tags["Series"], Tags["Title"], Tags["Date"]))
+                media_form.find_element_by_id('description').send_keys(Tags["Summary"])
+                media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
 
-            media_form.find_element_by_id("tabEmbedCode").click()
-            media_form.find_element_by_id("embedCode").send_keys("embed this" + Tags["vimeo_number"])
-            media_form.submit()
+                media_form.find_element_by_id("tabEmbedCode").click()
+                media_form.find_element_by_id("embedCode").send_keys(
+                    '<iframe src="https://player.vimeo.com/video/%s"' % (Tags["vimeo_number"]) +
+                        ' width="%d"' % (int(Tags['video_width'])) +
+                        ' height="%d"' % (int(Tags['video_height'])) +
+                        ' frameborder="0"' +
+                        ' webkitallowfullscreen' +
+                        ' mozallowfullscreen' +
+                        ' allowfullscreen>' +
+                    '</iframe>' +
+                    '<p><a href="https://vimeo.com/%s">%s</a> ' % (Tags["vimeo_number"], html.escape(Tags["vimeo_title"])) +
+                    'from <a href="https://vimeo.com/calvarysc">Calvary Church</a> on <a href="https://vimeo.com">Vimeo</a>.</p>')
+                media_form.submit()
+            
+            MessageCallback("Done updating website.\n")
+            
+        except:
+            MessageCallback('\n' + traceback.format_exc() + '\n')
+            return False
+            
+        finally:
+            # self.Close() 
+            pass
         
         return True
     
