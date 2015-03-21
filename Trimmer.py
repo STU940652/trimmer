@@ -93,7 +93,7 @@ class TrimmerMain (wx.Frame):
         self.jobmessagepanel = JobList(self.tabs, self.responseQueue, self.CancelJobCallback)
         self.tabs.AddPage(self.jobmessagepanel, "Messages")
         
-        self.uploadpanel = UploadTab(self.tabs)
+        self.uploadpanel = UploadTab(self.tabs, self.playerpanel.GetTags)
         self.tabs.AddPage(self.uploadpanel, "Upload")
         
         self.jobmessagepanel.SetCompletionCallback(self.uploadpanel.OnCompletion)

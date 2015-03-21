@@ -35,6 +35,7 @@ class Player(wx.Panel):
 
         self.MediaFileName = ''
         self.StatusBar = StatusBar
+        self.VideoSize = (0, 0)
 
         # Panels
         # The first panel holds the video and it's all black
@@ -247,8 +248,9 @@ class Player(wx.Panel):
             CropXString = ":x=%i" % self.cropslider.GetThumbPosition()
         
         # Substitute Tags
-        for tag in self.TagNames:
-            s = s.replace("$%s$" % (tag), self.Tags[tag].GetValue())
+        tags = self.GetTags()
+        for tag in tags:
+            s = s.replace("$%s$" % (tag), tags[tag])
         
         # Substitute other variables
         s = s\
@@ -440,6 +442,8 @@ class Player(wx.Panel):
             print (width, height)
             self.cropslider.SetScrollbar((width-height*4/3)/2, height*4/3, width, 20)
             print (width/2, height*4/3, width, 20)
+            
+        self.VideoSize = (width, height)
 
         # update the time on the slider
         CurrentTime = self.player.get_time()
@@ -487,3 +491,10 @@ class Player(wx.Panel):
                                                                 wx.ICON_ERROR)
         edialog.ShowModal()
 
+    def GetTags(self):
+        t = {}
+        t['video_width'] = self.VideoSize[0]
+        t['video_height'] = self.VideoSize[1]
+        for l in self.Tags:
+            t[l] = self.Tags[l].GetValue()
+        return t
