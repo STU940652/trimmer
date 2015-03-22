@@ -249,8 +249,9 @@ class Player(wx.Panel):
         
         # Substitute Tags
         tags = self.GetTags()
+        tags['SpeakerLast'] = tags['Speaker'].split(' ')[-1] # Speaker Last Name tag
         for tag in tags:
-            s = s.replace("$%s$" % (tag), tags[tag])
+            s = s.replace("$%s$" % (tag), str(tags[tag]))
         
         # Substitute other variables
         s = s\
@@ -493,8 +494,8 @@ class Player(wx.Panel):
 
     def GetTags(self):
         t = {}
-        t['video_width'] = self.VideoSize[0]
-        t['video_height'] = self.VideoSize[1]
+        t['video_width'] = str(self.VideoSize[0])
+        t['video_height'] = str(self.VideoSize[1])
         for l in self.Tags:
             t[l] = self.Tags[l].GetValue()
         return t
