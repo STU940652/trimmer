@@ -46,7 +46,7 @@ from PasswordDialog import PasswordDialog
 
 class TrimmerMain (wx.Frame):
     def __init__ (self, title):
-        minsize = (800,600)
+        minsize = (1000,600)
         wx.Frame.__init__(self, None, -1, title,
                           pos=wx.DefaultPosition, size=minsize)
         # Menu Bar
