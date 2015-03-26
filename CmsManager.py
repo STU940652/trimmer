@@ -7,6 +7,7 @@ import traceback
 from PasswordDialog import Credentials
 
 class CmsManager ():
+    drivers = [webdriver.PhantomJS, webdriver.Chrome, webdriver.Firefox]
     def __init__ (self):
         self.IsLoggedIn = False
         self.EventInfo = {}
@@ -15,8 +16,13 @@ class CmsManager ():
     def Login(self):
         if not self.IsLoggedIn:
             if self.driver == None:
-                #self.driver = webdriver.PhantomJS()
-                self.driver = webdriver.Chrome()
+                for thisDriver in self.drivers:
+                    try:
+                        self.driver = thisDriver()
+                    except:
+                        continue
+                    break
+                    
             self.driver.implicitly_wait(10) # seconds
             self.driver.get("http://my.ekklesia360.com/Login")
             self.driver.switch_to_frame('_monkIdXdm')
@@ -42,48 +48,52 @@ class CmsManager ():
         if not self.IsLoggedIn:
             if not self.Login():
                 return self.EventInfo
-                
-        self.driver.get("https://my.ekklesia360.com/Sermon/list")
+        try:        
+            self.driver.get("https://my.ekklesia360.com/Sermon/list")
 
-        l=self.driver.find_element_by_id('listOutput')
-        l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
-        time.sleep(1)
+            l=self.driver.find_element_by_id('listOutput')
+            l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
+            time.sleep(1)
 
-        self.EventInfo["title"] = self.driver.find_element_by_id("title").get_attribute("value")
+            self.EventInfo["title"] = self.driver.find_element_by_id("title").get_attribute("value")
 
-        l = self.driver.find_element_by_id("series_list")
-        for i in l.find_elements_by_tag_name('option'):
-            if i.get_attribute("selected"):
-                self.EventInfo["series"] = i.text
-           
-        self.EventInfo["date"] = self.driver.find_element_by_id("sermondate").get_attribute("value")
+            l = self.driver.find_element_by_id("series_list")
+            for i in l.find_elements_by_tag_name('option'):
+                if i.get_attribute("selected"):
+                    self.EventInfo["series"] = i.text
+               
+            self.EventInfo["date"] = self.driver.find_element_by_id("sermondate").get_attribute("value")
 
-        self.EventInfo["speaker"] = self.driver.find_element_by_id("selection").find_elements_by_tag_name('span')[0].text
+            self.EventInfo["speaker"] = self.driver.find_element_by_id("selection").find_elements_by_tag_name('span')[0].text
+            
+            # Get passage info
+            self.EventInfo["comment"] = ""
+            l = self.driver.find_element_by_id("passage")
+            for i in l.find_elements_by_tag_name('option'):
+                if i.get_attribute("selected"):
+                    self.EventInfo["comment"] = i.text
+                    break
+            passage1chapter = self.driver.find_element_by_name("passage1chapter").get_attribute("value")
+            self.EventInfo["comment"] += " " + passage1chapter
+            self.EventInfo["comment"] += ":" + self.driver.find_element_by_name("passage1verse").get_attribute("value")
+            passage1chapter2 = self.driver.find_element_by_name("passage1chapter2").get_attribute("value")
+            if passage1chapter2 != "":
+                self.EventInfo["comment"] += "-"
+                if passage1chapter != passage1chapter2:
+                    self.EventInfo["comment"] += passage1chapter2 + ":"
+                self.EventInfo["comment"] += self.driver.find_element_by_name("passage1verse2").get_attribute("value")
+            
+            # More Content Info
+            self.driver.find_element_by_link_text('Content').click()
+            self.EventInfo["summary"] = self.driver.find_element_by_id("summary").text
+            self.EventInfo["keywords"] = self.driver.find_element_by_id("audio").get_attribute("value")
+            
+            return self.EventInfo
+            
+        except:
+            self.driver.save_screenshot('screenshot.png')
+        return None
         
-        # Get passage info
-        self.EventInfo["comment"] = ""
-        l = self.driver.find_element_by_id("passage")
-        for i in l.find_elements_by_tag_name('option'):
-            if i.get_attribute("selected"):
-                self.EventInfo["comment"] = i.text
-                break
-        passage1chapter = self.driver.find_element_by_name("passage1chapter").get_attribute("value")
-        self.EventInfo["comment"] += " " + passage1chapter
-        self.EventInfo["comment"] += ":" + self.driver.find_element_by_name("passage1verse").get_attribute("value")
-        passage1chapter2 = self.driver.find_element_by_name("passage1chapter2").get_attribute("value")
-        if passage1chapter2 != "":
-            self.EventInfo["comment"] += "-"
-            if passage1chapter != passage1chapter2:
-                self.EventInfo["comment"] += passage1chapter2 + ":"
-            self.EventInfo["comment"] += self.driver.find_element_by_name("passage1verse2").get_attribute("value")
-        
-        # More Content Info
-        self.driver.find_element_by_link_text('Content').click()
-        self.EventInfo["summary"] = self.driver.find_element_by_id("summary").text
-        self.EventInfo["keywords"] = self.driver.find_element_by_id("audio").get_attribute("value")
-        
-        return self.EventInfo
-
     def SetMedia (self, Tags, MessageCallback):    
         if not self.IsLoggedIn:
             MessageCallback("Logging-in to CMS.\n")
