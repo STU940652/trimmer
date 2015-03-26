@@ -16,7 +16,10 @@ DEPENDENCIES
     - wxPython
     - Boto (Amazon S3 client)
     - Selenium (automated web client)
-    
+    - one of the following web browsers:
+        - PhantomJS (headless - put the exe in this directory, or your path)
+        - Chrome
+        - Firefox    
 
   Building the binary
     - cx_freeze 2.x
