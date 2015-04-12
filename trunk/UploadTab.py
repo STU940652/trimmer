@@ -18,6 +18,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import selenium.common.exceptions
 
 # Import other classes from this project
 from Settings import *
@@ -115,12 +116,15 @@ class UploadTab(wx.Panel):
         self.Tags.update(self.GetTags())
 
         if self.Mp3Enable.GetValue():
+            self.Mp3Enable.SetValue(False)
             self.UploadMP3()
         
         if self.Mp4Enable.GetValue():
+            self.Mp4Enable.SetValue(False)
             self.UploadMP4()
             
         if self.CmsEnable.GetValue():
+            self.CmsEnable.SetValue(False)
             c = CmsManager()
             c.SetMedia (self.Tags, self.Messages.AppendText)
         
@@ -146,7 +150,6 @@ class UploadTab(wx.Panel):
                 k.set_contents_from_filename(sourceFilename) 
                 #k.set_acl('public-read')
                 
-                self.Mp3Enable.SetValue(False)
                 self.Messages.AppendText("Done uploading %s\n" %(sourceFilename))
             except:
                 self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
@@ -175,9 +178,10 @@ class UploadTab(wx.Panel):
             time.sleep(5)
 
             # Wait for upload 
-            browser.implicitly_wait(30*60) # seconds
+            browser.implicitly_wait(60*60) # seconds.. wait up to one hour
             
             # Fill in some info
+            self.Messages.AppendText("Entering video info\n")
             try:
                 title = "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
                 self.Tags["vimeo_title"] = title
@@ -191,6 +195,20 @@ class UploadTab(wx.Panel):
                 self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
             browser.find_element_by_id('tags').submit()
             #time.sleep(5)
+            
+            # Wait until the 'Go to Video' link magically appears
+            self.Messages.AppendText("Wait for upload to complete\n")
+            still_going = True
+            browser.implicitly_wait(0)
+            while still_going:
+                self.Messages.AppendText(browser.title + '\n')
+                try:
+                    browser.find_element_by_partial_link_text('Go to Video')
+                    still_going = False
+                except selenium.common.exceptions.NoSuchElementException:
+                    time.sleep(10)
+                    
+            browser.implicitly_wait(60*60)
 
             # This is the link for the video
             self.Tags["vimeo_number"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
