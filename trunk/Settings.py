@@ -1,5 +1,6 @@
 import configparser
 import os
+import datetime
 
 # #Sample ini file
 # [FilePaths]
@@ -58,4 +59,10 @@ try:
     TrimmerConfig.read(['Trimmer.ini', os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'),'Trimmer.ini')])
 except:
     pass
+    
+# Figure out the "Date of Record"
+time_of_record = datetime.datetime.now()
+while time_of_record.weekday() != 6:
+    time_of_record += datetime.timedelta(days=1)
+
     
