@@ -136,7 +136,7 @@ class UploadTab(wx.Panel):
         if sourceFilename != "":
             try:
                 # Target filename
-                self.Tags["mp3_url"] = '/'.join([datetime.datetime.now().strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')), os.path.basename(sourceFilename)]).replace('\\','/')
+                self.Tags["mp3_url"] = '/'.join([time_of_record.strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')), os.path.basename(sourceFilename)]).replace('\\','/')
 
                 # connect to the bucket 
                 conn = boto.connect_s3(Credentials["AWS_ACCESS_KEY_ID"], 
