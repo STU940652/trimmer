@@ -178,7 +178,7 @@ class CmsManager ():
         
     def __exit__(self, exc_type, exc_value, traceback):
         if self.driver != None:
-            self.driver.close()
+            self.driver.quit()
             
         self.IsLoggedIn = False
         self.EventInfo = {}

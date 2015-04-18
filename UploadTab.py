@@ -218,6 +218,6 @@ class UploadTab(wx.Panel):
         except:
             self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
             
-        browser.close()
+        browser.quit()
            
          

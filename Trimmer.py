@@ -76,7 +76,7 @@ class TrimmerMain (wx.Frame):
         self.cancelQueue = queue.Queue()
         self.EncodeThread = EncodeThread(self.commandQueue, self.responseQueue, self.cancelQueue)
         self.EncodeThread.start()
-        self.Bind(wx.EVT_CLOSE, self.CloseEvent, self)
+        self.Bind(wx.EVT_CLOSE, self.OnClose, self)
 
         # Make a Notebook (Tab thingy)
         self.tabs = wx.Notebook(self)
@@ -120,7 +120,7 @@ class TrimmerMain (wx.Frame):
         self.tabs.SetSelection(1)
         self.playerpanel.OpenFile(DestFilename, Play = False)
         
-    def CloseEvent (self, evt): 
+    def OnClose (self, evt): 
         print ("Closing")
         self.cancelQueue.put("exit")
         #m = wx.MessageDialog(self, "Waiting for encoding to complete.  See other window for progress.",  "Please Wait...")
@@ -174,6 +174,7 @@ if __name__ == "__main__":
 #Completion = None            
             """)
         
+    log = None
     try:
         log = open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "stdout_log.txt"), "w")
         sys.stdout = log
@@ -187,3 +188,5 @@ if __name__ == "__main__":
     # show the player window centred and run the application
     player.Show()
     app.MainLoop()
+    if log:
+        log.close()
