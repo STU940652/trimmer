@@ -156,6 +156,10 @@ class Player(wx.Panel):
                 self.Tags[label] = wx.TextCtrl(tagpanel, size=(120, -1))
                 temp_box.Add(self.Tags[label], 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border = 5)
 
+        # Combobox to select the sermon
+        self.select_event = wx.Choice (tagpanel)
+        temp_box.Add(self.select_event, 0,  flag=wx.EXPAND | wx.BOTTOM | wx.TOP)
+        
         # Import Tags button
         self.import_tag = wx.Button(tagpanel, label="Import from CMS")
         #temp_box.AddStretchSpacer()
@@ -206,14 +210,25 @@ class Player(wx.Panel):
         self.OnChangeSelection()
 
     def OnImportFromCMS(self, evt=None):
+        global Tags
         self.import_tag.Enable(False)
-        self.CMSThread = ImportFromCMSThread(self, self.ImportFromCMSCallback)
+        event = None
+        if (self.select_event.GetCount() > 0) and ('event_list' in Tags) and (self.select_event.GetSelection() != wx.NOT_FOUND):
+            event = Tags['event_list'][self.select_event.GetSelection()][1]
+        
+        self.CMSThread = ImportFromCMSThread(self, self.ImportFromCMSCallback, event)
         self.CMSThread.start()
     
     def ImportFromCMSCallback(thread, self, info):
         global Tags
         Tags.update(info)
         for key in info:
+            if key == 'event_list':
+                l = []
+                for e in info[key]:
+                    l.append(e[0])
+                self.select_event.SetItems(l)
+                self.select_event.SetSelection(0)
             for textBox in self.Tags:                
                 if key.lower() == textBox.lower():
                     self.Tags[textBox].SetValue(info[key])
