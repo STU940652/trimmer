@@ -43,18 +43,46 @@ class CmsManager ():
             self.IsLoggedIn = True
             return True
             
-    def GetEventInfo (self):
+    def GetEventInfo (self, event = None):
         self.EventInfo = {}
         if not self.IsLoggedIn:
             if not self.Login():
                 return self.EventInfo
         try:        
-            self.driver.get("https://my.ekklesia360.com/Sermon/list")
+            if event == None:
+                self.driver.get("https://my.ekklesia360.com/Sermon/list")
 
-            l=self.driver.find_element_by_id('listOutput')
-            l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
-            time.sleep(1)
+                l=self.driver.find_element_by_id('listOutput')
+                event_list=[]
+                for a in l.find_elements_by_tag_name('tr'):
+                    if "Draft" in a.text:
+                        try:
+                            b = []
+                            for c in a.find_elements_by_tag_name('td')[1:4]:
+                                b.append(c.text.strip())
+                            event_list.append( (":".join(b), a.find_elements_by_tag_name('a')[0].get_attribute("href")) )
+                                
+                        except TypeError:
+                            pass
+                            
 
+                #print (event_list)
+                # Go to first in list by default
+                if len(event_list) == 0:
+                    # Nothing valid found
+                    return []
+                self.EventInfo["event_list"] = event_list
+                
+                # Go to first in list
+                self.driver.get(event_list[0][1])
+                #l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
+                time.sleep(1)
+                
+            else:
+                self.driver.get(event)
+                time.sleep(1)
+
+            #print(self.driver.current_url)
             self.EventInfo["title"] = self.driver.find_element_by_id("title").get_attribute("value")
 
             l = self.driver.find_element_by_id("series_list")
@@ -91,8 +119,9 @@ class CmsManager ():
             return self.EventInfo
             
         except:
+            print (traceback.format_exc())
             self.driver.save_screenshot('screenshot.png')
-        return None
+        return []
         
     def SetMedia (self, Tags, MessageCallback):    
         if not self.IsLoggedIn:
@@ -187,14 +216,15 @@ class CmsManager ():
         return False
 
 class ImportFromCMSThread(threading.Thread):
-    def __init__(self, parent, callback):
+    def __init__(self, parent, callback, event = None):
         threading.Thread.__init__(self)
         self.callback = callback
         self.parent = parent
+        self.event = event
         
     def run (self):
         with CmsManager() as c:
-            info = c.GetEventInfo()
+            info = c.GetEventInfo(self.event)
             
         if self.callback and self.parent:
             self.callback(self.parent, info)
