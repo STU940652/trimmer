@@ -82,7 +82,7 @@ class CmsManager ():
                 self.driver.get(event)
                 time.sleep(1)
 
-            #print(self.driver.current_url)
+            self.EventInfo["event_url"] = self.driver.current_url
             self.EventInfo["title"] = self.driver.find_element_by_id("title").get_attribute("value")
 
             l = self.driver.find_element_by_id("series_list")
@@ -135,10 +135,7 @@ class CmsManager ():
         MessageCallback("Updating website.\n")
         
         try:
-            self.driver.get("https://my.ekklesia360.com/Sermon/list")
-
-            l=self.driver.find_element_by_id('listOutput')
-            l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
+            self.driver.get(self.EventInfo["event_url"])
             
             # Enter the Vimeo Video link
             if "vimeo_number" in Tags:
