@@ -20,6 +20,7 @@ class CmsManager ():
                     try:
                         self.driver = thisDriver()
                     except:
+                        print(traceback.format_exc())
                         continue
                     break
                     
@@ -135,7 +136,7 @@ class CmsManager ():
         MessageCallback("Updating website.\n")
         
         try:
-            self.driver.get(self.EventInfo["event_url"])
+            self.driver.get(Tags["event_url"])
             
             # Enter the Vimeo Video link
             if "vimeo_number" in Tags:
