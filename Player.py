@@ -508,7 +508,8 @@ class Player(wx.Panel):
         edialog.ShowModal()
 
     def GetTags(self):
-        t = {}
+        global Tags
+        t = Tags
         t['video_width'] = str(self.VideoSize[0])
         t['video_height'] = str(self.VideoSize[1])
         for l in self.Tags:
