@@ -20,7 +20,7 @@ class CmsManager ():
                     try:
                         self.driver = thisDriver()
                     except:
-                        print(traceback.format_exc())
+                        #print(traceback.format_exc())
                         continue
                     break
                     
@@ -29,6 +29,7 @@ class CmsManager ():
             self.driver.switch_to_frame('_monkIdXdm')
             b = self.driver.find_element_by_id('button')
             b.click()
+            time.sleep(1)
             self.driver.switch_to_window(self.driver.window_handles[1])
             b = self.driver.find_element_by_id('user_email')
             b.send_keys(Credentials["CMS_Username"])
@@ -39,6 +40,9 @@ class CmsManager ():
 
             # We are now logged in
             self.driver.switch_to_window(self.driver.window_handles[0])
+            
+            # Wait for dashboard to build
+            time.sleep(5)
             
             # We have succeeded to log in
             self.IsLoggedIn = True
@@ -160,6 +164,7 @@ class CmsManager ():
                 media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
                 
                 media_form.find_element_by_id("tabExternalLink").click()
+                time.sleep(1)
                 media_form.find_element_by_id("urlFile").send_keys("http://media.calvarysc.org/" + Tags["mp3_url"])
                 media_form.submit()
 
@@ -172,6 +177,7 @@ class CmsManager ():
                 media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
 
                 media_form.find_element_by_id("tabEmbedCode").click()
+                time.sleep(1)
                 media_form.find_element_by_id("embedCode").send_keys(
                     '<iframe src="https://player.vimeo.com/video/%s"' % (Tags["vimeo_number"]) +
                         ' width="%d"' % (int(Tags['video_width'])) +
