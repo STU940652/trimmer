@@ -4,6 +4,7 @@ import time
 import threading
 import html
 import traceback
+import wx
 from PasswordDialog import Credentials
 
 class CmsManager ():
@@ -70,8 +71,6 @@ class CmsManager ():
                         except TypeError:
                             pass
                             
-
-                #print (event_list)
                 # Go to first in list by default
                 if len(event_list) == 0:
                     # Nothing valid found
@@ -80,7 +79,6 @@ class CmsManager ():
                 
                 # Go to first in list
                 self.driver.get(event_list[0][1])
-                #l.find_elements_by_class_name ('title')[1].find_elements_by_tag_name('a')[0].click()
                 time.sleep(1)
                 
             else:
@@ -231,7 +229,6 @@ class ImportFromCMSThread(threading.Thread):
             info = c.GetEventInfo(self.event)
             
         if self.callback and self.parent:
-            self.callback(self.parent, info)
-        
-            
+            # This we are in a non-GUI thread, so need to use CallAfter
+            wx.CallAfter(self.callback, self.parent, info)
         
