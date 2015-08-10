@@ -87,6 +87,7 @@ class TrimmerMain (wx.Frame):
             self.tabs.AddPage(self.copypanel,"Copy Files")
         
         # Setup the player panel
+        self.playerpanelid = self.tabs.GetPageCount()
         self.playerpanel = Player(self.tabs, self.SubmitJobCallback, self.StatusBar)
         self.tabs.AddPage(self.playerpanel, "Player")
         
@@ -111,13 +112,13 @@ class TrimmerMain (wx.Frame):
         self.jobmessagepanel.AddJob(cName)
         self.StatusBar.SetStatusText("Started job %s" % cName)
         self.JobCounter += 1
-        self.tabs.SetSelection(2)
+        self.tabs.SetSelection(self.playerpanelid+1)
     
     def CancelJobCallback (self, commandName):
         self.cancelQueue.put(commandName)
     
     def CopyDoneCallback (self, DestFilename):
-        self.tabs.SetSelection(1)
+        self.tabs.SetSelection(self.playerpanelid)
         self.playerpanel.OpenFile(DestFilename, Play = False)
         
     def OnClose (self, evt): 
@@ -133,7 +134,7 @@ class TrimmerMain (wx.Frame):
         subprocess.call('explorer "%s"' % TrimmerConfig.get('FilePaths', 'LogPath') )
  
     def OnOpen(self, evt):
-        self.tabs.SetSelection(1)
+        self.tabs.SetSelection(self.playerpanelid)
         self.playerpanel.OnOpen(None)
         
     def OnUpdatePasswords (self, evt):
