@@ -241,7 +241,7 @@ class Player(wx.Panel):
         
     def OnChangeSelection(self, evt=None):
         section = self.SectionSelect.GetClientData(self.SectionSelect.GetSelection())
-        self.OutputFileName.SetValue(TrimmerConfig.get(section,'DefaultOutFileName').replace('$InFileName$',self.MediaFileName.rsplit('.',1)[0]))
+        self.OutputFileName.SetValue(self.Substitute(TrimmerConfig.get(section,'DefaultOutFileName')))
         
     def Substitute (self, s):
         ClipOfInterestStart = hms_to_ms(self.StartTime.GetValue())/1000.0
@@ -279,7 +279,8 @@ class Player(wx.Panel):
                     .replace("$FadeLength$", str(FadeLength))\
                     .replace("$InFile$", self.MediaFileName)\
                     .replace("$InFileName$", self.MediaFileName.rsplit('.',1)[0])\
-                    .replace("$OutFileName$", self.OutputFileName.GetValue())
+                    .replace("$OutFileName$", self.OutputFileName.GetValue())\
+                    .replace("$DateSunday$", time_of_record.strftime("%s" % (TrimmerConfig.get('GlobalSettings', 'NameTemplate'))))
         return s
     
     def OnEncode(self, evt):
