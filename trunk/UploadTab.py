@@ -109,29 +109,38 @@ class UploadTab(wx.Panel):
             self.CmsEnable.SetValue(True)
     
     def OnUpload (self, evt):
-        self.UploadThread = threading.Thread(target=self.UploadFiles)
-        self.UploadThread.start()
-    
-    def UploadFiles (self):    
         self.Tags.update(self.GetTags())
-
-        if self.Mp3Enable.GetValue():
-            self.Mp3Enable.SetValue(False)
-            self.UploadMP3()
+        self.UploadThread = threading.Thread(target=self.UploadFiles, \
+                            args=(self.Mp3Enable.GetValue(), self.Mp4Enable.GetValue(), self.CmsEnable.GetValue(), \
+                            self.Mp3Path.GetValue(), self.Mp4Path.GetValue()))
+        self.UploadThread.start()
+        self.Mp3Enable.Disable()
+        self.Mp4Enable.Disable()
+        self.CmsEnable.Disable()
+    
+    ## This executes in a separate thread
+    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, Mp3Path, Mp4Path): 
+        # TODO: wx stuff here needs to be handled by an event
+        if Mp3Enable:
+            self.UploadMP3(Mp3Path)
+            wx.CallAfter (self.Mp3Enable.Enable)
+            wx.CallAfter (self.Mp3Enable.SetValue, False)
         
-        if self.Mp4Enable.GetValue():
-            self.Mp4Enable.SetValue(False)
-            self.UploadMP4()
+        if Mp4Enable:
+            self.UploadMP4(Mp4Path)
+            wx.CallAfter (self.Mp4Enable.Enable)
+            wx.CallAfter (self.Mp4Enable.SetValue, False)
             
-        if self.CmsEnable.GetValue():
-            self.CmsEnable.SetValue(False)
+        if CmsEnable:
             c = CmsManager()
-            c.SetMedia (self.Tags, self.Messages.AppendText)
+            c.SetMedia (self.Tags, self.ThreadSafeLog)
+            wx.CallAfter (self.CmsEnable.Enable)
+            wx.CallAfter (self.CmsEnable.SetValue, False)
         
-    def UploadMP3 (self):
-        sourceFilename = os.path.abspath(self.Mp3Path.GetValue())
+    def UploadMP3 (self, Mp3Path):
+        sourceFilename = os.path.abspath(Mp3Path)
         
-        self.Messages.AppendText("Uploading %s to Amazon S3\n" %(sourceFilename))
+        self.ThreadSafeLog ("Uploading %s to Amazon S3\n" %(sourceFilename))
         
         if sourceFilename != "":
             try:
@@ -146,19 +155,19 @@ class UploadTab(wx.Panel):
                 # create a key to keep track of our file in the storage  
                 k = Key(bucket) 
                 k.key = self.Tags["mp3_url"]
-                self.Messages.AppendText("... to %s\n" %(self.Tags["mp3_url"]))                
+                self.ThreadSafeLog ("... to %s\n" %(self.Tags["mp3_url"]))                
                 k.set_contents_from_filename(sourceFilename) 
                 #k.set_acl('public-read')
                 
-                self.Messages.AppendText("Done uploading %s\n" %(sourceFilename))
+                self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
             except:
-                self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
+                self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
                 return
  
-    def UploadMP4 (self):
-        sourceFilename = os.path.abspath(self.Mp4Path.GetValue())
-        self.Messages.AppendText("Uploading %s to Vimeo\n" %(sourceFilename))
-        
+    def UploadMP4 (self, Mp4Path):
+        sourceFilename = os.path.abspath(Mp4Path)
+        self.ThreadSafeLog ("Uploading %s to Vimeo\n" %(sourceFilename))
+
         try:
             browser = webdriver.Chrome()
             # Visit URL
@@ -181,7 +190,7 @@ class UploadTab(wx.Panel):
             browser.implicitly_wait(60*60) # seconds.. wait up to one hour
             
             # Fill in some info
-            self.Messages.AppendText("Entering video info\n")
+            self.ThreadSafeLog ("Entering video info\n")
             try:
                 title = "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
                 self.Tags["vimeo_title"] = title
@@ -192,16 +201,15 @@ class UploadTab(wx.Panel):
                 browser.find_element_by_id('tags').clear()
                 browser.find_element_by_id('tags').send_keys(self.Tags["Keywords"])
             except:
-                self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
+                self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
             browser.find_element_by_id('tags').submit()
-            #time.sleep(5)
             
             # Wait until the 'Go to Video' link magically appears
-            self.Messages.AppendText("Wait for upload to complete\n")
+            self.ThreadSafeLog ("Wait for upload to complete\n")
             still_going = True
             browser.implicitly_wait(0)
             while still_going:
-                self.Messages.AppendText(browser.title + '\n')
+                self.ThreadSafeLog (browser.title + '\n')
                 try:
                     browser.find_element_by_partial_link_text('Go to Video')
                     still_going = False
@@ -212,12 +220,14 @@ class UploadTab(wx.Panel):
 
             # This is the link for the video
             self.Tags["vimeo_number"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
-            self.Messages.AppendText (self.Tags["vimeo_number"] + '\n')
+            self.ThreadSafeLog (self.Tags["vimeo_number"] + '\n')
 
-            self.Messages.AppendText("Done uploading %s\n" %(sourceFilename))
+            self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
         except:
-            self.Messages.AppendText('\n' + traceback.format_exc() + '\n')
+            self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
             
         browser.quit()
-           
+          
+    def ThreadSafeLog(self, s):
+        wx.CallAfter (self.Messages.AppendText, s)
          
