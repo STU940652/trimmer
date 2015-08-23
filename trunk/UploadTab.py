@@ -3,6 +3,7 @@ import wx
 import traceback
 import json
 import boto 
+import boto.s3.connection
 import os
 import os.path
 import datetime
@@ -114,9 +115,12 @@ class UploadTab(wx.Panel):
                             args=(self.Mp3Enable.GetValue(), self.Mp4Enable.GetValue(), self.CmsEnable.GetValue(), \
                             self.Mp3Path.GetValue(), self.Mp4Path.GetValue()))
         self.UploadThread.start()
-        self.Mp3Enable.Disable()
-        self.Mp4Enable.Disable()
-        self.CmsEnable.Disable()
+        if self.Mp3Enable.GetValue():
+            self.Mp3Enable.Disable()
+        if self.Mp4Enable.GetValue():
+            self.Mp4Enable.Disable()
+        if self.CmsEnable.GetValue():
+            self.CmsEnable.Disable()
     
     ## This executes in a separate thread
     def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, Mp3Path, Mp4Path): 
@@ -149,7 +153,8 @@ class UploadTab(wx.Panel):
 
                 # connect to the bucket 
                 conn = boto.connect_s3(Credentials["AWS_ACCESS_KEY_ID"], 
-                                        Credentials["AWS_SECRET_ACCESS_KEY"]) 
+                                        Credentials["AWS_SECRET_ACCESS_KEY"],
+                                        calling_format=boto.s3.connection.OrdinaryCallingFormat()) 
                 bucket = conn.get_bucket(Credentials["BUCKET_NAME"]) 
 
                 # create a key to keep track of our file in the storage  
