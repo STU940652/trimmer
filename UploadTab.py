@@ -46,7 +46,13 @@ class UploadTab(wx.Panel):
         Mp3pathSizer.Add(self.Mp3Path, 1, flag=wx.EXPAND)
         Mp3pathSizer.Add(self.Mp3FileButton)
         Sizer.Add(Mp3pathSizer, flag=wx.EXPAND|wx.ALL, border = 5)
-        
+        URLSizer = wx.BoxSizer(wx.HORIZONTAL)
+        URLSizer.AddSpacer(25)
+        URLSizer.Add(wx.StaticText(self, -1, "MP3 URL"))
+        self.MP3URL = wx.TextCtrl(self, size=(200,-1))
+        URLSizer.Add(self.MP3URL, 1, flag=wx.EXPAND)
+        Sizer.Add(URLSizer, flag=wx.ALL, border = 5)
+
         Sizer.AddSpacer(20)
         
         # MP4 File dialog
@@ -60,6 +66,12 @@ class UploadTab(wx.Panel):
         Mp4pathSizer.Add(self.Mp4Path, 1, flag=wx.EXPAND)
         Mp4pathSizer.Add(self.Mp4FileButton)
         Sizer.Add(Mp4pathSizer, flag=wx.EXPAND|wx.ALL, border = 5)
+        VimNumSizer = wx.BoxSizer(wx.HORIZONTAL)
+        VimNumSizer.AddSpacer(25)
+        VimNumSizer.Add(wx.StaticText(self, -1, "Vimeo Number"))
+        self.VimNumber = wx.TextCtrl(self, size=(200,-1))
+        VimNumSizer.Add(self.VimNumber, 1, flag=wx.EXPAND)
+        Sizer.Add(VimNumSizer, flag=wx.ALL, border = 5)
         
         Sizer.AddSpacer(20)
         
@@ -126,13 +138,17 @@ class UploadTab(wx.Panel):
     def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, Mp3Path, Mp4Path): 
         # TODO: wx stuff here needs to be handled by an event
         if Mp3Enable:
-            self.UploadMP3(Mp3Path)
+            ret = self.UploadMP3(Mp3Path)
             wx.CallAfter (self.Mp3Enable.Enable)
+            if not ret:
+                return 
             wx.CallAfter (self.Mp3Enable.SetValue, False)
         
         if Mp4Enable:
-            self.UploadMP4(Mp4Path)
+            ret = self.UploadMP4(Mp4Path)
             wx.CallAfter (self.Mp4Enable.Enable)
+            if not ret:
+                return
             wx.CallAfter (self.Mp4Enable.SetValue, False)
             
         if CmsEnable:
@@ -161,13 +177,18 @@ class UploadTab(wx.Panel):
                 k = Key(bucket) 
                 k.key = self.Tags["mp3_url"]
                 self.ThreadSafeLog ("... to %s\n" %(self.Tags["mp3_url"]))                
+                try:
+                    wx.CallAfter (self.MP3URL.SetValue, self.Tags["mp3_url"])
+                except:
+                    self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
                 k.set_contents_from_filename(sourceFilename) 
                 #k.set_acl('public-read')
                 
                 self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
             except:
                 self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
-                return
+                return False
+        return True
  
     def UploadMP4 (self, Mp4Path):
         sourceFilename = os.path.abspath(Mp4Path)
@@ -176,16 +197,16 @@ class UploadTab(wx.Panel):
         try:
             browser = webdriver.Chrome()
             # Visit URL
-            browser.implicitly_wait(10) # seconds
+            browser.implicitly_wait(60) # seconds
             url = "http://www.vimeo.com/log_in"
             browser.get(url)
             login_form = browser.find_element_by_id('login_form')
             login_form.find_element_by_id('email').send_keys(Credentials["Vimeo_Username"])
             login_form.find_element_by_id('password').send_keys(Credentials["Vimeo_Password"])
             login_form.find_element_by_class_name('btn').click()
-            #time.sleep(5)
             browser.find_element_by_id('btn_upload').click()
-            #time.sleep(5)
+            browser.find_element_by_link_text('legacy uploader').click()
+            #browser.get("https://vimeo.com/upload?force_legacy=1") # This is a workaround for the Beta uploader
             browser.find_element_by_name('file_data').send_keys (sourceFilename)
             time.sleep(5)
             browser.find_element_by_id('submit_button').click()
@@ -226,12 +247,19 @@ class UploadTab(wx.Panel):
             # This is the link for the video
             self.Tags["vimeo_number"] = browser.find_element_by_partial_link_text('Go to Video').get_attribute('href').rsplit("/",1)[1]
             self.ThreadSafeLog (self.Tags["vimeo_number"] + '\n')
+            try:
+                wx.CallAfter (self.VimNumber.SetValue, self.Tags["vimeo_number"])
+            except:
+                self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
 
             self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
         except:
             self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+            browser.quit()
+            return False
             
         browser.quit()
+        return True
           
     def ThreadSafeLog(self, s):
         wx.CallAfter (self.Messages.AppendText, s)

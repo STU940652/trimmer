@@ -54,7 +54,7 @@ class Player(wx.Panel):
         # Time Slider
         self.timeslider = wx.Slider(ctrlpanel, -1, 0, 0, 1000)
         self.timeslider.SetRange(0, 1000)
-        self.timeText = wx.TextCtrl(ctrlpanel, size=(80, -1))
+        self.timeText = wx.TextCtrl(ctrlpanel, size=(100, -1))
         next   = wx.Button(ctrlpanel, label="Next")
         pause  = wx.Button(ctrlpanel, label="Pause")
         play   = wx.Button(ctrlpanel, label="Play")
@@ -64,8 +64,8 @@ class Player(wx.Panel):
         
         #My Stuff
         StartLabel = wx.StaticText(ctrlpanel, label="Start Time ", size=(100, -1), style = wx.TE_RIGHT)
-        StartFill = wx.Button(ctrlpanel, label="Fill", size=(30, -1))
-        self.StartTime = wx.TextCtrl(ctrlpanel, size=(80, -1))
+        StartFill = wx.Button(ctrlpanel, label="Fill", size=(50, -1))
+        self.StartTime = wx.TextCtrl(ctrlpanel, size=(100, -1))
         self.StartTime.SetValue("00:00:00.000")
         self.StartPlayFrom = wx.Button(ctrlpanel, label="Play From")
         self.StartPlayTo = wx.Button(ctrlpanel, label="Play To")
@@ -112,9 +112,9 @@ class Player(wx.Panel):
         self.SectionSelect.SetSelection(0)
         
         StopLabel = wx.StaticText(ctrlpanel, label="Stop Time", size=(100, -1), style = wx.TE_RIGHT)
-        self.StopFill = wx.Button(ctrlpanel, label="Fill", size=(30, -1))
+        self.StopFill = wx.Button(ctrlpanel, label="Fill", size=(50, -1))
         self.Bind(wx.EVT_BUTTON, self.OnStopFill, self.StopFill)
-        self.StopTime = wx.TextCtrl(ctrlpanel, size=(80, -1))
+        self.StopTime = wx.TextCtrl(ctrlpanel, size=(100, -1))
         self.StopTime.SetValue("00:00:00.000")
         self.StopPlayTo = wx.Button(ctrlpanel, label="Play To")
         self.Bind(wx.EVT_BUTTON, self.OnStopPlayTo, self.StopPlayTo)
@@ -123,7 +123,7 @@ class Player(wx.Panel):
         self.EncodeButton = wx.Button(ctrlpanel, label="Encode")
         self.Bind(wx.EVT_BUTTON, self.OnEncode, self.EncodeButton)
         # box4 contains Stop stuff
-        box4.Add(self.SectionSelect, flag=wx.ALIGN_RIGHT)
+        box4.Add(self.SectionSelect, flag=wx.ALIGN_RIGHT|wx.EXPAND)
         box4.Add(StopLabel)
         box4.Add(self.StopFill)
         box4.Add(self.StopTime)
