@@ -123,6 +123,11 @@ class UploadTab(wx.Panel):
     
     def OnUpload (self, evt):
         self.Tags.update(self.GetTags())
+        # Get the MP3 and Vimeo info is provided
+        if self.MP3URL.GetValue() != "":
+            self.Tags["mp3_url"] = self.MP3URL.GetValue()
+        if self.VimNumber.GetValue() != "":
+            self.Tags["vimeo_number"] = self.VimNumber.GetValue()
         self.UploadThread = threading.Thread(target=self.UploadFiles, \
                             args=(self.Mp3Enable.GetValue(), self.Mp4Enable.GetValue(), self.CmsEnable.GetValue(), \
                             self.Mp3Path.GetValue(), self.Mp4Path.GetValue()))
@@ -205,8 +210,13 @@ class UploadTab(wx.Panel):
             login_form.find_element_by_id('password').send_keys(Credentials["Vimeo_Password"])
             login_form.find_element_by_class_name('btn').click()
             browser.find_element_by_id('btn_upload').click()
-            browser.find_element_by_link_text('legacy uploader').click()
-            #browser.get("https://vimeo.com/upload?force_legacy=1") # This is a workaround for the Beta uploader
+            try:
+                # This is a workaround for the Beta uploader
+                browser.implicitly_wait(10) # seconds
+                browser.find_element_by_link_text('legacy uploader').click()
+            except:
+                pass
+            browser.implicitly_wait(60) # seconds
             browser.find_element_by_name('file_data').send_keys (sourceFilename)
             time.sleep(5)
             browser.find_element_by_id('submit_button').click()
