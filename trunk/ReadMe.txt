@@ -2,7 +2,7 @@ TRIMMER README
 ==============
 
 Trimmer is released under LGPL 2.1.  It is currently hosted at
-http://code.google.com/p/trimmer/, where you can find the most 
+http://trimmer.sourceforge.net where you can find the most 
 complete documentation.
 
 
@@ -16,6 +16,7 @@ DEPENDENCIES
     - wxPython
     - Boto (Amazon S3 client)
     - Selenium (automated web client)
+    - Vimeo client (pip install PyVimeo)
     - one of the following web browsers:
         - PhantomJS (headless - put the exe in this directory, or your path)
         - Chrome
