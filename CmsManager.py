@@ -176,6 +176,8 @@ class CmsManager ():
 
                 media_form.find_element_by_id("tabEmbedCode").click()
                 time.sleep(1)
+                if "vimeo_title" not in Tags:
+                    Tags["vimeo_title"] = "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
                 media_form.find_element_by_id("embedCode").send_keys(
                     '<iframe src="https://player.vimeo.com/video/%s"' % (Tags["vimeo_number"]) +
                         ' width="%d"' % (int(Tags['video_width'])) +
