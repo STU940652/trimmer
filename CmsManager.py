@@ -191,6 +191,9 @@ class CmsManager ():
                     'from <a href="https://vimeo.com/calvarysc">Calvary Church</a> on <a href="https://vimeo.com">Vimeo</a>.</p>')
                 media_form.submit()
             
+            # Publish it
+            self.PublishWebsite(Tags, MessageCallback)
+
             MessageCallback("Done updating website.\n")
             
         except:
@@ -203,6 +206,75 @@ class CmsManager ():
         
         return True
     
+    def PublishWebsite (self, Tags, MessageCallback):    
+        if not self.IsLoggedIn:
+            MessageCallback("Logging-in to CMS.\n")
+            if not self.Login():
+                MessageCallback("CMS Log-in failed.\n")
+                return False
+                
+            MessageCallback("CMS Log-in OK.\n")
+
+        MessageCallback("Publishing website.\n")
+        
+        try:
+            # First get the list of sermons to remove from the Homepage list
+            self.driver.get("https://my.ekklesia360.com/Sermon/list")
+
+            l=self.driver.find_element_by_id('listOutput')
+            homepage=[]
+            for a in l.find_elements_by_tag_name('tr'):
+                if ("Published" in a.text) and ("Homepage" in a.text):
+                    try:
+                        link = a.find_elements_by_tag_name('a')[0].get_attribute("href")
+                        if link != self.EventInfo["event_url"]:
+                            homepage.append() 
+                    except TypeError:
+                        pass
+                        
+            # Pass a little debug info
+            MessageCallback (str(homepage))
+            
+            # Go to the sermon of interest
+            self.driver.get(self.EventInfo["event_url"])
+            
+            # Go to publish tab
+            self.driver.find_element_by_link_text('Publish').click() 
+
+            # TODO: See if this is added to Homepage group
+            # TODO: .. if not, add to Homepage group
+            
+            # Click Publish button
+            self.driver.find_element (by="value", value='Publish as Featured').click
+            
+            # Do we need to remove homepage from others?
+            for this_sermon in homepage:
+                # Go to the sermon of interest
+                self.driver.get(this_sermon)
+                
+                # Go to publish tab
+                self.driver.find_element_by_link_text('Publish').click() 
+                
+                # Delete homepage tag
+                b = self.driver.find_element_by_id ('groupDropdowns')
+                for c in b.find_elements_by_tag_name('div'):
+                    if "Homepage" in c.text:
+                        c.find_element_by_link_text('Remove').click()
+                
+                # Publish-not-as-featured
+                self.driver.find_element (by="value", value='Publish').click
+            
+        except:
+            MessageCallback('\n' + traceback.format_exc() + '\n')
+            return False
+            
+        finally:
+            # self.Close() 
+            pass
+        
+        return True 
+
+        
     def Close( self):
         self.__exit__ (None, None, None)
     
