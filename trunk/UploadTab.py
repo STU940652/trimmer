@@ -11,7 +11,12 @@ import threading
 import time
 
 # Boto = Amazon S3
-from boto.s3.key import Key 
+from boto.s3.key import Key
+
+# Vimeo
+import vimeo
+import urllib.parse
+import io
 
 # Selenium for Vimeo
 from selenium import webdriver
@@ -24,8 +29,40 @@ import selenium.common.exceptions
 # Import other classes from this project
 from Settings import *
 from PasswordDialog import Credentials
+from PasswordDialog import SaveCredentials
 from CmsManager import CmsManager
     
+class MyVimeoClient(vimeo.VimeoClient):
+    # Overload upload function to report progress
+    def _perform_upload(self, filename, ticket):
+        """Take an upload ticket and perform the actual upload."""
+
+        assert ticket.status_code == 201, "Failed to create an upload ticket"
+
+        ticket = ticket.json()
+
+        # Perform the actual upload.
+        target = ticket['upload_link']
+        size = os.path.getsize(filename)
+        last_byte = 0
+        with io.open(filename, 'rb') as f:
+            while last_byte < size:
+                try:
+                    self._make_pass(target, f, size, last_byte)
+                except requests.exceptions.Timeout:
+                    # If there is a timeout here, we are okay with it, since
+                    # we'll check and resume.
+                    pass
+                last_byte = self._get_progress(target, size)
+                print (100.0 * last_byte / size)
+
+        # Perform the finalization and get the location.
+        finalized_resp = self.delete(ticket['complete_uri'])
+
+        assert finalized_resp.status_code == 201, "Failed to create the video."
+
+        return finalized_resp.headers.get('Location', None)
+
 class UploadTab(wx.Panel):
     Tags = {}
     def __init__ (self, parent, GetTags):
@@ -198,6 +235,92 @@ class UploadTab(wx.Panel):
     def UploadMP4 (self, Mp4Path):
         sourceFilename = os.path.abspath(Mp4Path)
         self.ThreadSafeLog ("Uploading %s to Vimeo\n" %(sourceFilename))
+        end_url = "http://sourceforge.net/p/trimmer/wiki/AuthEnd/"
+
+        try:
+            v = MyVimeoClient(
+                key=Credentials["Vimeo_Client_Id"],
+                secret=Credentials["Vimeo_Client_Secret"])
+                
+            # There seems to be a problem in the released api
+            v.API_ROOT = v.API_ROOT.replace("http://api.vimeo.dev", "https://api.vimeo.com")
+
+            code_from_url = ""
+            token = Credentials["Vimeo_User_Token"].strip()
+
+            if token == "":
+                """This section is used to determine where to direct the user."""
+                vimeo_authorization_url = v.auth_url(['upload', 'edit'], end_url, state = "INITIAL")
+
+                # Your application should now redirect to vimeo_authorization_url.
+                browser = webdriver.Chrome()
+                # Visit URL
+                browser.get(vimeo_authorization_url)
+                self.ThreadSafeLog  (vimeo_authorization_url)
+                
+                # Wait until URL = end_url
+                still_going = True
+                while still_going:
+                    time.sleep(0.5)
+                    if end_url in browser.current_url:
+                        authorized_url = browser.current_url
+                        browser.quit()
+                        still_going = False 
+
+                authorized_params = urllib.parse.parse_qs(urllib.parse.urlparse(authorized_url).query)
+
+                if authorized_params['state'] == ["INITIAL"]:
+                    code_from_url = authorized_params['code'][0]
+                    #print (code_from_url)
+
+                """This section completes the authentication for the user."""
+                # You should retrieve the "code" from the URL string Vimeo redirected to.  Here that's named CODE_FROM_URL
+                try:
+                    token, user, scope = v.exchange_code(code_from_url, end_url)
+                    #print(token, user, scope)
+                    Credentials["Vimeo_User_Token"] = token
+                    SaveCredentials()
+                    
+                except vimeo.auth.GrantFailed:
+                    # Handle the failure to get a token from the provided code and redirect.
+                    self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+                    return
+
+                # Store the token, scope and any additional user data you require in your database so users do not have to re-authorize 
+            else:
+                v.token = token
+                
+            # Upload file
+            video_uri = v.upload(sourceFilename)
+            
+            self.Tags["vimeo_number"] = video_uri.split('/')[-1]
+            self.ThreadSafeLog (self.Tags["vimeo_number"] + '\n')
+            try:
+                wx.CallAfter (self.VimNumber.SetValue, self.Tags["vimeo_number"])
+            except:
+                self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+            
+            title = "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
+            # Update Metadata
+            m={}
+            m["name"]=title
+            m["description"]=self.Tags["Summary"]
+            
+            w = v.patch(video_uri, data=m)
+            #print (w)
+            
+            for tag in self.Tags["Keywords"].split(','):
+                w = v.put(video_uri + '/tags/' + tag)
+                #print (tag, w)
+        
+            self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
+        except:
+            self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+            return False
+
+        return True
+        
+        ################ Old Stuff ###############
 
         try:
             browser = webdriver.Chrome()
