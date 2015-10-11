@@ -192,7 +192,7 @@ class CmsManager ():
                 media_form.submit()
             
             # Publish it
-            self.PublishWebsite(Tags, MessageCallback)
+            self.PublishWebsite(Tags, MessageCallback, Tags["event_url"])
 
             MessageCallback("Done updating website.\n")
             
@@ -206,7 +206,7 @@ class CmsManager ():
         
         return True
     
-    def PublishWebsite (self, Tags, MessageCallback):    
+    def PublishWebsite (self, Tags, MessageCallback, EventURL):    
         if not self.IsLoggedIn:
             MessageCallback("Logging-in to CMS.\n")
             if not self.Login():
@@ -227,7 +227,7 @@ class CmsManager ():
                 if ("Published" in a.text) and ("Homepage" in a.text):
                     try:
                         link = a.find_elements_by_tag_name('a')[0].get_attribute("href")
-                        if link != self.EventInfo["event_url"]:
+                        if link != EventURL:
                             homepage.append() 
                     except TypeError:
                         pass
@@ -236,7 +236,7 @@ class CmsManager ():
             MessageCallback (str(homepage))
             
             # Go to the sermon of interest
-            self.driver.get(self.EventInfo["event_url"])
+            self.driver.get(EventURL)
             
             # Go to publish tab
             self.driver.find_element_by_link_text('Publish').click() 
