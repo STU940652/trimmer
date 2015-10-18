@@ -228,7 +228,7 @@ class CmsManager ():
                     try:
                         link = a.find_elements_by_tag_name('a')[0].get_attribute("href")
                         if link != EventURL:
-                            homepage.append() 
+                            homepage.append(link) 
                     except TypeError:
                         pass
                         
@@ -245,7 +245,12 @@ class CmsManager ():
             # TODO: .. if not, add to Homepage group
             
             # Click Publish button
-            self.driver.find_element (by="value", value='Publish as Featured').click
+            form = self.driver.find_element_by_id ('publishForm')
+            buttons = form.find_elements_by_name('action')
+            for button in buttons:
+                if button.get_attribute("value") == 'Publish as Featured':
+                    button.click()
+                    break
             
             # Do we need to remove homepage from others?
             for this_sermon in homepage:
@@ -262,7 +267,13 @@ class CmsManager ():
                         c.find_element_by_link_text('Remove').click()
                 
                 # Publish-not-as-featured
-                self.driver.find_element (by="value", value='Publish').click
+                form = self.driver.find_element_by_id ('publishForm')
+                buttons = form.find_elements_by_name('action')
+                for button in buttons:
+                    if button.get_attribute("value") == 'Publish as Featured':
+                        button.click() 
+                        break
+
             
         except:
             MessageCallback('\n' + traceback.format_exc() + '\n')
