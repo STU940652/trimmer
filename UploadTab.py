@@ -86,7 +86,7 @@ class UploadTab(wx.Panel):
         URLSizer = wx.BoxSizer(wx.HORIZONTAL)
         URLSizer.AddSpacer(25)
         URLSizer.Add(wx.StaticText(self, -1, "MP3 URL"))
-        self.MP3URL = wx.TextCtrl(self, size=(200,-1))
+        self.MP3URL = wx.TextCtrl(self, size=(400,-1))
         URLSizer.Add(self.MP3URL, 1, flag=wx.EXPAND)
         Sizer.Add(URLSizer, flag=wx.ALL, border = 5)
 
