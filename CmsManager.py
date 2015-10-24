@@ -158,7 +158,7 @@ class CmsManager ():
                 MessageCallback("...adding Audio\n")
                 media_form=self.driver.find_element_by_id('mediaForm')
                 media_form.find_element_by_id('name').send_keys("Sermon Audio: %s: %s: %s: %s" % (Tags["Speaker"], Tags["Series"], Tags["Title"], Tags["Date"]))
-                media_form.find_element_by_id('description').send_keys(Tags["Summary"])
+                media_form.find_element_by_id('description').send_keys(Tags["Summary"].replace('\n','').replace('\r',''))
                 media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
                 
                 media_form.find_element_by_id("tabExternalLink").click()
@@ -171,7 +171,7 @@ class CmsManager ():
                 MessageCallback("...adding Video\n")
                 media_form=self.driver.find_element_by_id('mediaForm')
                 media_form.find_element_by_id('name').send_keys("Sermon Video: %s: %s: %s: %s" % (Tags["Speaker"], Tags["Series"], Tags["Title"], Tags["Date"]))
-                media_form.find_element_by_id('description').send_keys(Tags["Summary"])
+                media_form.find_element_by_id('description').send_keys(Tags["Summary"].replace('\n','').replace('\r',''))
                 media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
 
                 media_form.find_element_by_id("tabEmbedCode").click()
