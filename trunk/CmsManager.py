@@ -249,6 +249,7 @@ class CmsManager ():
             buttons = form.find_elements_by_name('action')
             for button in buttons:
                 if button.get_attribute("value") == 'Publish as Featured':
+                    time.sleep(5.0) # Pause 5 seconds for the groups to populate
                     button.click()
                     break
             
@@ -270,7 +271,8 @@ class CmsManager ():
                 form = self.driver.find_element_by_id ('publishForm')
                 buttons = form.find_elements_by_name('action')
                 for button in buttons:
-                    if button.get_attribute("value") == 'Publish as Featured':
+                    if button.get_attribute("value") == 'Publish':
+                        time.sleep(5.0) # Pause 5 seconds for the groups to populate
                         button.click() 
                         break
 
