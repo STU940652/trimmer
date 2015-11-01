@@ -251,6 +251,7 @@ class CmsManager ():
                 if button.get_attribute("value") == 'Publish as Featured':
                     time.sleep(5.0) # Pause 5 seconds for the groups to populate
                     button.click()
+                    time.sleep(2.0) # I think there is some AJAXish stuff that has to happen here.
                     break
             
             # Do we need to remove homepage from others?
@@ -266,6 +267,7 @@ class CmsManager ():
                 for c in b.find_elements_by_tag_name('div'):
                     if "Homepage" in c.text:
                         c.find_element_by_link_text('Remove').click()
+                        time.sleep(2.0) # Wait to take effect
                 
                 # Publish-not-as-featured
                 form = self.driver.find_element_by_id ('publishForm')
@@ -274,6 +276,7 @@ class CmsManager ():
                     if button.get_attribute("value") == 'Publish':
                         time.sleep(5.0) # Pause 5 seconds for the groups to populate
                         button.click() 
+                        time.sleep(2.0) # Wait to take effect
                         break
 
             
