@@ -261,6 +261,7 @@ class CmsManager ():
                 
                 # Go to publish tab
                 self.driver.find_element_by_link_text('Publish').click() 
+                time.sleep(5.0) # Pause 5 seconds for the groups to populate
                 
                 # Delete homepage tag
                 b = self.driver.find_element_by_id ('groupDropdowns')
