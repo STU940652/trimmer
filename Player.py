@@ -50,6 +50,10 @@ class Player(wx.Panel):
         self.cropslider = wx.ScrollBar(ctrlpanel, -1, style = wx.SB_HORIZONTAL )
         self.cropslider.Disable()
         self.cropCheckbox = wx.CheckBox(ctrlpanel, -1, "Adjust Crop Position")
+        if TrimmerConfig.get('GlobalSettings', 'CropControls').lower() == "false":
+            self.cropCheckbox.Disable()
+            self.cropCheckbox.Hide()
+            self.cropslider.Hide()
         
         # Time Slider
         self.timeslider = wx.Slider(ctrlpanel, -1, 0, 0, 1000)
