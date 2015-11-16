@@ -79,18 +79,18 @@ class UploadTab(wx.Panel):
         self.Mp3FileButton = wx.Button(self, label='...', size=(20,-1))
         self.Bind(wx.EVT_BUTTON, self.SelectMP3, self.Mp3FileButton)
         Mp3pathSizer = wx.BoxSizer(wx.HORIZONTAL)
-        Mp3pathSizer.AddSpacer(25)
+        Mp3pathSizer.AddSpacer(20)
         Mp3pathSizer.Add(self.Mp3Path, 1, flag=wx.EXPAND)
         Mp3pathSizer.Add(self.Mp3FileButton)
         Sizer.Add(Mp3pathSizer, flag=wx.EXPAND|wx.ALL, border = 5)
         URLSizer = wx.BoxSizer(wx.HORIZONTAL)
-        URLSizer.AddSpacer(25)
+        URLSizer.AddSpacer(20)
         URLSizer.Add(wx.StaticText(self, -1, "MP3 URL"))
         self.MP3URL = wx.TextCtrl(self, size=(400,-1))
         URLSizer.Add(self.MP3URL, 1, flag=wx.EXPAND)
         Sizer.Add(URLSizer, flag=wx.ALL, border = 5)
 
-        Sizer.AddSpacer(20)
+        Sizer.AddSpacer(10)
         
         # MP4 File dialog
         self.Mp4Enable = wx.CheckBox(self, -1, "Upload MP4 Video (Vimeo)")
@@ -99,22 +99,28 @@ class UploadTab(wx.Panel):
         self.Mp4FileButton = wx.Button(self, label='...', size=(20,-1))
         self.Bind(wx.EVT_BUTTON, self.SelectMP4, self.Mp4FileButton)
         Mp4pathSizer = wx.BoxSizer(wx.HORIZONTAL)
-        Mp4pathSizer.AddSpacer(25)
+        Mp4pathSizer.AddSpacer(20)
         Mp4pathSizer.Add(self.Mp4Path, 1, flag=wx.EXPAND)
         Mp4pathSizer.Add(self.Mp4FileButton)
         Sizer.Add(Mp4pathSizer, flag=wx.EXPAND|wx.ALL, border = 5)
         VimNumSizer = wx.BoxSizer(wx.HORIZONTAL)
-        VimNumSizer.AddSpacer(25)
+        VimNumSizer.AddSpacer(20)
         VimNumSizer.Add(wx.StaticText(self, -1, "Vimeo Number"))
         self.VimNumber = wx.TextCtrl(self, size=(200,-1))
         VimNumSizer.Add(self.VimNumber, 1, flag=wx.EXPAND)
         Sizer.Add(VimNumSizer, flag=wx.ALL, border = 5)
         
-        Sizer.AddSpacer(20)
+        Sizer.AddSpacer(10)
         
         # Web page CMS
         self.CmsEnable = wx.CheckBox(self, -1, "Update Web Page")
         Sizer.Add(self.CmsEnable, 0, flag=wx.TOP|wx.LEFT, border = 10)
+
+        Sizer.AddSpacer(10)
+        
+        # Update on completion
+        self.UpdateOnCompletion = wx.CheckBox(self, -1, "Update On Completion")
+        Sizer.Add(self.UpdateOnCompletion, 0, flag=wx.TOP|wx.LEFT, border = 10)
 
         # Upload Button
         self.StartButton = wx.Button (self, label='Upload')      
@@ -140,6 +146,7 @@ class UploadTab(wx.Panel):
             self.Mp4Path.SetValue(openFileDialog.GetPath())
 
     def OnCompletion (self, completion):
+        update = False
         print (completion)
         try:
             CompletionDict = json.loads(completion)
@@ -152,11 +159,18 @@ class UploadTab(wx.Panel):
             self.Mp3Path.SetValue(CompletionDict["MP3"])
             self.Mp3Enable.SetValue(True)
             self.CmsEnable.SetValue(True)
+            if self.UpdateOnCompletion.GetValue():
+                update = True
 
         if "MP4" in CompletionDict:
             self.Mp4Path.SetValue(CompletionDict["MP4"])
             self.Mp4Enable.SetValue(True)
             self.CmsEnable.SetValue(True)
+            if self.UpdateOnCompletion.GetValue():
+                update = True
+            
+        if update:
+            self.OnUpload(None)
             
         # Upload the Site-MP4 immediatly
         if "Site-MP4"  in CompletionDict:
@@ -190,6 +204,9 @@ class UploadTab(wx.Panel):
             ret = self.UploadMP3(Mp3Path)
             wx.CallAfter (self.Mp3Enable.Enable)
             if not ret:
+                wx.CallAfter (self.Mp3Enable.Enable)
+                wx.CallAfter (self.Mp4Enable.Enable)
+                wx.CallAfter (self.CmsEnable.Enable)
                 return 
             wx.CallAfter (self.Mp3Enable.SetValue, False)
         
@@ -197,6 +214,8 @@ class UploadTab(wx.Panel):
             ret = self.UploadMP4(Mp4Path, TitlePrefix, UpdateVimeoLink)
             wx.CallAfter (self.Mp4Enable.Enable)
             if not ret:
+                wx.CallAfter (self.Mp4Enable.Enable)
+                wx.CallAfter (self.CmsEnable.Enable)
                 return
             wx.CallAfter (self.Mp4Enable.SetValue, False)
             
