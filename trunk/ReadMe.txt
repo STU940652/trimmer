@@ -17,6 +17,7 @@ DEPENDENCIES
     - Boto (Amazon S3 client)
     - Selenium (automated web client)
     - Vimeo client (pip install PyVimeo)
+    - Google API (pip install google-api-python-client)
     - one of the following web browsers:
         - PhantomJS (headless - put the exe in this directory, or your path)
         - Chrome
