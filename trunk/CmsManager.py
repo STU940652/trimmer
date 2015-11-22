@@ -269,6 +269,7 @@ class CmsManager ():
                     if "Homepage" in c.text:
                         c.find_element_by_link_text('Remove').click()
                         time.sleep(2.0) # Wait to take effect
+                        break
                 
                 # Publish-not-as-featured
                 form = self.driver.find_element_by_id ('publishForm')
