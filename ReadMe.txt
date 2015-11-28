@@ -20,8 +20,16 @@ DEPENDENCIES
     - Google API (pip install google-api-python-client)
     - one of the following web browsers:
         - PhantomJS (headless - put the exe in this directory, or your path)
-        - Chrome
+        - Chrome (need Chrome Driver)
         - Firefox    
 
   Building the binary
     - cx_freeze 2.x
+	
+PIP
+===
+pip install --trusted_host -U --pre -f http://wxpython.org/Phoenix/snapshot-builds/ wxPython_Phoenix
+pip install boto
+pip install selenium
+pip install PyVimeo
+
