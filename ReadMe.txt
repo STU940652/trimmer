@@ -32,4 +32,5 @@ pip install --trusted_host -U --pre -f http://wxpython.org/Phoenix/snapshot-buil
 pip install boto
 pip install selenium
 pip install PyVimeo
+pip install google-api-python-client
 
