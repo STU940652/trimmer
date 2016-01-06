@@ -28,7 +28,7 @@ import selenium.common.exceptions
 
 # Import other classes from this project
 from Settings import *
-from PasswordDialog import Credentials
+from Credentials import Credentials
 from PasswordDialog import SaveCredentials
 from CmsManager import CmsManager
     
