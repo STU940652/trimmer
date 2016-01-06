@@ -14,9 +14,7 @@ import urllib.parse
 from apiclient import errors
 
 import logging
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
-from oauth2client.client import AccessTokenCredentials
+import oauth2client.client
 from apiclient.discovery import build
 import httplib2
 import json
@@ -31,6 +29,7 @@ import selenium.common.exceptions
 import traceback
 import time
 
+from Credentials import Credentials
 
 # Path to client_secrets.json which should contain a JSON document such as:
 #   {
@@ -129,12 +128,11 @@ class GmailClient():
         NotImplemented: This function has not been implemented.
         """
         
-        #credentials = AccessTokenCredentials('<an access token>',
-        #    'my-user-agent/1.0')
-        #http = httplib2.Http()
-        #http = credentials.authorize(http) 
-        c = None
-        #c = AccessTokenCredentials.from_json('...')
+        c = Credentials["Gmail_Token"]
+        if not len(c):
+            c = None
+        else:
+            c = oauth2client.client.AccessTokenCredentials.new_from_json(c)
         
         return c
 
@@ -165,11 +163,11 @@ class GmailClient():
       Raises:
         CodeExchangeException: an error occurred.
       """
-      flow = flow_from_clientsecrets(CLIENTSECRETS_LOCATION, scope=' '.join(SCOPES), redirect_uri=REDIRECT_URI)
+      flow = oauth2client.client.flow_from_clientsecrets(CLIENTSECRETS_LOCATION, scope=' '.join(SCOPES), redirect_uri=REDIRECT_URI)
       try:
         self.credentials = flow.step2_exchange(authorization_code)
         return self.credentials
-      except FlowExchangeError as error:
+      except oauth2client.client.FlowExchangeError as error:
         logging.error('An error occurred: %s', error)
         raise CodeExchangeException(None)
 
@@ -206,7 +204,7 @@ class GmailClient():
       Returns:
         Authorization URL to redirect the user to.
       """
-      flow = flow_from_clientsecrets(CLIENTSECRETS_LOCATION, scope=' '.join(SCOPES), redirect_uri=REDIRECT_URI)
+      flow = oauth2client.client.flow_from_clientsecrets(CLIENTSECRETS_LOCATION, scope=' '.join(SCOPES), redirect_uri=REDIRECT_URI)
       flow.params['access_type'] = 'offline'
       flow.params['approval_prompt'] = 'force'
       flow.params['user_id'] = email_address

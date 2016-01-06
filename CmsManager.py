@@ -5,7 +5,7 @@ import threading
 import html
 import traceback
 import wx
-from PasswordDialog import Credentials
+from Credentials import Credentials
 
 class CmsManager ():
     drivers = [webdriver.PhantomJS, webdriver.Chrome, webdriver.Firefox]

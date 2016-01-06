@@ -3,27 +3,8 @@ import pickle
 import codecs
 from Settings import *
 import traceback
-
-Credentials = {}
-Credentials["CMS_Username"] = ""
-Credentials["CMS_Password"] = ""
-Credentials["AWS_ACCESS_KEY_ID"] = ""
-Credentials["AWS_SECRET_ACCESS_KEY"] = ""
-Credentials["BUCKET_NAME"] = ""
-Credentials["Vimeo_Client_Id"] = ""
-Credentials["Vimeo_Client_Secret"] = ""
-Credentials["Vimeo_User_Token"] = ""
-
-# LoadCredentials ():
-try:
-    with open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'),'Trimmer.pwl'), "rb") as f:
-
-        newCredentials = pickle.loads(codecs.decode(f.read(), "base64"))
-        Credentials.update(newCredentials)
-        
-        
-except:
-    print (traceback.format_exc())
+from Credentials import Credentials
+from GmailClient import GmailClient
 
 def SaveCredentials ():
     global Credentials
@@ -73,6 +54,22 @@ class PasswordDialog(wx.Dialog):
 
         Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
         
+        # Gmail
+        Sizer.Add(wx.StaticText(self, -1, "Gmail User Token"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        rowSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.Gmail_Token = wx.TextCtrl(self, value=Credentials["Gmail_Token"])
+        rowSizer.Add(self.Gmail_Token, 1, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+        self.GmailAuthenticate = wx.Button (self, -1, "Authenticate")
+        self.Bind(wx.EVT_BUTTON, self.OnGmailAuthenticate, self.GmailAuthenticate)
+        rowSizer.Add(self.GmailAuthenticate, 0)
+        self.GmailTest = wx.Button (self, -1, "Test")
+        self.Bind(wx.EVT_BUTTON, self.OnGmailTest, self.GmailTest)
+        rowSizer.Add(self.GmailTest, 0)
+
+        Sizer.Add(rowSizer, flag=wx.EXPAND)
+
+        Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
+        
         #Buttons
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
         buttonSizer.AddStretchSpacer()
@@ -98,6 +95,7 @@ class PasswordDialog(wx.Dialog):
         Credentials["Vimeo_Client_Id"] = self.Vimeo_Client_Id.GetValue()
         Credentials["Vimeo_Client_Secret"] = self.Vimeo_Client_Secret.GetValue()
         Credentials["Vimeo_User_Token"] = self.Vimeo_User_Token.GetValue()
+        Credentials["Gmail_Token"] = self.Gmail_Token.GetValue()
         
         SaveCredentials()
         
@@ -106,4 +104,20 @@ class PasswordDialog(wx.Dialog):
     def OnCancel (self, evt):
         self.Close()
         
+    def OnGmailAuthenticate (self, evt):
+        g = GmailClient()
+        g.authenticate()
+        if g.credentials:
+            self.Gmail_Token.SetValue(g.credentials.to_json()) 
+            
+    def OnGmailTest (self, evt):
+        try:
+            g = GmailClient()
+            g.authenticate()
+            g.SendMessage(sender = "me", to = g.credentials.id_token['email'], subject="Test Message", message_text="This is a Trimmer test message.")
+            m = wx.MessageDialog(self, "Test email sent.", "Test Email", wx.OK)
+            m.ShowModal()
+        except:
+            m = wx.MessageDialog(self, traceback.format_exc(), "Test Email Error", wx.OK)
+            m.ShowModal()
         
