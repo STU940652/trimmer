@@ -113,7 +113,6 @@ class PasswordDialog(wx.Dialog):
     def OnGmailTest (self, evt):
         try:
             g = GmailClient()
-            g.authenticate()
             g.SendMessage(sender = "me", to = g.credentials.id_token['email'], subject="Test Message", message_text="This is a Trimmer test message.")
             m = wx.MessageDialog(self, "Test email sent.", "Test Email", wx.OK)
             m.ShowModal()

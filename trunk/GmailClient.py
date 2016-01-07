@@ -78,9 +78,11 @@ class NoUserIdException(Exception):
 class GmailClient():
     credentials = None
     
+    def __init__(self):
+        self.credentials = self.get_stored_credentials("")
+        
     def authenticate(self):
         # See if we have a stored token
-        self.credentials = self.get_stored_credentials("")
         if self.credentials == None:
             # No stored token, so let's get one
             
