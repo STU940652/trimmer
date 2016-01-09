@@ -30,6 +30,7 @@ import traceback
 import time
 
 from Credentials import Credentials
+from Settings import *
 
 # Path to client_secrets.json which should contain a JSON document such as:
 #   {
@@ -368,3 +369,18 @@ class GmailClient():
 
       m = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
       return self.SendMIMEMessage(m)
+
+def ExceptionEmail (s):
+    if not len( Credentials["Gmail_Token"]):
+        return
+    to = TrimmerConfig.get('GlobalSettings', 'ExceptionEmail', fallback='')
+    if not len(to):
+        return
+    try:
+        g = GmailClient()
+        g.SendMessage(sender = "me", 
+                      to = to, 
+                      subject = "Trimmer Exception", 
+                      message_text = "Trimmer threw an exception:\n\n" + s)
+    except:
+        print (traceback.format_exc())
