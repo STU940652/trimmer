@@ -31,6 +31,7 @@ from Settings import *
 from Credentials import Credentials
 from PasswordDialog import SaveCredentials
 from CmsManager import CmsManager
+import GmailClient
     
 class MyVimeoClient(vimeo.VimeoClient):
     # Overload upload function to report progress
@@ -54,7 +55,7 @@ class MyVimeoClient(vimeo.VimeoClient):
                     # we'll check and resume.
                     pass
                 last_byte = self._get_progress(target, size)
-                print (100.0 * last_byte / size)
+                #print (100.0 * last_byte / size)
 
         # Perform the finalization and get the location.
         finalized_resp = self.delete(ticket['complete_uri'])
@@ -147,12 +148,13 @@ class UploadTab(wx.Panel):
 
     def OnCompletion (self, completion):
         update = False
-        print (completion)
+        #print (completion)
         try:
             CompletionDict = json.loads(completion)
             
         except:
-            #print (traceback.format_exc())
+            print (traceback.format_exc())
+            GmailClient.ExceptionEmail(traceback.format_exc())
             return
             
         if "MP3" in CompletionDict:
@@ -174,10 +176,13 @@ class UploadTab(wx.Panel):
             
         # Upload the Site-MP4 immediatly
         if "Site-MP4"  in CompletionDict:
+            EmailMessage = None
+            if "EmailMessage" in CompletionDict:
+                EmailMessage = CompletionDict["EmailMessage"]
             self.Tags.update(self.GetTags())
             self.SiteUploadThread = threading.Thread(target=self.UploadFiles, \
                                 args=(False, True, False, \
-                                "", CompletionDict["Site-MP4"], "SITE VIDEO: ", False))
+                                "", CompletionDict["Site-MP4"], "SITE VIDEO: ", False, EmailMessage))
             self.SiteUploadThread.start()
     
     def OnUpload (self, evt):
@@ -199,7 +204,7 @@ class UploadTab(wx.Panel):
             self.CmsEnable.Disable()
     
     ## This executes in a separate thread
-    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, Mp3Path, Mp4Path, TitlePrefix="", UpdateVimeoLink = True): 
+    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, Mp3Path, Mp4Path, TitlePrefix="", UpdateVimeoLink = True, EmailMessage = None): 
         if Mp3Enable:
             ret = self.UploadMP3(Mp3Path)
             wx.CallAfter (self.Mp3Enable.Enable)
@@ -224,6 +229,22 @@ class UploadTab(wx.Panel):
             c.SetMedia (self.Tags, self.ThreadSafeLog)
             wx.CallAfter (self.CmsEnable.Enable)
             wx.CallAfter (self.CmsEnable.SetValue, False)
+            
+        if EmailMessage and len(Credentials["Gmail_Token"]):
+            try:
+                message = "\n".join(EmailMessage["message"])
+                for t in self.Tags:
+                    message = message.replace('$'+t+'$', self.Tags[t])
+                g = GmailClient.GmailClient()
+                g.SendMessage(sender = "me", 
+                              to = EmailMessage["to"], 
+                              subject = EmailMessage["subject"], 
+                              message_text = message)
+
+            except:
+                self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+                GmailClient.ExceptionEmail(traceback.format_exc())
+                
         
     def UploadMP3 (self, Mp3Path):
         sourceFilename = os.path.abspath(Mp3Path)
@@ -255,6 +276,7 @@ class UploadTab(wx.Panel):
                 self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
             except:
                 self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+                GmailClient.ExceptionEmail(traceback.format_exc())
                 return False
         return True
  
@@ -310,6 +332,7 @@ class UploadTab(wx.Panel):
                 except vimeo.auth.GrantFailed:
                     # Handle the failure to get a token from the provided code and redirect.
                     self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+                    GmailClient.ExceptionEmail(traceback.format_exc())
                     return
 
                 # Store the token, scope and any additional user data you require in your database so users do not have to re-authorize 
@@ -320,6 +343,7 @@ class UploadTab(wx.Panel):
             video_uri = v.upload(sourceFilename)
             d = v.get(video_uri)
             self.ThreadSafeLog (TitlePrefix + " URL is " + str(d.json()["link"]) + '\n')
+            self.Tags["vimeo_link"] = str(d.json()["link"])
             
             if UpdateVimeoLink:
                 self.Tags["vimeo_number"] = video_uri.split('/')[-1]
@@ -344,6 +368,7 @@ class UploadTab(wx.Panel):
             self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
         except:
             self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+            GmailClient.ExceptionEmail(traceback.format_exc())
             return False
 
         return True

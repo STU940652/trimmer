@@ -34,6 +34,7 @@ TrimmerConfig.add_section('GlobalSettings')
 TrimmerConfig.set('GlobalSettings', 'FileCopy', 'true')
 TrimmerConfig.set('GlobalSettings', 'CropControls', 'false')
 TrimmerConfig.set('GlobalSettings', 'NameTemplate', '%%Y%%m%%d')
+TrimmerConfig.set('GlobalSettings', 'ExceptionEmail', '')
 
 if "APPDATA" in os.environ:
     # For Windows
