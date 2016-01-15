@@ -126,7 +126,7 @@ class CmsManager ():
             self.driver.save_screenshot('screenshot.png')
         return []
         
-    def SetMedia (self, Tags, MessageCallback):    
+    def SetMedia (self, Tags, MessageCallback, CmsPublish):    
         if not self.IsLoggedIn:
             MessageCallback("Logging-in to CMS.\n")
             if not self.Login():
@@ -192,7 +192,8 @@ class CmsManager ():
                 media_form.submit()
             
             # Publish it
-            self.PublishWebsite(Tags, MessageCallback, Tags["event_url"])
+            if CmsPublish:
+                self.PublishWebsite(Tags, MessageCallback, Tags["event_url"])
 
             MessageCallback("Done updating website.\n")
             

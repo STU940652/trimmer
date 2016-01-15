@@ -116,6 +116,8 @@ class UploadTab(wx.Panel):
         # Web page CMS
         self.CmsEnable = wx.CheckBox(self, -1, "Update Web Page")
         Sizer.Add(self.CmsEnable, 0, flag=wx.TOP|wx.LEFT, border = 10)
+        self.CmsPublish = wx.CheckBox(self, -1, "Publish Web Page")
+        Sizer.Add(self.CmsPublish, 0, flag=wx.TOP|wx.LEFT, border = 10)
 
         Sizer.AddSpacer(10)
         
@@ -181,7 +183,7 @@ class UploadTab(wx.Panel):
                 EmailMessage = CompletionDict["EmailMessage"]
             self.Tags.update(self.GetTags())
             self.SiteUploadThread = threading.Thread(target=self.UploadFiles, \
-                                args=(False, True, False, \
+                                args=(False, True, False, False,\
                                 "", CompletionDict["Site-MP4"], "SITE VIDEO: ", False, EmailMessage))
             self.SiteUploadThread.start()
     
@@ -193,7 +195,7 @@ class UploadTab(wx.Panel):
         if self.VimNumber.GetValue() != "":
             self.Tags["vimeo_number"] = self.VimNumber.GetValue()
         self.UploadThread = threading.Thread(target=self.UploadFiles, \
-                            args=(self.Mp3Enable.GetValue(), self.Mp4Enable.GetValue(), self.CmsEnable.GetValue(), \
+                            args=(self.Mp3Enable.GetValue(), self.Mp4Enable.GetValue(), self.CmsEnable.GetValue(), self.CmsPublish.GetValue(),\
                             self.Mp3Path.GetValue(), self.Mp4Path.GetValue()))
         self.UploadThread.start()
         if self.Mp3Enable.GetValue():
@@ -202,9 +204,10 @@ class UploadTab(wx.Panel):
             self.Mp4Enable.Disable()
         if self.CmsEnable.GetValue():
             self.CmsEnable.Disable()
+            self.CmsPublish.Disable()
     
     ## This executes in a separate thread
-    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, Mp3Path, Mp4Path, TitlePrefix="", UpdateVimeoLink = True, EmailMessage = None): 
+    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, CmsPublish, Mp3Path, Mp4Path, TitlePrefix="", UpdateVimeoLink = True, EmailMessage = None): 
         if Mp3Enable:
             ret = self.UploadMP3(Mp3Path)
             wx.CallAfter (self.Mp3Enable.Enable)
@@ -226,8 +229,9 @@ class UploadTab(wx.Panel):
             
         if CmsEnable:
             c = CmsManager()
-            c.SetMedia (self.Tags, self.ThreadSafeLog)
+            c.SetMedia (self.Tags, self.ThreadSafeLog, CmsPublish)
             wx.CallAfter (self.CmsEnable.Enable)
+            wx.CallAfter (self.CmsPublish.Enable)
             wx.CallAfter (self.CmsEnable.SetValue, False)
             
         if EmailMessage and len(Credentials["Gmail_Token"]):
