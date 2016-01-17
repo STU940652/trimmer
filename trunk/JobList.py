@@ -33,6 +33,15 @@ class JobList(wx.Panel):
         self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
         self.timer.Start(1000)
 
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        
+    def OnDestroy (self, evt):
+        # Cleanup Timer
+        self.timer.Stop()
+        
+        # Let the event pass
+        evt.Skip()
+        
     def AddJob (self, cName):
         row = self.MessageList.GetItemCount()
         self.MessageList.InsertItem(row, cName)

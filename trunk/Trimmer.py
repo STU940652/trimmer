@@ -122,12 +122,8 @@ class TrimmerMain (wx.Frame):
         self.playerpanel.OpenFile(DestFilename, Play = False)
         
     def OnClose (self, evt): 
-        print ("Closing")
         self.cancelQueue.put("exit")
-        #m = wx.MessageDialog(self, "Waiting for encoding to complete.  See other window for progress.",  "Please Wait...")
-        #m.Show()
         self.EncodeThread.join()
-        print ("Done")
         self.Destroy()
 
     def OnViewLogDir(self, evt):
