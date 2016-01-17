@@ -214,6 +214,15 @@ class Player(wx.Panel):
         
         self.OnChangeSelection()
 
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        
+    def OnDestroy (self, evt):
+        # Cleanup Timer
+        self.timer.Stop()
+        
+        # Let the event pass
+        evt.Skip()
+        
     def OnImportFromCMS(self, evt=None):
         global Tags
         self.import_tag.Enable(False)
