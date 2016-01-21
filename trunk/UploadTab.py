@@ -240,7 +240,10 @@ class UploadTab(wx.Panel):
                 for t in self.Tags:
                     message = message.replace('$'+t+'$', self.Tags[t])
                 g = GmailClient.GmailClient()
-                g.SendMessage(sender = "me", 
+                sender = "me"
+                if "from" in EmailMessage:
+                    sender = EmailMessage["from"]
+                g.SendMessage(sender = sender, 
                               to = EmailMessage["to"], 
                               subject = EmailMessage["subject"], 
                               message_text = message)
