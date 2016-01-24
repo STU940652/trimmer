@@ -238,7 +238,7 @@ class UploadTab(wx.Panel):
             try:
                 message = "\n".join(EmailMessage["message"])
                 for t in self.Tags:
-                    message = message.replace('$'+t+'$', self.Tags[t])
+                    message = message.replace('$'+str(t)+'$', str(self.Tags[t]))
                 g = GmailClient.GmailClient()
                 sender = "me"
                 if "from" in EmailMessage:
