@@ -150,10 +150,12 @@ class UploadTab(wx.Panel):
 
     def OnCompletion (self, completion):
         update = False
-        #print (completion)
+
         try:
-            CompletionDict = json.loads(completion)
-            
+            if completion.lower() != 'none':
+                CompletionDict = json.loads(completion)
+            else:
+                return            
         except:
             print (traceback.format_exc())
             GmailClient.ExceptionEmail(traceback.format_exc())
