@@ -165,10 +165,15 @@ class Player(wx.Panel):
         self.select_event = wx.Choice (tagpanel)
         temp_box.Add(self.select_event, 0,  flag=wx.EXPAND | wx.BOTTOM | wx.TOP)
         
+        # Include non-Draft
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.include_published = wx.CheckBox(tagpanel, -1, "Include Published")
+        sizer.Add(self.include_published, 1, flag=wx.EXPAND)
+        
         # Import Tags button
         self.import_tag = wx.Button(tagpanel, label="Import from CMS")
-        #temp_box.AddStretchSpacer()
-        temp_box.Add(self.import_tag, 0,  flag=wx.ALIGN_RIGHT | wx.BOTTOM | wx.TOP)
+        sizer.Add(self.import_tag, 0, flag=wx.EXPAND | wx.ALIGN_RIGHT)
+        temp_box.Add(sizer, 0,  flag=wx.EXPAND | wx.BOTTOM | wx.TOP)
         tagpanel.SetSizer(temp_box)
 
         # Put everything together
@@ -230,22 +235,23 @@ class Player(wx.Panel):
         if (self.select_event.GetCount() > 0) and ('event_list' in Tags) and (self.select_event.GetSelection() != wx.NOT_FOUND):
             event = Tags['event_list'][self.select_event.GetSelection()][1]
         
-        self.CMSThread = ImportFromCMSThread(self, self.ImportFromCMSCallback, event)
+        self.CMSThread = ImportFromCMSThread(self, self.ImportFromCMSCallback, event, self.include_published.GetValue())
         self.CMSThread.start()
     
     def ImportFromCMSCallback(thread, self, info):
         global Tags
-        Tags.update(info)
-        for key in info:
-            if key == 'event_list':
-                l = []
-                for e in info[key]:
-                    l.append(e[0])
-                self.select_event.SetItems(l)
-                self.select_event.SetSelection(0)
-            for textBox in self.Tags:                
-                if key.lower() == textBox.lower():
-                    self.Tags[textBox].SetValue(info[key])
+        if info:
+            Tags.update(info)
+            for key in info:
+                if key == 'event_list':
+                    l = []
+                    for e in info[key]:
+                        l.append(e[0])
+                    self.select_event.SetItems(l)
+                    self.select_event.SetSelection(0)
+                for textBox in self.Tags:                
+                    if key.lower() == textBox.lower():
+                        self.Tags[textBox].SetValue(info[key])
                 
         self.import_tag.Enable(True)
         
