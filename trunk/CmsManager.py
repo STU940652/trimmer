@@ -16,44 +16,49 @@ class CmsManager ():
 
     def Login(self):
         if not self.IsLoggedIn:
-            if self.driver == None:
-                for thisDriver in self.drivers:
-                    try:
-                        self.driver = thisDriver()
-                    except:
-                        #print(traceback.format_exc())
-                        continue
-                    break
-                    
-            self.driver.implicitly_wait(10) # seconds
-            self.driver.get("http://my.ekklesia360.com/Login")
-            self.driver.switch_to_frame('_monkIdXdm')
-            b = self.driver.find_element_by_id('button')
-            b.click()
-            time.sleep(1)
-            self.driver.switch_to_window(self.driver.window_handles[1])
-            b = self.driver.find_element_by_id('user_email')
-            b.send_keys(Credentials["CMS_Username"])
-            b = self.driver.find_element_by_id('user_password')
-            b.send_keys(Credentials["CMS_Password"])
-            b = self.driver.find_element_by_name('button')
-            b.click()
+            try:
+                if self.driver == None:
+                    for thisDriver in self.drivers:
+                        try:
+                            self.driver = thisDriver()
+                        except:
+                            #print(traceback.format_exc())
+                            continue
+                        break
+                        
+                self.driver.implicitly_wait(10) # seconds
+                self.driver.get("http://my.ekklesia360.com/Login")
+                self.driver.switch_to_frame('_monkIdXdm')
+                b = self.driver.find_element_by_id('button')
+                b.click()
+                time.sleep(1)
+                self.driver.switch_to_window(self.driver.window_handles[1])
+                b = self.driver.find_element_by_id('user_email')
+                b.send_keys(Credentials["CMS_Username"])
+                b = self.driver.find_element_by_id('user_password')
+                b.send_keys(Credentials["CMS_Password"])
+                b = self.driver.find_element_by_name('button')
+                b.click()
 
-            # We are now logged in
-            self.driver.switch_to_window(self.driver.window_handles[0])
+                # We are now logged in
+                self.driver.switch_to_window(self.driver.window_handles[0])
+                
+                # Wait for dashboard to build
+                time.sleep(5)
+                
+                # We have succeeded to log in
+                self.IsLoggedIn = True
+                return True
+            except:
+                print (traceback.format_exc())
+                self.driver.save_screenshot('screenshot.png')
+                return False
             
-            # Wait for dashboard to build
-            time.sleep(5)
-            
-            # We have succeeded to log in
-            self.IsLoggedIn = True
-            return True
-            
-    def GetEventInfo (self, event = None):
+    def GetEventInfo (self, event = None, include_published = False):
         self.EventInfo = {}
         if not self.IsLoggedIn:
             if not self.Login():
-                return self.EventInfo
+                return None
         try:        
             if event == None:
                 self.driver.get("https://my.ekklesia360.com/Sermon/list")
@@ -61,7 +66,7 @@ class CmsManager ():
                 l=self.driver.find_element_by_id('listOutput')
                 event_list=[]
                 for a in l.find_elements_by_tag_name('tr'):
-                    if "Draft" in a.text:
+                    if ("Draft" in a.text) or (include_published and "Published" in a.text):
                         try:
                             b = []
                             for c in a.find_elements_by_tag_name('td')[1:4]:
@@ -124,6 +129,7 @@ class CmsManager ():
         except:
             print (traceback.format_exc())
             self.driver.save_screenshot('screenshot.png')
+            return None
         return []
         
     def SetMedia (self, Tags, MessageCallback, CmsPublish):    
@@ -282,6 +288,8 @@ class CmsManager ():
                         time.sleep(2.0) # Wait to take effect
                         break
 
+            # Everything worked.  Close the browser
+            self.driver.quit()
             
         except:
             MessageCallback('\n' + traceback.format_exc() + '\n')
@@ -311,15 +319,16 @@ class CmsManager ():
         return False
 
 class ImportFromCMSThread(threading.Thread):
-    def __init__(self, parent, callback, event = None):
+    def __init__(self, parent, callback, event = None, include_published = False):
         threading.Thread.__init__(self)
         self.callback = callback
         self.parent = parent
         self.event = event
+        self.include_published = include_published
         
     def run (self):
         with CmsManager() as c:
-            info = c.GetEventInfo(self.event)
+            info = c.GetEventInfo(self.event, self.include_published)
             
         if self.callback and self.parent:
             # This we are in a non-GUI thread, so need to use CallAfter
