@@ -24,6 +24,36 @@ def hms_to_ms (s):
     return int(ms)
 
 Tags = {}
+
+class AdditionalInputPanel (wx.Panel):
+    def __init__(self, parent, name):
+        wx.Panel.__init__(self, parent)
+
+        box = wx.BoxSizer(wx.HORIZONTAL)
+        self.Name = name
+        FilenameLabel=wx.StaticText(self, label=name.replace("_"," "), size=(120, -1), style = wx.TE_RIGHT)
+        box.Add(FilenameLabel)
+        self.InputFileName = wx.TextCtrl(self, size=(120, -1))
+        box.Add(self.InputFileName, 1)
+        FileButton = wx.Button(self, label='...', size=(20,-1))
+        self.Bind(wx.EVT_BUTTON, self._SelectFile, FileButton)
+        box.Add(FileButton, 0)
+        self.SetSizer(box)
+        self.Layout()
+
+    def _SelectFile (self, evt):
+        openFileDialog = wx.FileDialog(self, "Select MP4 Video File", "", "",
+                                       "MP4 (*.mp4)|*.mp4|All Files (*.*)", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        if (openFileDialog.ShowModal() == wx.ID_OK):
+            self.InputFileName.SetValue(openFileDialog.GetPath())
+            
+    def GetFileName (self):
+        return self.InputFileName.GetValue()
+        
+    def GetName (self):
+        return self.Name
+        
+        
     
 class Player(wx.Panel):
     """The main window has to deal with events.
@@ -45,6 +75,7 @@ class Player(wx.Panel):
 
         # The second panel holds controls
         ctrlpanel = wx.Panel(self, -1 )
+        self.ctrlpanel = ctrlpanel
         
         # Crop Slider
         self.cropslider = wx.ScrollBar(ctrlpanel, -1, style = wx.SB_HORIZONTAL )
@@ -76,10 +107,6 @@ class Player(wx.Panel):
 
         # Give a pretty layout to the controls
         ctrlbox = wx.BoxSizer(wx.VERTICAL)
-        box1 = wx.BoxSizer(wx.HORIZONTAL)
-        box2 = wx.BoxSizer(wx.HORIZONTAL)
-        box4 = wx.FlexGridSizer(cols = 7)
-        box4.AddGrowableCol(0,1)
         
         # Reset Video size
         (self.width, self.height) = (0,0)
@@ -87,9 +114,11 @@ class Player(wx.Panel):
         ctrlbox.Add(self.cropCheckbox, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
 
         # box1 contains the timeslider
+        box1 = wx.BoxSizer(wx.HORIZONTAL)
         box1.Add(self.timeslider, 2)
         box1.Add(self.timeText)
         # box2 contains some buttons and the volume controls
+        box2 = wx.BoxSizer(wx.HORIZONTAL)
         box2.Add(play, flag=wx.RIGHT, border=5)
         box2.Add(pause)
         box2.Add(next)
@@ -98,6 +127,8 @@ class Player(wx.Panel):
         box2.Add(volume)
         box2.Add(self.volslider, flag=wx.TOP | wx.LEFT, border=5)
         # box3 contains Start stuff
+        box4 = wx.FlexGridSizer(cols = 7)
+        box4.AddGrowableCol(0,1)
         box4.Add((-1, -1), 1)
         box4.Add(StartLabel)
         box4.Add(StartFill)
@@ -144,6 +175,10 @@ class Player(wx.Panel):
         self.OutputFileName = wx.TextCtrl(ctrlpanel, size=(120, -1))
         box5.Add(self.OutputFileName, 1)
         ctrlbox.Add(box5, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+        
+        # Sizer for additional inputs
+        self.AdditionalInputsSizer = wx.BoxSizer(wx.VERTICAL)
+        ctrlbox.Add(self.AdditionalInputsSizer, 0, flag=wx.EXPAND)
         
         ctrlpanel.SetSizer(ctrlbox)
         
@@ -264,6 +299,19 @@ class Player(wx.Panel):
         self.OutputFileName.SetValue(os.path.join(\
             TrimmerConfig.get('FilePaths','DestPath'),\
             self.Substitute(TrimmerConfig.get(section,'DefaultOutFileName'))))
+            
+        # Set up inputs for additional Inputs
+        # Remove existing Addition Inputs
+        self.AdditionalInputsSizer.Clear(delete_windows=True)
+        
+        # Add new Additional Inputs
+        for input_name in TrimmerConfig.get(section,'AdditionalInputs', fallback = '').split(','):
+            if input_name:     
+                self.AdditionalInputsSizer.Add(AdditionalInputPanel(self.ctrlpanel, input_name), 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+        self.ctrlpanel.Layout()
+        self.Layout()
+
+            
         
     def Substitute (self, s):
         ClipOfInterestStart = hms_to_ms(self.StartTime.GetValue())/1000.0
@@ -292,6 +340,9 @@ class Player(wx.Panel):
         
         # Substitute other variables
         s = s\
+                    .replace("$ClipStart$",  str(FadeInStart))\
+                    .replace("$ClipLength$",  str(ClipOfInterestStop - ClipOfInterestStart))\
+                    .replace("$ClipFade$",  str(ClipOfInterestStop - ClipOfInterestStart - 0.5))\
                     .replace("$CropX$",  CropXString)\
                     .replace("$OutputStart$",  str(OutputStart))\
                     .replace("$OutputLength$", str(OutputLength))\
@@ -535,6 +586,10 @@ class Player(wx.Panel):
         t = Tags
         t['video_width'] = str(self.VideoSize[0])
         t['video_height'] = str(self.VideoSize[1])
+        # Get the additional inputs
+        for i in self.AdditionalInputsSizer.GetChildren():
+            t[i.GetWindow().GetName()]=i.GetWindow().GetFileName()
+        
         for l in self.Tags:
             t[l] = self.Tags[l].GetValue()
         return t
