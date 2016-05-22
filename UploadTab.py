@@ -34,35 +34,36 @@ from CmsManager import CmsManager
 import GmailClient
     
 class MyVimeoClient(vimeo.VimeoClient):
-    # Overload upload function to report progress
-    def _perform_upload(self, filename, ticket):
-        """Take an upload ticket and perform the actual upload."""
-
-        assert ticket.status_code == 201, "Failed to create an upload ticket"
-
-        ticket = ticket.json()
-
-        # Perform the actual upload.
-        target = ticket['upload_link']
-        size = os.path.getsize(filename)
-        last_byte = 0
-        with io.open(filename, 'rb') as f:
-            while last_byte < size:
-                try:
-                    self._make_pass(target, f, size, last_byte)
-                except requests.exceptions.Timeout:
-                    # If there is a timeout here, we are okay with it, since
-                    # we'll check and resume.
-                    pass
-                last_byte = self._get_progress(target, size)
-                #print (100.0 * last_byte / size)
-
-        # Perform the finalization and get the location.
-        finalized_resp = self.delete(ticket['complete_uri'])
-
-        assert finalized_resp.status_code == 201, "Failed to create the video."
-
-        return finalized_resp.headers.get('Location', None)
+    pass
+#   # Overload upload function to report progress
+#   def _perform_upload(self, filename, ticket):
+#       """Take an upload ticket and perform the actual upload."""
+#
+#       assert (ticket.status_code == 201), "Failed to create an upload ticket"
+#
+#       ticket = ticket.json()
+#
+#       # Perform the actual upload.
+#       target = ticket['upload_link']
+#       size = os.path.getsize(filename)
+#       last_byte = 0
+#       with io.open(filename, 'rb') as f:
+#           while last_byte < size:
+#               try:
+#                   self._make_pass(target, f, size, last_byte)
+#               except requests.exceptions.Timeout:
+#                   # If there is a timeout here, we are okay with it, since
+#                   # we'll check and resume.
+#                   pass
+#               last_byte = self._get_progress(target, size)
+#               #print (100.0 * last_byte / size)
+#
+#       # Perform the finalization and get the location.
+#       finalized_resp = self.delete(ticket['complete_uri'])
+#
+#       assert finalized_resp.status_code == 201, "Failed to create the video."
+#
+#       return finalized_resp.headers.get('Location', None)
 
 class UploadTab(wx.Panel):
     Tags = {}
@@ -188,6 +189,18 @@ class UploadTab(wx.Panel):
                                 args=(False, True, False, False,\
                                 "", CompletionDict["Site-MP4"], "SITE VIDEO: ", False, EmailMessage))
             self.SiteUploadThread.start()
+            
+        # Replace existing public MP4
+        if "Replace-MP4" in CompletionDict:
+            if ("Vimeo_Number" in CompletionDict) and CompletionDict["Vimeo_Number"]:
+                self.ThreadSafeLog ("Replacing Vimeo video %s\n" % CompletionDict["Vimeo_Number"])            
+                # Ready to go
+                self.UploadReplaceThread = threading.Thread(target=self.UploadFiles, \
+                                args=(False, True, False, False,\
+                                "", CompletionDict["Replace-MP4"], "", False, None, CompletionDict["Vimeo_Number"]))
+                self.UploadReplaceThread.start()
+            else:
+                self.ThreadSafeLog ("Missing Vimeo Number.  Could not update\n")
     
     def OnUpload (self, evt):
         self.Tags.update(self.GetTags())
@@ -209,7 +222,7 @@ class UploadTab(wx.Panel):
             self.CmsPublish.Disable()
     
     ## This executes in a separate thread
-    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, CmsPublish, Mp3Path, Mp4Path, TitlePrefix="", UpdateVimeoLink = True, EmailMessage = None): 
+    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, CmsPublish, Mp3Path, Mp4Path, TitlePrefix="", UpdateVimeoLink = True, EmailMessage = None,  ReplaceURI = None): 
         if Mp3Enable:
             ret = self.UploadMP3(Mp3Path)
             wx.CallAfter (self.Mp3Enable.Enable)
@@ -221,7 +234,7 @@ class UploadTab(wx.Panel):
             wx.CallAfter (self.Mp3Enable.SetValue, False)
         
         if Mp4Enable:
-            ret = self.UploadMP4(Mp4Path, TitlePrefix, UpdateVimeoLink)
+            ret = self.UploadMP4(Mp4Path, TitlePrefix, UpdateVimeoLink,  ReplaceURI)
             wx.CallAfter (self.Mp4Enable.Enable)
             if not ret:
                 wx.CallAfter (self.Mp4Enable.Enable)
@@ -289,7 +302,7 @@ class UploadTab(wx.Panel):
                 return False
         return True
  
-    def UploadMP4 (self, Mp4Path, TitlePrefix = "", UpdateVimeoLink = True):
+    def UploadMP4 (self, Mp4Path, TitlePrefix = "", UpdateVimeoLink = True, ReplaceURI = None):
         sourceFilename = os.path.abspath(Mp4Path)
         self.ThreadSafeLog ("Uploading %s to Vimeo\n" %(sourceFilename))
         end_url = "http://sourceforge.net/p/trimmer/wiki/AuthEnd/"
@@ -299,9 +312,6 @@ class UploadTab(wx.Panel):
                 key=Credentials["Vimeo_Client_Id"],
                 secret=Credentials["Vimeo_Client_Secret"])
                 
-            # There seems to be a problem in the released api
-            v.API_ROOT = v.API_ROOT.replace("http://api.vimeo.dev", "https://api.vimeo.com")
-
             code_from_url = ""
             token = Credentials["Vimeo_User_Token"].strip()
 
@@ -348,33 +358,42 @@ class UploadTab(wx.Panel):
             else:
                 v.token = token
                 
-            # Upload file
-            video_uri = v.upload(sourceFilename)
-            d = v.get(video_uri)
-            self.ThreadSafeLog (TitlePrefix + " URL is " + str(d.json()["link"]) + '\n')
-            self.Tags["vimeo_link"] = str(d.json()["link"])
+            if ReplaceURI:
+                # Fixup URI
+                ReplaceURI = "/videos/" + ReplaceURI.split('/')[-1]                
+                
+                # Replace existing file
+                self.ThreadSafeLog ("Replacing " + ReplaceURI + "\n")
+                video_uri = v.replace(ReplaceURI, sourceFilename)
             
-            if UpdateVimeoLink:
-                self.Tags["vimeo_number"] = video_uri.split('/')[-1]
-                try:
-                    wx.CallAfter (self.VimNumber.SetValue, self.Tags["vimeo_number"])
-                except:
-                    self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
-            
-            title = TitlePrefix + "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
-            # Update Metadata
-            m={}
-            m["name"]=title
-            m["description"]=self.Tags["Summary"]
-            
-            w = v.patch(video_uri, data=m)
-            #print (w)
-            
-            for tag in self.Tags["Keywords"].split(','):
-                w = v.put(video_uri + '/tags/' + tag)
-                #print (tag, w)
+            else:
+                # Upload file
+                video_uri = v.upload(sourceFilename)
+                d = v.get(video_uri)
+                self.ThreadSafeLog (TitlePrefix + " URL is " + str(d.json()["link"]) + '\n')
+                self.Tags["vimeo_link"] = str(d.json()["link"])
+                
+                if UpdateVimeoLink:
+                    self.Tags["vimeo_number"] = video_uri.split('/')[-1]
+                    try:
+                        wx.CallAfter (self.VimNumber.SetValue, self.Tags["vimeo_number"])
+                    except:
+                        self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+                
+                title = TitlePrefix + "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
+                # Update Metadata
+                m={}
+                m["name"]=title
+                m["description"]=self.Tags["Summary"]
+                
+                w = v.patch(video_uri, data=m)
+                #print (w)
+                
+                for tag in self.Tags["Keywords"].split(','):
+                    w = v.put(video_uri + '/tags/' + tag)
+                    #print (tag, w)
         
-            self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
+            self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
         except:
             self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
             GmailClient.ExceptionEmail(traceback.format_exc())
