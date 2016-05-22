@@ -7,22 +7,28 @@ from Settings import *
 from CmsManager import *
 
 def ms_to_hms (ms):
-    h = int(ms/(60*60*1000))
-    msl = ms - h*60*60*1000
-    m = int(msl/(60*1000))
-    msl = msl - m*60*1000
-    s = msl/1000.0
-    return "%02i:%02i:%06.3f" % (h,m,s)
+    try:
+        h = int(ms/(60*60*1000))
+        msl = ms - h*60*60*1000
+        m = int(msl/(60*1000))
+        msl = msl - m*60*1000
+        s = msl/1000.0
+        return "%02i:%02i:%06.3f" % (h,m,s)
+    except:
+        return ""
     
 def hms_to_ms (s):
     d = s.split(':')
     mult = 1000.0
     ms = 0
-    while len (d):
-        ms = ms + float(d.pop(-1))*mult
-        mult = mult * 60.0
-    return int(ms)
-
+    try:
+        while len (d):
+            ms = ms + float(d.pop(-1))*mult
+            mult = mult * 60.0
+        return int(ms)
+    except:
+        return 0
+        
 Tags = {}
 
 class AdditionalInputPanel (wx.Panel):
