@@ -37,13 +37,14 @@ class AdditionalInputPanel (wx.Panel):
 
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.Name = name
-        FilenameLabel=wx.StaticText(self, label=name.replace("_"," "), size=(120, -1), style = wx.TE_RIGHT)
+        FilenameLabel=wx.StaticText(self, label=name.replace("_"," ").replace("@",""), size=(120, -1), style = wx.TE_RIGHT)
         box.Add(FilenameLabel)
         self.InputFileName = wx.TextCtrl(self, size=(120, -1))
         box.Add(self.InputFileName, 1)
-        FileButton = wx.Button(self, label='...', size=(20,-1))
-        self.Bind(wx.EVT_BUTTON, self._SelectFile, FileButton)
-        box.Add(FileButton, 0)
+        if (name[0] == "@"):
+            FileButton = wx.Button(self, label='...', size=(20,-1))
+            self.Bind(wx.EVT_BUTTON, self._SelectFile, FileButton)
+            box.Add(FileButton, 0)
         self.SetSizer(box)
         self.Layout()
 
