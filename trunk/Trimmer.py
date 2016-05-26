@@ -136,6 +136,7 @@ class TrimmerMain (wx.Frame):
     def OnUpdatePasswords (self, evt):
         p = PasswordDialog()
         p.ShowModal()
+        p.Destroy()
         
     def OnExit(self, evt):
         """Closes the window.
