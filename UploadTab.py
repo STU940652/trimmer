@@ -18,14 +18,6 @@ import vimeo
 import urllib.parse
 import io
 
-# Selenium for Vimeo
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import selenium.common.exceptions
-
 # Import other classes from this project
 from Settings import *
 from Credentials import Credentials
@@ -305,7 +297,6 @@ class UploadTab(wx.Panel):
     def UploadMP4 (self, Mp4Path, TitlePrefix = "", UpdateVimeoLink = True, ReplaceURI = None):
         sourceFilename = os.path.abspath(Mp4Path)
         self.ThreadSafeLog ("Uploading %s to Vimeo\n" %(sourceFilename))
-        end_url = "http://sourceforge.net/p/trimmer/wiki/AuthEnd/"
 
         try:
             v = MyVimeoClient(
@@ -316,45 +307,8 @@ class UploadTab(wx.Panel):
             token = Credentials["Vimeo_User_Token"].strip()
 
             if token == "":
-                """This section is used to determine where to direct the user."""
-                vimeo_authorization_url = v.auth_url(['upload', 'edit'], end_url, state = "INITIAL")
-
-                # Your application should now redirect to vimeo_authorization_url.
-                browser = webdriver.Chrome()
-                # Visit URL
-                browser.get(vimeo_authorization_url)
-                self.ThreadSafeLog  (vimeo_authorization_url)
-                
-                # Wait until URL = end_url
-                still_going = True
-                while still_going:
-                    time.sleep(0.5)
-                    if end_url in browser.current_url:
-                        authorized_url = browser.current_url
-                        browser.quit()
-                        still_going = False 
-
-                authorized_params = urllib.parse.parse_qs(urllib.parse.urlparse(authorized_url).query)
-
-                if authorized_params['state'] == ["INITIAL"]:
-                    code_from_url = authorized_params['code'][0]
-                    #print (code_from_url)
-
-                """This section completes the authentication for the user."""
-                # You should retrieve the "code" from the URL string Vimeo redirected to.  Here that's named CODE_FROM_URL
-                try:
-                    token, user, scope = v.exchange_code(code_from_url, end_url)
-                    #print(token, user, scope)
-                    Credentials["Vimeo_User_Token"] = token
-                    SaveCredentials()
-                    
-                except vimeo.auth.GrantFailed:
-                    # Handle the failure to get a token from the provided code and redirect.
-                    self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
-                    GmailClient.ExceptionEmail(traceback.format_exc())
-                    return
-
-                # Store the token, scope and any additional user data you require in your database so users do not have to re-authorize 
+                self.ThreadSafeLog ('\nMP4 Upload failed - Vimeo authorization required\n')
+                return
             else:
                 v.token = token
                 
