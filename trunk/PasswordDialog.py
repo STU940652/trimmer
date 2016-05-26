@@ -3,8 +3,23 @@ import pickle
 import codecs
 from Settings import *
 import traceback
+import time
 from Credentials import Credentials
 from GmailClient import GmailClient
+
+# Vimeo
+import vimeo
+import urllib.parse
+import io
+
+# Selenium for Vimeo
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import selenium.common.exceptions
+
 
 def SaveCredentials ():
     global Credentials
@@ -49,15 +64,21 @@ class PasswordDialog(wx.Dialog):
         Sizer.Add(self.Vimeo_Client_Secret, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
 
         Sizer.Add(wx.StaticText(self, -1, "Vimeo User Token"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        
+        rowSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.Vimeo_User_Token = wx.TextCtrl(self, value=Credentials["Vimeo_User_Token"])
-        Sizer.Add(self.Vimeo_User_Token, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+        rowSizer.Add(self.Vimeo_User_Token, 1, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+        self.VimeoAuthenticate = wx.Button (self, -1, "Authenticate")
+        rowSizer.Add(self.VimeoAuthenticate, 0)
+        self.Bind(wx.EVT_BUTTON, self.OnVimeoAuthenticate, self.VimeoAuthenticate)        
+        Sizer.Add(rowSizer, flag=wx.EXPAND)
 
         Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
         
         # Gmail
         Sizer.Add(wx.StaticText(self, -1, "Gmail User Token"), 0, flag=wx.TOP|wx.LEFT, border = 10)
         rowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.Gmail_Token = wx.TextCtrl(self, value=Credentials["Gmail_Token"])
+        self.Gmail_Token = wx.TextCtrl(self, value=Credentials["Gmail_Token"], style=wx.TE_PASSWORD)
         rowSizer.Add(self.Gmail_Token, 1, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
         self.GmailAuthenticate = wx.Button (self, -1, "Authenticate")
         self.Bind(wx.EVT_BUTTON, self.OnGmailAuthenticate, self.GmailAuthenticate)
@@ -104,6 +125,55 @@ class PasswordDialog(wx.Dialog):
     def OnCancel (self, evt):
         self.Close()
         
+    def OnVimeoAuthenticate (self, evt):
+        end_url = "http://sourceforge.net/p/trimmer/wiki/AuthEnd/"
+        try:
+            v = vimeo.VimeoClient(
+                key=Credentials["Vimeo_Client_Id"],
+                secret=Credentials["Vimeo_Client_Secret"])
+                
+            code_from_url = ""
+
+            """This section is used to determine where to direct the user."""
+            vimeo_authorization_url = v.auth_url(['upload', 'edit'], end_url, state = "INITIAL")
+
+            # Your application should now redirect to vimeo_authorization_url.
+            browser = webdriver.Chrome()
+            # Visit URL
+            browser.get(vimeo_authorization_url)
+            
+            # Wait until URL = end_url
+            still_going = True
+            while still_going:
+                time.sleep(0.5)
+                if end_url.split(":", 1)[-1] in browser.current_url:
+                    authorized_url = browser.current_url
+                    browser.quit()
+                    still_going = False 
+
+            authorized_params = urllib.parse.parse_qs(urllib.parse.urlparse(authorized_url).query)
+
+            if authorized_params['state'] == ["INITIAL"]:
+                code_from_url = authorized_params['code'][0]
+                #print (code_from_url)
+
+            """This section completes the authentication for the user."""
+            # You should retrieve the "code" from the URL string Vimeo redirected to.  Here that's named CODE_FROM_URL
+            try:
+                token, user, scope = v.exchange_code(code_from_url, end_url)
+                #print(token, user, scope)
+                self.Vimeo_User_Token.SetValue(token)
+                
+            except vimeo.auth.GrantFailed:
+                m = wx.MessageDialog(self, traceback.format_exc(), "Vimeo Authentication Error", wx.OK)
+                m.ShowModal()
+
+        except:
+            m = wx.MessageDialog(self, traceback.format_exc(), "Vimeo Authentication Error", wx.OK)
+            m.ShowModal()
+            
+
+            
     def OnGmailAuthenticate (self, evt):
         g = GmailClient()
         g.authenticate()
