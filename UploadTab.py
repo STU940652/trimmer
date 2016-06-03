@@ -177,22 +177,42 @@ class UploadTab(wx.Panel):
             if "EmailMessage" in CompletionDict:
                 EmailMessage = CompletionDict["EmailMessage"]
             self.Tags.update(self.GetTags())
+            title = "SITE VIDEO: %s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
+
             self.SiteUploadThread = threading.Thread(target=self.UploadFiles, \
                                 args=(False, True, False, False,\
-                                "", CompletionDict["Site-MP4"], "SITE VIDEO: ", False, EmailMessage))
+                                "", CompletionDict["Site-MP4"], title, False, EmailMessage))
             self.SiteUploadThread.start()
             
         # Replace existing public MP4
         if "Replace-MP4" in CompletionDict:
             if ("Vimeo_Number" in CompletionDict) and CompletionDict["Vimeo_Number"]:
-                self.ThreadSafeLog ("Replacing Vimeo video %s\n" % CompletionDict["Vimeo_Number"])            
+                self.ThreadSafeLog ("Replacing Vimeo video %s\n" % CompletionDict["Vimeo_Number"]) 
+                self.Tags.update(self.GetTags())
+                title = "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
+
                 # Ready to go
                 self.UploadReplaceThread = threading.Thread(target=self.UploadFiles, \
                                 args=(False, True, False, False,\
-                                "", CompletionDict["Replace-MP4"], "", False, None, CompletionDict["Vimeo_Number"]))
+                                "", CompletionDict["Replace-MP4"], title, False, None, CompletionDict["Vimeo_Number"]))
                 self.UploadReplaceThread.start()
             else:
                 self.ThreadSafeLog ("Missing Vimeo Number.  Could not update\n")
+
+        # Upload the Site-MP4 immediatly
+        if "Custom-MP4"  in CompletionDict:
+            self.Tags.update({"Summary":"","Keywords":""})
+            title = ""
+            if "Title" in CompletionDict:
+                title = CompletionDict["Title"]
+            password = ""
+            if "Vimeo_Password" in CompletionDict:
+                password = CompletionDict["Vimeo_Password"]                
+            self.SiteUploadThread = threading.Thread(target=self.UploadFiles, \
+                                args=(False, True, False, False,\
+                                "", CompletionDict["Custom-MP4"], title, False, None, None,  password))
+            self.SiteUploadThread.start()
+            
     
     def OnUpload (self, evt):
         self.Tags.update(self.GetTags())
@@ -214,7 +234,7 @@ class UploadTab(wx.Panel):
             self.CmsPublish.Disable()
     
     ## This executes in a separate thread
-    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, CmsPublish, Mp3Path, Mp4Path, TitlePrefix="", UpdateVimeoLink = True, EmailMessage = None,  ReplaceURI = None): 
+    def UploadFiles (self, Mp3Enable, Mp4Enable, CmsEnable, CmsPublish, Mp3Path, Mp4Path, Title="", UpdateVimeoLink = True, EmailMessage = None,  ReplaceURI = None, Password = None): 
         if Mp3Enable:
             ret = self.UploadMP3(Mp3Path)
             wx.CallAfter (self.Mp3Enable.Enable)
@@ -226,7 +246,7 @@ class UploadTab(wx.Panel):
             wx.CallAfter (self.Mp3Enable.SetValue, False)
         
         if Mp4Enable:
-            ret = self.UploadMP4(Mp4Path, TitlePrefix, UpdateVimeoLink,  ReplaceURI)
+            ret = self.UploadMP4(Mp4Path, Title, UpdateVimeoLink,  ReplaceURI, Password)
             wx.CallAfter (self.Mp4Enable.Enable)
             if not ret:
                 wx.CallAfter (self.Mp4Enable.Enable)
@@ -294,9 +314,13 @@ class UploadTab(wx.Panel):
                 return False
         return True
  
-    def UploadMP4 (self, Mp4Path, TitlePrefix = "", UpdateVimeoLink = True, ReplaceURI = None):
+    def UploadMP4 (self, Mp4Path, title = "", UpdateVimeoLink = True, ReplaceURI = None, Password = None):
         sourceFilename = os.path.abspath(Mp4Path)
         self.ThreadSafeLog ("Uploading %s to Vimeo\n" %(sourceFilename))
+        if title:
+            self.ThreadSafeLog ('  with title "%s"\n' % (title))
+        if Password:
+            self.ThreadSafeLog ('  and password "%s"\n' % (Password))
 
         try:
             v = MyVimeoClient(
@@ -324,7 +348,7 @@ class UploadTab(wx.Panel):
                 # Upload file
                 video_uri = v.upload(sourceFilename)
                 d = v.get(video_uri)
-                self.ThreadSafeLog (TitlePrefix + " URL is " + str(d.json()["link"]) + '\n')
+                self.ThreadSafeLog ('"' + title + '" URL is ' + str(d.json()["link"]) + '\n')
                 self.Tags["vimeo_link"] = str(d.json()["link"])
                 
                 if UpdateVimeoLink:
@@ -334,18 +358,20 @@ class UploadTab(wx.Panel):
                     except:
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
                 
-                title = TitlePrefix + "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
                 # Update Metadata
                 m={}
                 m["name"]=title
                 m["description"]=self.Tags["Summary"]
-                
                 w = v.patch(video_uri, data=m)
-                #print (w)
+                
+                if Password:
+                    m={}
+                    m["privacy"] = {'view': 'password'}
+                    m["password"] = Password
+                    w = v.patch(video_uri, data=m)
                 
                 for tag in self.Tags["Keywords"].split(','):
                     w = v.put(video_uri + '/tags/' + tag)
-                    #print (tag, w)
         
             self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
         except:
