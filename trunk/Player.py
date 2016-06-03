@@ -314,7 +314,7 @@ class Player(wx.Panel):
         # Add new Additional Inputs
         for input_name in TrimmerConfig.get(section,'AdditionalInputs', fallback = '').split(','):
             if input_name:     
-                self.AdditionalInputsSizer.Add(AdditionalInputPanel(self.ctrlpanel, input_name), 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+                self.AdditionalInputsSizer.Add(AdditionalInputPanel(self.ctrlpanel, input_name.strip()), 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
         self.ctrlpanel.Layout()
         self.Layout()
 
