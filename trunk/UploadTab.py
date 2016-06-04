@@ -208,9 +208,9 @@ class UploadTab(wx.Panel):
             title = ""
             if "Title" in CompletionDict:
                 title = CompletionDict["Title"]
-            password = ""               
+            password = "" 
             self.SiteUploadThread = threading.Thread(target=self.UploadFiles,
-                                kwargs={"Mp4Enable": True,
+                                kwargs={"Mp4Enable": CompletionDict.get("Mp4Enable", False),
                                         "Mp4Path": CompletionDict["Custom-MP4"],
                                         "Title": title,
                                         "CompletionDict": CompletionDict
