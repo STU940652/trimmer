@@ -186,8 +186,8 @@ class UploadTab(wx.Panel):
             
         # Replace existing public MP4
         if "Replace-MP4" in CompletionDict:
-            if CompletionDict.get("Vimeo_Number", False):
-                self.ThreadSafeLog ("Replacing Vimeo video %s\n" % CompletionDict["Vimeo_Number"]) 
+            if CompletionDict.get("Video_To_Replace", False):
+                self.ThreadSafeLog ("Replacing Vimeo video %s\n" % CompletionDict["Video_To_Replace"]) 
                 self.Tags.update(self.GetTags())
                 title = "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
 
@@ -352,9 +352,9 @@ class UploadTab(wx.Panel):
             else:
                 v.token = token
                 
-            if CompletionDict.get("Vimeo_Number", False):
+            if CompletionDict.get("Video_To_Replace", False):
                 # Fixup URI
-                ReplaceURI = "/videos/" + CompletionDict["Vimeo_Number"].split('/')[-1]                
+                ReplaceURI = "/videos/" + CompletionDict["Video_To_Replace"].split('/')[-1]                
                 
                 # Replace existing file
                 self.ThreadSafeLog ("Replacing " + ReplaceURI + "\n")
