@@ -363,16 +363,6 @@ class UploadTab(wx.Panel):
             else:
                 # Upload file
                 video_uri = v.upload(sourceFilename)
-                d = v.get(video_uri)
-                self.ThreadSafeLog ('"' + title + '" URL is ' + str(d.json()["link"]) + '\n')
-                self.Tags["vimeo_link"] = str(d.json()["link"])
-                
-                if UpdateVimeoLink:
-                    self.Tags["vimeo_number"] = video_uri.split('/')[-1]
-                    try:
-                        wx.CallAfter (self.VimNumber.SetValue, self.Tags["vimeo_number"])
-                    except:
-                        self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
                 
             # Update Metadata
             m={}
@@ -385,9 +375,25 @@ class UploadTab(wx.Panel):
                 m["privacy"] = {'view': 'password'}
                 m["password"] = Password
                 w = v.patch(video_uri, data=m)
-            
+            elif CompletionDict.get("Vimeo_Private", False):
+                m={}
+                m["privacy"] = {'view': 'unlisted'}
+                w = v.patch(video_uri, data=m)
+                
             for tag in self.Tags["Keywords"].split(','):
                 w = v.put(video_uri + '/tags/' + tag)
+            
+            # Report video URL
+            d = v.get(video_uri)
+            self.ThreadSafeLog ('"' + title + '" URL is ' + str(d.json()["link"]) + '\n')
+            self.Tags["vimeo_link"] = str(d.json()["link"])
+            
+            if UpdateVimeoLink:
+                self.Tags["vimeo_number"] = video_uri.split('/')[-1]
+                try:
+                    wx.CallAfter (self.VimNumber.SetValue, self.Tags["vimeo_number"])
+                except:
+                    self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
         
             self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
         except:

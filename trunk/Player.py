@@ -37,14 +37,21 @@ class AdditionalInputPanel (wx.Panel):
 
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.Name = name
-        FilenameLabel=wx.StaticText(self, label=name.replace("_"," ").replace("@",""), size=(120, -1), style = wx.TE_RIGHT)
-        box.Add(FilenameLabel)
-        self.InputFileName = wx.TextCtrl(self, size=(120, -1))
-        box.Add(self.InputFileName, 1)
-        if (name[0] == "@"):
-            FileButton = wx.Button(self, label='...', size=(20,-1))
-            self.Bind(wx.EVT_BUTTON, self._SelectFile, FileButton)
-            box.Add(FileButton, 0)
+        if (name[0] == "&"):
+            # Boolean Checkbox
+            self.Input = wx.CheckBox(self, label=name[1:].replace("_"," "))
+            box.AddSpacer(120)
+            box.Add(self.Input, 1)
+        else:
+            # Text Box
+            FilenameLabel=wx.StaticText(self, label=name.replace("_"," ").replace("@"," "), size=(120, -1), style = wx.TE_RIGHT)
+            box.Add(FilenameLabel)
+            self.Input = wx.TextCtrl(self, size=(120, -1))
+            box.Add(self.Input, 1)
+            if (name[0] == "@"):
+                FileButton = wx.Button(self, label='...', size=(20,-1))
+                self.Bind(wx.EVT_BUTTON, self._SelectFile, FileButton)
+                box.Add(FileButton, 0)
         self.SetSizer(box)
         self.Layout()
 
@@ -52,10 +59,16 @@ class AdditionalInputPanel (wx.Panel):
         openFileDialog = wx.FileDialog(self, "Select MP4 Video File", "", "",
                                        "MP4 (*.mp4)|*.mp4|All Files (*.*)", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         if (openFileDialog.ShowModal() == wx.ID_OK):
-            self.InputFileName.SetValue(openFileDialog.GetPath())
+            self.Input.SetValue(openFileDialog.GetPath())
             
-    def GetFileName (self):
-        return self.InputFileName.GetValue()
+    def GetStringValue (self):
+        if (self.Name == "&"):
+            # Boolean Checkbox
+            if self.Input.IsChecked():
+                return "True"
+            else:
+                return ""
+        return self.Input.GetValue()
         
     def GetName (self):
         return self.Name
@@ -595,7 +608,7 @@ class Player(wx.Panel):
         t['video_height'] = str(self.VideoSize[1])
         # Get the additional inputs
         for i in self.AdditionalInputsSizer.GetChildren():
-            t[i.GetWindow().GetName()]=i.GetWindow().GetFileName()
+            t[i.GetWindow().GetName()]=i.GetWindow().GetStringValue()
         
         for l in self.Tags:
             t[l] = self.Tags[l].GetValue()
