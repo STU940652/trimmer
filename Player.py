@@ -62,7 +62,7 @@ class AdditionalInputPanel (wx.Panel):
             self.Input.SetValue(openFileDialog.GetPath())
             
     def GetStringValue (self):
-        if (self.Name == "&"):
+        if (self.Name[0] == "&"):
             # Boolean Checkbox
             if self.Input.IsChecked():
                 return "True"
