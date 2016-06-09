@@ -56,8 +56,8 @@ class AdditionalInputPanel (wx.Panel):
         self.Layout()
 
     def _SelectFile (self, evt):
-        openFileDialog = wx.FileDialog(self, "Select MP4 Video File", "", "",
-                                       "MP4 (*.mp4)|*.mp4|All Files (*.*)", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        openFileDialog = wx.FileDialog(self, "Select File", "", "",
+                                       "All Files (*.*)|*.*|MP4 (*.mp4)|*.mp4|JPEG (*.jpg)|*.jpg", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         if (openFileDialog.ShowModal() == wx.ID_OK):
             self.Input.SetValue(openFileDialog.GetPath())
             
