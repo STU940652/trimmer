@@ -159,12 +159,6 @@ class Player(wx.Panel):
         # Merge box1 and box2 to the ctrlsizer
         ctrlbox.Add(box1, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
         ctrlbox.Add(box2, 1, wx.EXPAND)
-
-        self.SectionSelect = wx.ComboBox(ctrlpanel, style=wx.CB_READONLY)
-        for section in TrimmerConfig.sections():
-            if section[:7]=="Segment":
-                self.SectionSelect.Append(TrimmerConfig.get(section,'Name'), section)
-        self.SectionSelect.SetSelection(0)
         
         StopLabel = wx.StaticText(ctrlpanel, label="Stop Time", size=(100, -1), style = wx.TE_RIGHT)
         self.StopFill = wx.Button(ctrlpanel, label="Fill", size=(50, -1))
@@ -178,7 +172,7 @@ class Player(wx.Panel):
         self.EncodeButton = wx.Button(ctrlpanel, label="Encode")
         self.Bind(wx.EVT_BUTTON, self.OnEncode, self.EncodeButton)
         # box4 contains Stop stuff
-        box4.Add(self.SectionSelect, flag=wx.ALIGN_RIGHT|wx.EXPAND)
+        box4.Add((-1, -1), 1)
         box4.Add(StopLabel)
         box4.Add(self.StopFill)
         box4.Add(self.StopTime)
@@ -187,6 +181,13 @@ class Player(wx.Panel):
         box4.Add(self.EncodeButton)
                 
         ctrlbox.Add(box4, 0, wx.EXPAND)
+        
+        self.SectionSelect = wx.ComboBox(ctrlpanel, style=wx.CB_READONLY)
+        for section in TrimmerConfig.sections():
+            if section[:7]=="Segment":
+                self.SectionSelect.Append(TrimmerConfig.get(section,'Name'), section)
+        self.SectionSelect.SetSelection(0)
+        ctrlbox.Add(self.SectionSelect, flag=wx.EXPAND)        
         
         # box 5 for filename
         box5 = wx.BoxSizer(wx.HORIZONTAL)
