@@ -322,13 +322,24 @@ class Player(wx.Panel):
             self.Substitute(TrimmerConfig.get(section,'DefaultOutFileName'))))
             
         # Set up inputs for additional Inputs
+        
+        # First store the existing values
+        t = {}
+        for i in self.AdditionalInputsSizer.GetChildren():
+            t[i.GetWindow().GetName()]=i.GetWindow().GetStringValue()
+        
         # Remove existing Addition Inputs
         self.AdditionalInputsSizer.Clear(delete_windows=True)
         
         # Add new Additional Inputs
         for input_name in TrimmerConfig.get(section,'AdditionalInputs', fallback = '').split(','):
-            if input_name:     
-                self.AdditionalInputsSizer.Add(AdditionalInputPanel(self.ctrlpanel, input_name.strip()), 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+            if input_name:
+                a = AdditionalInputPanel(self.ctrlpanel, input_name.strip())
+                self.AdditionalInputsSizer.Add(a, 0, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=5)
+                try:
+                    a.Input.SetValue(t[input_name.strip()])
+                except:
+                    pass
         self.ctrlpanel.Layout()
         self.Layout()
 
