@@ -382,7 +382,7 @@ class UploadTab(wx.Panel):
                 
             for tag in self.Tags["Keywords"].split(','):
                 w = v.put(video_uri + '/tags/' + tag)
-            
+                
             # Report video URL
             d = v.get(video_uri)
             self.ThreadSafeLog ('"' + title + '" URL is ' + str(d.json()["link"]) + '\n')
@@ -395,6 +395,11 @@ class UploadTab(wx.Panel):
                 except:
                     self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
         
+            # Add Thumbnail Picture
+            if CompletionDict.get("Vimeo_Thumbnail", False):
+                v.upload_picture(d.json(), CompletionDict["Vimeo_Thumbnail"], True)
+                
+            #Vimeo_Thumbnail
             self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
         except:
             self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
