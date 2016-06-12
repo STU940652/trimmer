@@ -102,6 +102,8 @@ class UploadTab(wx.Panel):
         VimNumSizer.Add(wx.StaticText(self, -1, "Vimeo Number"))
         self.VimNumber = wx.TextCtrl(self, size=(200,-1))
         VimNumSizer.Add(self.VimNumber, 1, flag=wx.EXPAND)
+        self.Mp4Replace = wx.CheckBox(self, -1, "Replace Existing")
+        VimNumSizer.Add(self.Mp4Replace, flag=wx.LEFT, border = 5)        
         Sizer.Add(VimNumSizer, flag=wx.ALL, border = 5)
         
         Sizer.AddSpacer(10)
@@ -225,15 +227,19 @@ class UploadTab(wx.Panel):
             self.Tags["mp3_url"] = self.MP3URL.GetValue()
         if self.VimNumber.GetValue() != "":
             self.Tags["vimeo_number"] = self.VimNumber.GetValue()
-        self.UploadThread = threading.Thread( target=self.UploadFiles,
-                        kwargs={"Mp3Enable": self.Mp3Enable.GetValue(), 
+        UploadFiles_kwargs={"Mp3Enable": self.Mp3Enable.GetValue(), 
                                 "Mp4Enable": self.Mp4Enable.GetValue(), 
                                 "CmsEnable": self.CmsEnable.GetValue(), 
                                 "CmsPublish": self.CmsPublish.GetValue(), 
                                 "Mp3Path": self.Mp3Path.GetValue(), 
                                 "Mp4Path": self.Mp4Path.GetValue(), 
-                                "Title": "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/",".")),
-                                "UpdateVimeoLink": True})
+                                "Title": "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))}
+        if self.Mp4Replace.GetValue():
+            UploadFiles_kwargs["CompletionDict"]={"Video_To_Replace":self.VimNumber.GetValue()}
+        else:
+            UploadFiles_kwargs["UpdateVimeoLink"]=True
+        self.UploadThread = threading.Thread( target=self.UploadFiles,
+                        kwargs=UploadFiles_kwargs)
         self.UploadThread.start()
         if self.Mp3Enable.GetValue():
             self.Mp3Enable.Disable()
