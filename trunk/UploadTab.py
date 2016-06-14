@@ -82,6 +82,8 @@ class UploadTab(wx.Panel):
         URLSizer.Add(wx.StaticText(self, -1, "MP3 URL"))
         self.MP3URL = wx.TextCtrl(self, size=(400,-1))
         URLSizer.Add(self.MP3URL, 1, flag=wx.EXPAND)
+        self.Mp3Replace = wx.CheckBox(self, -1, "Replace Existing")
+        URLSizer.Add(self.Mp3Replace, flag=wx.LEFT, border = 5)        
         Sizer.Add(URLSizer, flag=wx.ALL, border = 5)
 
         Sizer.AddSpacer(10)
@@ -130,6 +132,12 @@ class UploadTab(wx.Panel):
         Sizer.Add(self.Messages, 1, flag=wx.ALL|wx.EXPAND, border = 5)
         
         self.SetSizer(Sizer)
+        
+    def UploadCMSCallback(self, info):
+        if "Existing_MP3" in info:
+            self.MP3URL.SetValue(info["Existing_MP3"])
+        if "Existing_MP4" in info:
+            self.VimNumber.SetValue(info["Existing_MP4"])
 
     def SelectMP3 (self, evt):
         openFileDialog = wx.FileDialog(self, "Select MP3 Audio File", "", "",
@@ -227,17 +235,23 @@ class UploadTab(wx.Panel):
             self.Tags["mp3_url"] = self.MP3URL.GetValue()
         if self.VimNumber.GetValue() != "":
             self.Tags["vimeo_number"] = self.VimNumber.GetValue()
+            
         UploadFiles_kwargs={"Mp3Enable": self.Mp3Enable.GetValue(), 
                                 "Mp4Enable": self.Mp4Enable.GetValue(), 
                                 "CmsEnable": self.CmsEnable.GetValue(), 
                                 "CmsPublish": self.CmsPublish.GetValue(), 
                                 "Mp3Path": self.Mp3Path.GetValue(), 
                                 "Mp4Path": self.Mp4Path.GetValue(), 
-                                "Title": "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))}
+                                "Title": "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/",".")),
+                                "CompletionDict": {}}
         if self.Mp4Replace.GetValue():
-            UploadFiles_kwargs["CompletionDict"]={"Video_To_Replace":self.VimNumber.GetValue()}
+            UploadFiles_kwargs["CompletionDict"]["Video_To_Replace"]=self.VimNumber.GetValue()
         else:
             UploadFiles_kwargs["UpdateVimeoLink"]=True
+            
+        if self.Mp3Replace.GetValue():
+            UploadFiles_kwargs["CompletionDict"]["Mp3_Replace_URL"]=self.MP3URL.GetValue()            
+            
         self.UploadThread = threading.Thread( target=self.UploadFiles,
                         kwargs=UploadFiles_kwargs)
         self.UploadThread.start()
@@ -253,7 +267,7 @@ class UploadTab(wx.Panel):
     def UploadFiles (self, Mp3Enable=False, Mp4Enable=False, CmsEnable=False, CmsPublish=False, 
                      Mp3Path="", Mp4Path="", Title="", UpdateVimeoLink=False, CompletionDict={}): 
         if Mp3Enable:
-            ret = self.UploadMP3(Mp3Path)
+            ret = self.UploadMP3(Mp3Path, CompletionDict)
             wx.CallAfter (self.Mp3Enable.Enable)
             if not ret:
                 wx.CallAfter (self.Mp3Enable.Enable)
@@ -299,15 +313,20 @@ class UploadTab(wx.Panel):
                 GmailClient.ExceptionEmail(traceback.format_exc())
                 
         
-    def UploadMP3 (self, Mp3Path):
+    def UploadMP3 (self, Mp3Path, CompletionDict={}):
         sourceFilename = os.path.abspath(Mp3Path)
         
         self.ThreadSafeLog ("Uploading %s to Amazon S3\n" %(sourceFilename))
-        
-        if sourceFilename != "":
+        if sourceFilename:
             try:
-                # Target filename
-                self.Tags["mp3_url"] = '/'.join([time_of_record.strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')), os.path.basename(sourceFilename)]).replace('\\','/')
+                replace_file = False
+                # Is this a replace?
+                if CompletionDict.get("Mp3_Replace_URL", False):
+                    self.Tags["mp3_url"] = CompletionDict["Mp3_Replace_URL"]
+                    replace_file = True
+                else:                        
+                    # Target filename
+                    self.Tags["mp3_url"] = '/'.join([time_of_record.strftime(TrimmerConfig.get('Upload', 'MP3BasePath', fallback='')), os.path.basename(sourceFilename)]).replace('\\','/')
 
                 # connect to the bucket 
                 conn = boto.connect_s3(Credentials["AWS_ACCESS_KEY_ID"], 
@@ -323,10 +342,13 @@ class UploadTab(wx.Panel):
                     wx.CallAfter (self.MP3URL.SetValue, self.Tags["mp3_url"])
                 except:
                     self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
-                k.set_contents_from_filename(sourceFilename) 
-                #k.set_acl('public-read')
+                    
+                if k.set_contents_from_filename(sourceFilename, replace=replace_file):
+                    self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
+                    
+                else:
+                    self.ThreadSafeLog ("\n *** Failed to upload %s\n    Maybe it already exists\n\n" %(sourceFilename))
                 
-                self.ThreadSafeLog ("Done uploading %s\n" %(sourceFilename))
             except:
                 self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
                 GmailClient.ExceptionEmail(traceback.format_exc())
