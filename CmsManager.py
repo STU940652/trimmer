@@ -71,7 +71,7 @@ class CmsManager ():
                             b = []
                             for c in a.find_elements_by_tag_name('td')[1:4]:
                                 b.append(c.text.strip())
-                            event_list.append( (":".join(b), a.find_elements_by_tag_name('a')[0].get_attribute("href")) )
+                            event_list.append( (": ".join(b), a.find_elements_by_tag_name('a')[0].get_attribute("href")) )
                                 
                         except TypeError:
                             pass
@@ -118,12 +118,23 @@ class CmsManager ():
                 if passage1chapter != passage1chapter2:
                     self.EventInfo["comment"] += passage1chapter2 + ":"
                 self.EventInfo["comment"] += self.driver.find_element_by_name("passage1verse2").get_attribute("value")
-            
+                
+            # Get Vimeo Number for replace
+            if include_published:
+                self.EventInfo["Existing_MP4"] = self.driver.find_element_by_name("custom_vimeovideolink").get_attribute("value").rsplit('/')[-1]
+
+                
             # More Content Info
             self.driver.find_element_by_link_text('Content').click()
             self.EventInfo["summary"] = self.driver.find_element_by_id("summary").text
             self.EventInfo["keywords"] = self.driver.find_element_by_id("audio").get_attribute("value")
             
+            # Get Audio link for replace
+            if include_published:
+                self.driver.find_element_by_link_text('Media').click()
+                self.driver.get(self.driver.find_element_by_id("selectSermonAudioEdit").get_attribute("href"))
+                self.EventInfo["Existing_MP3"] = self.driver.find_element_by_id("urlFile").get_attribute("value").replace("http://media.calvarysc.org/","")
+
             return self.EventInfo
             
         except:

@@ -96,6 +96,7 @@ class TrimmerMain (wx.Frame):
         
         self.uploadpanel = UploadTab(self.tabs, self.playerpanel.GetTags)
         self.tabs.AddPage(self.uploadpanel, "Upload")
+        self.playerpanel.UploadPanel = self.uploadpanel
         
         self.jobmessagepanel.SetCompletionCallback(self.uploadpanel.OnCompletion)
         

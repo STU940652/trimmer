@@ -80,6 +80,7 @@ class Player(wx.Panel):
     """
     TagNames = ["Title", "Series", "Speaker", "Date", "Comment", "Summary", "Keywords"]
     MultiLineTags = ["Summary", "Keywords"]
+    UploadPanel = None
     
     def __init__(self, parent, SubmitJobCallback, StatusBar):
         wx.Panel.__init__(self, parent)
@@ -308,6 +309,9 @@ class Player(wx.Panel):
                 for textBox in self.Tags:                
                     if key.lower() == textBox.lower():
                         self.Tags[textBox].SetValue(info[key])
+                        
+            if self.UploadPanel:
+                self.UploadPanel.UploadCMSCallback(info)
                 
         self.import_tag.Enable(True)
         
@@ -621,6 +625,9 @@ class Player(wx.Panel):
         # Get the additional inputs
         for i in self.AdditionalInputsSizer.GetChildren():
             t[i.GetWindow().GetName()]=i.GetWindow().GetStringValue()
+        
+        if "Vimeo_Title" in t:
+            t["Vimeo_Title_For_Filename"] = t["Vimeo_Title"].replace("/","_").replace("\\","_").replace(":","_").replace(".","_")
         
         for l in self.Tags:
             t[l] = self.Tags[l].GetValue()
