@@ -59,6 +59,7 @@ class MyVimeoClient(vimeo.VimeoClient):
 
 class UploadTab(wx.Panel):
     Tags = {}
+    CompletionDict = {}
     def __init__ (self, parent, GetTags):
         wx.Panel.__init__(self, parent)
         self.GetTags = GetTags
@@ -175,6 +176,7 @@ class UploadTab(wx.Panel):
             self.Mp4Path.SetValue(CompletionDict["MP4"])
             self.Mp4Enable.SetValue(True)
             self.CmsEnable.SetValue(True)
+            self.CompletionDict = CompletionDict
             if self.UpdateOnCompletion.GetValue():
                 update = True
             
@@ -243,7 +245,7 @@ class UploadTab(wx.Panel):
                                 "Mp3Path": self.Mp3Path.GetValue(), 
                                 "Mp4Path": self.Mp4Path.GetValue(), 
                                 "Title": "%s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/",".")),
-                                "CompletionDict": {}}
+                                "CompletionDict": self.CompletionDict}
         if self.Mp4Replace.GetValue():
             UploadFiles_kwargs["CompletionDict"]["Video_To_Replace"]=self.VimNumber.GetValue()
         else:
