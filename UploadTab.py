@@ -387,8 +387,16 @@ class UploadTab(wx.Panel):
                 ReplaceURI = "/videos/" + CompletionDict["Video_To_Replace"].split('/')[-1]                
                 
                 # Replace existing file
+				# Log exception, but continue on
                 self.ThreadSafeLog ("Replacing " + ReplaceURI + "\n")
-                video_uri = v.replace(ReplaceURI, sourceFilename)
+				for i in range(3):
+					try:
+						video_uri = v.replace(ReplaceURI, sourceFilename)  # TODO: Handel exception here
+						break
+					except vimeo.exceptions.UploadTicketCreationFailure:
+						self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
+						GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+						continue
             
             else:
                 # Upload file
@@ -427,10 +435,17 @@ class UploadTab(wx.Panel):
         
             # Add Thumbnail Picture
             if CompletionDict.get("Vimeo_Thumbnail", False):
-                v.upload_picture(d.json(), CompletionDict["Vimeo_Thumbnail"], True)
-                
-            #Vimeo_Thumbnail
-            self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
+				# Log exception, but continue on
+				for i in range(3):
+					try:
+						v.upload_picture(d.json(), CompletionDict["Vimeo_Thumbnail"], True)
+						self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
+						break
+					except vimeo.exceptions.PictureCreationFailure:
+						self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
+						GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+						continue
+
         except:
             self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
             GmailClient.ExceptionEmail(traceback.format_exc())
