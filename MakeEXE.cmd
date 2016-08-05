@@ -1,3 +1,3 @@
 @echo off
-MakeEXE.py build_exe -b dist/Trimmer
-MakeEXE.py bdist_msi
+MakeEXE.py build_exe -b ../Win32/Trimmer
+rem MakeEXE.py bdist_msi -b ../Win32
