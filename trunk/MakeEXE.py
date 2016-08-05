@@ -4,7 +4,7 @@ from cx_Freeze import setup, Executable
 # fine tuning.
 buildOptions = dict(packages = [], 
                     excludes = [], 
-                    include_files = [   'ffmpeg.exe', 
+                    include_files = [   #'ffmpeg.exe', 
                                         'Trimmer.ini', 
                                         'LICENSES_FFMPEG.zip',
                                         'lgpl-2.1.txt',
