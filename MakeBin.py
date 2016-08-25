@@ -18,7 +18,7 @@ import sys
 base = 'Win32GUI' if sys.platform=='win32' else None
 
 executables = [
-    Executable('Trimmer.py', base=base)
+    Executable('Trimmer.py', base=base, icon="icon.ico")
 ]
 
 # Build version string
