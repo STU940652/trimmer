@@ -1,23 +1,41 @@
 # -*- mode: python -*-
+
+block_cipher = None
+
+
 a = Analysis(['Trimmer.py'],
-             pathex=[r'C:\Users\AndynDeanna\Documents\Projects\Trimmer\trunk'],
+             pathex=['/Users/projection/Andy_Projects/trimmer-code/src'],
+             binaries=None,
+             datas=None,
              hiddenimports=[],
-             hookspath=None)
-pyz = PYZ(a.pure)
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
-          exclude_binaries=1,
-          name=os.path.join('build\\pyi.win32\\Trimmer', 'Trimmer.exe'),
+          exclude_binaries=True,
+          name='Trimmer',
           debug=False,
-          strip=None,
+          strip=False,
           upx=True,
-          console=False )
+          console=False , icon='icon.icns')
 coll = COLLECT(exe,
-               a.binaries + [('ffmpeg.exe','ffmpeg.exe','DATA'), ('Trimmer.ini','Trimmer.ini','DATA'), ('Format for EW.cmd','Format for EW.cmd','DATA')],
+               a.binaries + 
+                  [('ffmpeg','ffmpeg','DATA'),
+                   # ('ffmpeg.exe','ffmpeg.exe','DATA'), 
+                   # ('Format for EW.cmd','Format for EW.cmd','DATA'),  
+                   ('Trimmer.ini','Trimmer.ini','DATA')],
                a.zipfiles,
                a.datas,
-               strip=None,
+               strip=False,
                upx=True,
-               name=os.path.join('dist', 'Trimmer'))
+               name='Trimmer')
 app = BUNDLE(coll,
-             name=os.path.join('dist', 'Trimmer.app'))
+             name='Trimmer.app',
+             icon='icon.icns',
+             bundle_identifier=None)
