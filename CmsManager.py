@@ -20,7 +20,10 @@ class CmsManager ():
                 if self.driver == None:
                     for thisDriver in self.drivers:
                         try:
-                            self.driver = thisDriver()
+                            if thisDriver == webdriver.Chrome:
+                                self.driver = thisDriver('/usr/local/bin/chromedriver')
+                            else:
+                                self.driver = thisDriver()
                         except:
                             #print(traceback.format_exc())
                             continue
