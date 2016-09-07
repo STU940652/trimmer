@@ -30,8 +30,18 @@ Date: 23-11-2010
 import wx 
 import sys
 import os
+import os.path
 import queue
 import subprocess
+
+# Make sure we are in the correct directory
+application_path = ''
+if (getattr(sys, 'frozen', False)):
+    application_path = os.path.dirname( os.path.abspath(sys.executable))
+elif __file__:
+    application_path = os.path.dirname( os.path.abspath(__file__))
+if application_path:
+    os.chdir( application_path)
 
 # import external libraries
 from FileCopy import FileCopy

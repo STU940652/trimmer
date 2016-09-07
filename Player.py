@@ -186,7 +186,10 @@ class Player(wx.Panel):
         self.SectionSelect = wx.ComboBox(ctrlpanel, style=wx.CB_READONLY)
         for section in TrimmerConfig.sections():
             if section[:7]=="Segment":
-                self.SectionSelect.Append(TrimmerConfig.get(section,'Name'), section)
+            	try:
+                	self.SectionSelect.Append(TrimmerConfig.get(section,'Name'), section)
+            	except:
+            		continue
         self.SectionSelect.SetSelection(0)
         ctrlbox.Add(self.SectionSelect, flag=wx.EXPAND)        
         
@@ -323,7 +326,7 @@ class Player(wx.Panel):
         section = self.SectionSelect.GetClientData(self.SectionSelect.GetSelection())
         self.OutputFileName.SetValue(os.path.join(\
             TrimmerConfig.get('FilePaths','DestPath'),\
-            self.Substitute(TrimmerConfig.get(section,'DefaultOutFileName'))))
+            self.Substitute(TrimmerConfig.get(section,'DefaultOutFileName', fallback=''))))
             
         # Set up inputs for additional Inputs
         
