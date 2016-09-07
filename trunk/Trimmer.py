@@ -191,7 +191,7 @@ if __name__ == "__main__":
     #except:
     #    pass
     # Create a wx.App(), which handles the windowing system event loop
-    app = wx.App()
+    app = wx.App(redirect=False)
     # Create the window containing our small media player
     player = TrimmerMain("Trimmer")
     # show the player window centred and run the application
