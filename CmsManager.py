@@ -5,6 +5,7 @@ import threading
 import html
 import traceback
 import wx
+import sys
 from Credentials import Credentials
 
 class CmsManager ():
@@ -20,7 +21,7 @@ class CmsManager ():
                 if self.driver == None:
                     for thisDriver in self.drivers:
                         try:
-                            if thisDriver == webdriver.Chrome:
+                            if (thisDriver == webdriver.Chrome) and sys.platform.startswith('darwin'):
                                 self.driver = thisDriver('/usr/local/bin/chromedriver')
                             else:
                                 self.driver = thisDriver()
