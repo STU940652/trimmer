@@ -1,10 +1,38 @@
 # -*- mode: python -*-
+import sys
+import subprocess
+import re
 
 block_cipher = None
 
+# Build version string
+version = '1.0'
+
+svn_info = subprocess.check_output('svn info', shell=True).decode('utf-8')
+svn_match = re.search("Last Changed Rev: *([0-9]+)", svn_info)
+if svn_match:
+    version += '.'+svn_match.group(1)
+
+with open ("version.iss", "wt") as f:
+    f.write('#define MyAppVersion "%s"\n' % version)
+with open ("version", "wt") as f:
+    f.write(version)
+
+datas = [('Trimmer.ini','Trimmer.ini','DATA')]
+icon = None
+
+if sys.platform.startswith('win'):
+    datas.append( ('ffmpeg.exe','ffmpeg.exe','DATA') )
+    datas.append( ('ffmpeg.exe','ffmpeg.exe','DATA') )
+    icon='icon.ico'
+    
+if sys.platform.startswith('darwin'):
+    datas.append( ('ffmpeg','ffmpeg','DATA') )
+    icon='icon.icns'
+
 
 a = Analysis(['Trimmer.py'],
-             pathex=['/Users/projection/Andy_Projects/trimmer-code/src'],
+             pathex=[os.getcwd()],
              binaries=None,
              datas=None,
              hiddenimports=[],
@@ -23,19 +51,17 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=False , icon='icon.icns')
+          console=False,
+          icon=icon)
 coll = COLLECT(exe,
-               a.binaries + 
-                  [('ffmpeg','ffmpeg','DATA'),
-                   # ('ffmpeg.exe','ffmpeg.exe','DATA'), 
-                   # ('Format for EW.cmd','Format for EW.cmd','DATA'),  
-                   ('Trimmer.ini','Trimmer.ini','DATA')],
+               a.binaries + datas,
                a.zipfiles,
                a.datas,
                strip=False,
                upx=True,
                name='Trimmer')
-app = BUNDLE(coll,
-             name='Trimmer.app',
-             icon='icon.icns',
-             bundle_identifier=None)
+if sys.platform.startswith('darwin'):
+    app = BUNDLE(coll,
+                 name='Trimmer.app',
+                 icon=icon,
+                 bundle_identifier=None)

@@ -39,7 +39,7 @@ class EncodeThread (threading.Thread):
                                                         bufsize=0, 
                                                         universal_newlines=True, 
                                                         creationflags=0x08000000, # CREATE_NO_WINDOW
-                                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
                                 else:    
                                     sp = subprocess.Popen(command, 
                                                         shell=True, 
