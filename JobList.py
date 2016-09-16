@@ -16,16 +16,22 @@ class JobList(wx.Panel):
         self.CancelJobCallback = CancelJobCallback
         self.CompletionCallback = None
         
-        #Main Sizer
-        Sizer=wx.BoxSizer(wx.VERTICAL)
+        #Window Splitter
+        splitter = wx.SplitterWindow(self)
 
-        # File List
-        self.MessageList = ListCtrlAutoWidth(self, resizecolumn='LAST')
+        # Job List Window
+        self.MessageList = ListCtrlAutoWidth(splitter, resizecolumn='LAST')
         self.MessageList.InsertColumn(0,'Job', width = 175)
         self.MessageList.InsertColumn(1,'Message')
-        Sizer.Add(self.MessageList, 1, flag=wx.EXPAND)
         self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnRightClick, self.MessageList)
+        
+        # Log Window
+        self.Messages = wx.TextCtrl (splitter, style=wx.TE_MULTILINE|wx.TE_READONLY)
 
+        # Add sizer and init splitter
+        Sizer=wx.BoxSizer(wx.VERTICAL)
+        Sizer.Add(splitter, 1, flag=wx.EXPAND)
+        splitter.SplitHorizontally(self.MessageList, self.Messages, 100)
         self.SetSizer(Sizer)
 
         # finally create the timer, which checks for the source files
@@ -80,6 +86,7 @@ class JobList(wx.Panel):
             for row in range(self.MessageList.GetItemCount()):
                 if cName==self.MessageList.GetItemText(row):
                     self.MessageList.SetItem(row,1, message)
+                    self.Messages.AppendText(message+'\n')
                     found = True
                     break
             if not found:
