@@ -27,7 +27,7 @@ if sys.platform.startswith('win'):
     icon='icon.ico'
     
 if sys.platform.startswith('darwin'):
-    datas.append( ('ffmpeg','ffmpeg','DATA') )
+    datas.append( ('ffmpeg','../OSX/ext/ffmpeg','DATA') )
     icon='icon.icns'
 
 
