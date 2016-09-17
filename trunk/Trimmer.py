@@ -42,6 +42,7 @@ elif __file__:
     application_path = os.path.dirname( os.path.abspath(__file__))
 if application_path:
     os.chdir( application_path)
+    os.environ["PATH"] = application_path + ":" + os.environ["PATH"]
 
 # import external libraries
 from FileCopy import FileCopy
