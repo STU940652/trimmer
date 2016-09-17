@@ -17,6 +17,9 @@ with open ("version.iss", "wt") as f:
     f.write('#define MyAppVersion "%s"\n' % version)
 with open ("version", "wt") as f:
     f.write(version)
+with open ("version.py", "wt") as f:
+    f.write("VERSION=' %s'" % version)
+
 
 datas = [('Trimmer.ini','Trimmer.ini','DATA'),
          ('lgpl-2.1.txt','lgpl-2.1.txt','DATA'),
@@ -27,11 +30,11 @@ if sys.platform.startswith('win'):
     datas.append( ('ffmpeg.exe','../Win64/ext/ffmpeg.exe','DATA') )
     datas.append( ('chromedriver.exe','../Win64/ext/chromedriver.exe','DATA') )
     # datas.append( ('phantomjs.exe','../Win64/ext/phantomjs.exe','DATA') )
-    icon='icon.ico'
+    icon='../Win64/ext/icon.ico'
     
 if sys.platform.startswith('darwin'):
     datas.append( ('ffmpeg','../OSX/ext/ffmpeg','DATA') )
-    icon='icon.icns'
+    icon='../OSX/ext/icon.icns'
 
 
 a = Analysis(['Trimmer.py'],

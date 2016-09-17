@@ -36,10 +36,15 @@ import subprocess
 
 # Make sure we are in the correct directory
 application_path = ''
+VERSION = ''
 if (getattr(sys, 'frozen', False)):
     application_path = os.path.dirname( os.path.abspath(sys.executable))
 elif __file__:
     application_path = os.path.dirname( os.path.abspath(__file__))
+    try:
+        import version
+    except:
+        pass
 if application_path:
     os.chdir( application_path)
     os.environ["PATH"] = application_path + ":" + os.environ["PATH"]
@@ -194,7 +199,7 @@ if __name__ == "__main__":
     # Create a wx.App(), which handles the windowing system event loop
     app = wx.App(redirect=False)
     # Create the window containing our small media player
-    player = TrimmerMain("Trimmer")
+    player = TrimmerMain("Trimmer" + VERSION)
     # show the player window centred and run the application
     player.Show()
     app.MainLoop()
