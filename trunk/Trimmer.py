@@ -37,14 +37,15 @@ import subprocess
 # Make sure we are in the correct directory
 application_path = ''
 VERSION = ''
+try:
+    from version import VERSION
+except:
+    pass
+
 if (getattr(sys, 'frozen', False)):
     application_path = os.path.dirname( os.path.abspath(sys.executable))
 elif __file__:
     application_path = os.path.dirname( os.path.abspath(__file__))
-    try:
-        import version
-    except:
-        pass
 if application_path:
     os.chdir( application_path)
     os.environ["PATH"] = application_path + ":" + os.environ["PATH"]
