@@ -18,12 +18,15 @@ with open ("version.iss", "wt") as f:
 with open ("version", "wt") as f:
     f.write(version)
 
-datas = [('Trimmer.ini','Trimmer.ini','DATA')]
+datas = [('Trimmer.ini','Trimmer.ini','DATA'),
+         ('lgpl-2.1.txt','lgpl-2.1.txt','DATA'),
+         ('LICENSES_FFMPEG.zip','LICENSES_FFMPEG.zip','DATA')]
 icon = None
 
 if sys.platform.startswith('win'):
-    datas.append( ('ffmpeg.exe','ffmpeg.exe','DATA') )
-    datas.append( ('ffmpeg.exe','ffmpeg.exe','DATA') )
+    datas.append( ('ffmpeg.exe','../Win64/ext/ffmpeg.exe','DATA') )
+    datas.append( ('chromedriver.exe','../Win64/ext/chromedriver.exe','DATA') )
+    # datas.append( ('phantomjs.exe','../Win64/ext/phantomjs.exe','DATA') )
     icon='icon.ico'
     
 if sys.platform.startswith('darwin'):
