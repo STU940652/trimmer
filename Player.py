@@ -1,10 +1,15 @@
-import wx # 2.8
-import vlc
+import wx
 import os
 import os.path
 import platform
 from Settings import *
 from CmsManager import *
+try:
+    import vlc
+    HAVE_VLC = True
+except:
+    HAVE_VLC = False
+
 
 def ms_to_hms (ms):
     try:
@@ -84,6 +89,13 @@ class Player(wx.Panel):
     
     def __init__(self, parent, SubmitJobCallback, StatusBar):
         wx.Panel.__init__(self, parent)
+
+        # See if VLC loaded
+        if not HAVE_VLC:
+            m = wx.MessageDialog(self, message = "Please download and install VLC Media Player\nfrom www.VideoLAN.org.", 
+                                caption = "Could not find VLC Media Player.",
+                                style = wx.ICON_ERROR|wx.OK)
+            m.ShowModal()
 
         self.MediaFileName = ''
         self.StatusBar = StatusBar
@@ -271,8 +283,9 @@ class Player(wx.Panel):
         self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 
         # VLC player controls
-        self.Instance = vlc.Instance()
-        self.player = self.Instance.media_player_new()
+        if HAVE_VLC:
+            self.Instance = vlc.Instance()
+            self.player = self.Instance.media_player_new()
         
         # Command queue to the Encode thread
         self.SubmitJobCallback = SubmitJobCallback
