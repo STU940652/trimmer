@@ -343,7 +343,7 @@ class Player(wx.Panel):
             self.Substitute(TrimmerConfig.get(section,'DefaultOutFileName', fallback=''))))
             
         # Set up inputs for additional Inputs
-        
+
         # First store the existing values
         t = {}
         for i in self.AdditionalInputsSizer.GetChildren():
@@ -455,7 +455,6 @@ class Player(wx.Panel):
 
         # Reset Video size
         (self.width, self.height) = (0,0)
-        self.OnChangeSelection()
     
     def OnOpen(self, evt):
         """Pop up a new dialow window to choose a file, then play the selected file.
