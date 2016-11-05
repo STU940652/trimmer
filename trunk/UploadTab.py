@@ -169,6 +169,7 @@ class UploadTab(wx.Panel):
             self.Mp3Path.SetValue(CompletionDict["MP3"])
             self.Mp3Enable.SetValue(True)
             self.CmsEnable.SetValue(True)
+            self.CompletionDict = CompletionDict
             if self.UpdateOnCompletion.GetValue():
                 update = True
 
@@ -290,7 +291,7 @@ class UploadTab(wx.Panel):
             
         if CmsEnable:
             c = CmsManager()
-            c.SetMedia (self.Tags, self.ThreadSafeLog, CmsPublish)
+            c.SetMedia (self.Tags, self.ThreadSafeLog, CmsPublish, CompletionDict)
             wx.CallAfter (self.CmsEnable.Enable)
             wx.CallAfter (self.CmsPublish.Enable)
             wx.CallAfter (self.CmsEnable.SetValue, False)

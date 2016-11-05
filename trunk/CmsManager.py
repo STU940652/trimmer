@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 import time
 import threading
 import html
@@ -160,7 +161,7 @@ class CmsManager ():
             return None
         return []
         
-    def SetMedia (self, Tags, MessageCallback, CmsPublish):    
+    def SetMedia (self, Tags, MessageCallback, CmsPublish, CompletionDict={}):    
         if not self.IsLoggedIn:
             MessageCallback("Logging-in to CMS.\n")
             if not self.Login():
@@ -227,7 +228,7 @@ class CmsManager ():
             
             # Publish it
             if CmsPublish:
-                self.PublishWebsite(Tags, MessageCallback, Tags["event_url"])
+                self.PublishWebsite(Tags, MessageCallback, Tags["event_url"], CompletionDict)
 
             MessageCallback("Done updating website.\n")
             
@@ -241,7 +242,7 @@ class CmsManager ():
         
         return True
     
-    def PublishWebsite (self, Tags, MessageCallback, EventURL):    
+    def PublishWebsite (self, Tags, MessageCallback, EventURL, CompletionDict={}):    
         if not self.IsLoggedIn:
             MessageCallback("Logging-in to CMS.\n")
             if not self.Login():
@@ -276,8 +277,16 @@ class CmsManager ():
             # Go to publish tab
             self.driver.find_element_by_link_text('Publish').click() 
 
-            # TODO: See if this is added to Homepage group
-            # TODO: .. if not, add to Homepage group
+            if ('CMS_Groups' in CompletionDict):
+                groupDropdowns = self.driver.find_element_by_id('groupDropdowns')
+                for group in CompletionDict['CMS_Groups'].split(','):
+                    # See if this is added to the group
+                    if (group not in groupDropdowns.text):
+                        # .. if not, add to the group
+                        groupDropdowns.find_element_by_link_text('Add another group').click()
+                        time.sleep(2.0) # Wait to take effect
+                        s = groupDropdowns.find_element_by_id('recordListGroup1')
+                        Select(s).select_by_visible_text(group)
             
             # Click Publish button
             form = self.driver.find_element_by_id ('publishForm')
@@ -290,31 +299,32 @@ class CmsManager ():
                     break
             
             # Do we need to remove homepage from others?
-            for this_sermon in homepage:
-                # Go to the sermon of interest
-                self.driver.get(this_sermon)
-                
-                # Go to publish tab
-                self.driver.find_element_by_link_text('Publish').click() 
-                time.sleep(5.0) # Pause 5 seconds for the groups to populate
-                
-                # Delete homepage tag
-                b = self.driver.find_element_by_id ('groupDropdowns')
-                for c in b.find_elements_by_tag_name('div'):
-                    if "Homepage" in c.text:
-                        c.find_element_by_link_text('Remove').click()
-                        time.sleep(2.0) # Wait to take effect
-                        break
-                
-                # Publish-not-as-featured
-                form = self.driver.find_element_by_id ('publishForm')
-                buttons = form.find_elements_by_name('action')
-                for button in buttons:
-                    if button.get_attribute("value") == 'Publish':
-                        time.sleep(5.0) # Pause 5 seconds for the groups to populate
-                        button.click() 
-                        time.sleep(2.0) # Wait to take effect
-                        break
+            if ('CMS_Groups' in CompletionDict) and ("Homepage" in CompletionDict['CMS_Groups'].split(',')):
+                for this_sermon in homepage:
+                    # Go to the sermon of interest
+                    self.driver.get(this_sermon)
+                    
+                    # Go to publish tab
+                    self.driver.find_element_by_link_text('Publish').click() 
+                    time.sleep(5.0) # Pause 5 seconds for the groups to populate
+                    
+                    # Delete homepage tag
+                    b = self.driver.find_element_by_id ('groupDropdowns')
+                    for c in b.find_elements_by_tag_name('div'):
+                        if "Homepage" in c.text:
+                            c.find_element_by_link_text('Remove').click()
+                            time.sleep(2.0) # Wait to take effect
+                            break
+                    
+                    # Publish-not-as-featured
+                    form = self.driver.find_element_by_id ('publishForm')
+                    buttons = form.find_elements_by_name('action')
+                    for button in buttons:
+                        if button.get_attribute("value") == 'Publish':
+                            time.sleep(5.0) # Pause 5 seconds for the groups to populate
+                            button.click() 
+                            time.sleep(2.0) # Wait to take effect
+                            break
 
             # Everything worked.  Close the browser
             self.driver.quit()
