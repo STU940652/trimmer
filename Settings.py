@@ -10,7 +10,7 @@ import datetime
 #
 # [GlobalSettings]
 # FileCopy = True
-# NameTemplate = %m_%d_%Y
+# DateTemplate = %m_%d_%Y
 #
 # [Segment1]
 # Seg1_Name = "Before Prayer"
@@ -33,7 +33,7 @@ TrimmerConfig.set('FilePaths', 'AutoStart', 'false')
 TrimmerConfig.add_section('GlobalSettings')
 TrimmerConfig.set('GlobalSettings', 'FileCopy', 'true')
 TrimmerConfig.set('GlobalSettings', 'CropControls', 'false')
-TrimmerConfig.set('GlobalSettings', 'NameTemplate', '%%Y%%m%%d')
+TrimmerConfig.set('GlobalSettings', 'DateTemplate', '%%Y%%m%%d')
 TrimmerConfig.set('GlobalSettings', 'ExceptionEmail', '')
 
 if "APPDATA" in os.environ:

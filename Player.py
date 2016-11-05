@@ -2,6 +2,7 @@ import wx
 import os
 import os.path
 import platform
+import datetime
 from Settings import *
 from CmsManager import *
 try:
@@ -92,7 +93,7 @@ class Player(wx.Panel):
 
         # See if VLC loaded
         if not HAVE_VLC:
-            m = wx.MessageDialog(self, message = "Please download and install VLC Media Player\nfrom www.VideoLAN.org.", 
+            m = wx.MessageDialog(self, message = "Please download and install %s VLC Media Player\nfrom www.VideoLAN.org." % platform.architecture()[0],
                                 caption = "Could not find VLC Media Player.",
                                 style = wx.ICON_ERROR|wx.OK)
             m.ShowModal()
@@ -405,7 +406,8 @@ class Player(wx.Panel):
                     .replace("$InFile$", self.MediaFileName)\
                     .replace("$InFileName$", os.path.basename(self.MediaFileName).rsplit('.',1)[0])\
                     .replace("$OutFileName$", self.OutputFileName.GetValue())\
-                    .replace("$DateSunday$", time_of_record.strftime("%s" % (TrimmerConfig.get('GlobalSettings', 'NameTemplate'))))
+                    .replace("$CurrentDate$", datetime.datetime.now().strftime("%s" % (TrimmerConfig.get('GlobalSettings', 'DateTemplate'))))\
+                    .replace("$DateSunday$", time_of_record.strftime("%s" % (TrimmerConfig.get('GlobalSettings', 'DateTemplate'))))
         return s
     
     def OnEncode(self, evt):

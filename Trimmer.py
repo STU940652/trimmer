@@ -176,7 +176,7 @@ if __name__ == "__main__":
 #
 #[GlobalSettings]
 #FileCopy = True
-#NameTemplate = %m_%d_%Y
+#DateTemplate = %m_%d_%Y
 #
 #[Segment4]
 #Name = Before Prayer
