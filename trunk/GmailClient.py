@@ -376,11 +376,13 @@ def ExceptionEmail (s):
     to = TrimmerConfig.get('GlobalSettings', 'ExceptionEmail', fallback='')
     if not len(to):
         return
+        
+    id = "%s@%s: " % (os.getenv('USERNAME',"unknown"), os.getenv('COMPUTERNAME',"unknown"))
     try:
         g = GmailClient()
         g.SendMessage(sender = "me", 
                       to = to, 
                       subject = "Trimmer Exception", 
-                      message_text = "Trimmer threw an exception:\n\n" + s)
+                      message_text = id + "Trimmer threw an exception:\n\n" + s)
     except:
         print (traceback.format_exc())
