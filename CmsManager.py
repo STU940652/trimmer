@@ -230,7 +230,7 @@ class CmsManager ():
             if CmsPublish:
                 self.PublishWebsite(Tags, MessageCallback, Tags["event_url"], CompletionDict)
 
-            MessageCallback("Done updating website.\n")
+            MessageCallback("\nDone updating website.\n")
             
         except:
             MessageCallback('\n' + traceback.format_exc() + '\n')
@@ -268,9 +268,6 @@ class CmsManager ():
                     except TypeError:
                         pass
                         
-            # Pass a little debug info
-            MessageCallback (str(homepage))
-            
             # Go to the sermon of interest
             self.driver.get(EventURL)
             
@@ -283,11 +280,15 @@ class CmsManager ():
                     # See if this is added to the group
                     if (group not in groupDropdowns.text):
                         # .. if not, add to the group
-                        groupDropdowns.find_element_by_link_text('Add another group').click()
-                        time.sleep(2.0) # Wait to take effect
-                        s = groupDropdowns.find_element_by_id('recordListGroup1')
-                        Select(s).select_by_visible_text(group)
-            
+                        try:
+                            groupDropdowns.find_element_by_link_text('Add another group').click()
+                            time.sleep(2.0) # Wait to take effect
+                            s = groupDropdowns.find_element_by_id('recordListGroup1')
+                            Select(s).select_by_visible_text(group)
+                            MessageCallback("Added to group \"%s\"\n" % group)
+                        except:
+                            MessageCallback("Failed to add to group \"%s\"\n" % group)
+           
             # Click Publish button
             form = self.driver.find_element_by_id ('publishForm')
             buttons = form.find_elements_by_name('action')
@@ -296,6 +297,7 @@ class CmsManager ():
                     time.sleep(5.0) # Pause 5 seconds for the groups to populate
                     button.click()
                     time.sleep(2.0) # I think there is some AJAXish stuff that has to happen here.
+                    MessageCallback("Published\n")
                     break
             
             # Do we need to remove homepage from others?
