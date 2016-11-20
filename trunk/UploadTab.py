@@ -286,6 +286,7 @@ class UploadTab(wx.Panel):
             if not ret:
                 wx.CallAfter (self.Mp4Enable.Enable)
                 wx.CallAfter (self.CmsEnable.Enable)
+                wx.CallAfter (self.CmsPublish.Enable)
                 return
             wx.CallAfter (self.Mp4Enable.SetValue, False)
             
@@ -397,6 +398,8 @@ class UploadTab(wx.Panel):
                     except vimeo.exceptions.UploadTicketCreationFailure:
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
                         GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+                        if i == 2:
+                            return False
                         continue
             
             else:
@@ -409,6 +412,8 @@ class UploadTab(wx.Panel):
                     except vimeo.exceptions.UploadTicketCreationFailure:
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
                         GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+                        if i == 2:
+                            return False
                         continue
                 
             # Update Metadata
@@ -452,6 +457,8 @@ class UploadTab(wx.Panel):
                     except vimeo.exceptions.PictureCreationFailure:
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
                         GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+                        if i == 2:
+                            return False
                         continue
 
             self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
