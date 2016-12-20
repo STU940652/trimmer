@@ -34,6 +34,8 @@ if sys.platform.startswith('win'):
     
 if sys.platform.startswith('darwin'):
     datas.append( ('ffmpeg','../OSX/ext/ffmpeg','DATA') )
+    datas.append( ('chromedriver.exe','../OSX/ext/chromedriver','DATA') )
+    # datas.append( ('phantomjs.exe','../OSX/ext/phantomjs','DATA') )
     icon='../OSX/ext/icon.icns'
 
 
