@@ -225,8 +225,8 @@ class Player(wx.Panel):
         temp_box = wx.BoxSizer(wx.VERTICAL)
         self.Tags = {}
         for label in self.TagNames:
-            temp_label = wx.StaticText(tagpanel, label=label, size=(60, -1), style = wx.TE_LEFT)
-            temp_box.Add(temp_label, 0, flag=wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, border=5)
+            temp_label = wx.StaticText(tagpanel, label=label, style = wx.TE_LEFT)
+            temp_box.Add(temp_label, 0, flag=wx.EXPAND | wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, border=5)
             if label in self.MultiLineTags:
                 self.Tags[label] = wx.TextCtrl(tagpanel, size=(120, -1), style = wx.TE_MULTILINE)
                 temp_box.Add(self.Tags[label], 1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border = 5)
