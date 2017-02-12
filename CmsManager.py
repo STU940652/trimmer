@@ -31,21 +31,6 @@ class CmsManager ():
                             continue
                         break
                         
-                # Disable Flash
-                # This is a rude hack to disable flash.  In the latest version of Chrome, the
-                # flash upload client that Ekklesia uses detected flash, but is broken.  This 
-                # causes JavaScript errors when trying to change tabs, which means you can't get
-                # to the other tabs.  Using a rude hack because I couldn't get the chrome_options
-                # stuff working, and this module is basically a rude hack anyway.
-                self.driver.get("chrome://plugins")
-                for p in self.driver.find_elements_by_class_name('plugin'):
-                    if 'Adobe Flash Player' in p.text:
-                        try:
-                            d = p.find_element_by_link_text('Disable')
-                            d.click()
-                        except:
-                            pass
-                
                 # Login
                 self.driver.implicitly_wait(10) # seconds
                 self.driver.get("http://my.ekklesia360.com/Login")
@@ -153,6 +138,7 @@ class CmsManager ():
             # Get Audio link for replace
             if include_published:
                 self.driver.find_element_by_link_text('Media').click()
+                self.driver.find_element_by_id('mediaForm').find_element_by_link_text('Basic Uploader').click()
                 self.driver.get(self.driver.find_element_by_id("selectSermonAudioEdit").get_attribute("href"))
                 self.EventInfo["Existing_MP3"] = self.driver.find_element_by_id("urlFile").get_attribute("value").replace("http://media.calvarysc.org/","")
 
@@ -190,6 +176,13 @@ class CmsManager ():
             
             # Go to media tab
             self.driver.find_element_by_link_text('Media').click()
+
+            # Disable Flash
+            # In the latest version of Chrome, the
+            # flash upload client that Ekklesia uses detected flash, but is broken.  This 
+            # causes JavaScript errors when trying to change tabs, which means you can't get
+            # to the other tabs.  Switching to the basic uploader works around the problem.
+            self.driver.find_element_by_id('mediaForm').find_element_by_link_text('Basic Uploader').click()
             
             # Audio
             if "mp3_url" in Tags:
