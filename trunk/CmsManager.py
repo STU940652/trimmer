@@ -40,8 +40,11 @@ class CmsManager ():
                 self.driver.get("chrome://plugins")
                 for p in self.driver.find_elements_by_class_name('plugin'):
                     if 'Adobe Flash Player' in p.text:
-                        d = p.find_element_by_link_text('Disable')
-                        d.click()
+                        try:
+                            d = p.find_element_by_link_text('Disable')
+                            d.click()
+                        except:
+                            pass
                 
                 # Login
                 self.driver.implicitly_wait(10) # seconds
