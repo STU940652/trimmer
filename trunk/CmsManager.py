@@ -66,33 +66,34 @@ class CmsManager ():
             if not self.Login():
                 return None
         try:        
-            if event == None:
-                self.driver.get("https://my.ekklesia360.com/Sermon/list")
+            self.driver.get("https://my.ekklesia360.com/Sermon/list")
 
-                l=self.driver.find_element_by_id('listOutput')
-                event_list=[]
-                for a in l.find_elements_by_tag_name('tr'):
-                    if ("Draft" in a.text) or (include_published and "Published" in a.text):
-                        try:
-                            b = []
-                            for c in a.find_elements_by_tag_name('td')[1:4]:
-                                b.append(c.text.strip())
-                            event_list.append( (": ".join(b), a.find_elements_by_tag_name('a')[0].get_attribute("href")) )
-                                
-                        except TypeError:
-                            pass
+            l=self.driver.find_element_by_id('listOutput')
+            event_list=[]
+            for a in l.find_elements_by_tag_name('tr'):
+                if ("Draft" in a.text) or (include_published and "Published" in a.text):
+                    try:
+                        b = []
+                        for c in a.find_elements_by_tag_name('td')[1:4]:
+                            b.append(c.text.strip())
+                        event_list.append( (": ".join(b), a.find_elements_by_tag_name('a')[0].get_attribute("href")) )
                             
-                # Go to first in list by default
-                if len(event_list) == 0:
-                    # Nothing valid found
-                    return []
-                self.EventInfo["event_list"] = event_list
+                    except TypeError:
+                        pass
+                        
+            # Go to first in list by default
+            if len(event_list) == 0:
+                # Nothing valid found
+                return []
+            self.EventInfo["event_list"] = event_list
                 
+            if event == None:
                 # Go to first in list
                 self.driver.get(event_list[0][1])
                 time.sleep(1)
                 
             else:
+                # Go to the requested event
                 self.driver.get(event)
                 time.sleep(1)
 
