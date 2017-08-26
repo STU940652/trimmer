@@ -184,6 +184,7 @@ class Player(wx.Panel):
 
         self.TimeToStop = None
         self.EncodeButton = wx.Button(ctrlpanel, label="Encode")
+        self.EncodeButton.SetForegroundColour(wx.BLUE)
         self.Bind(wx.EVT_BUTTON, self.OnEncode, self.EncodeButton)
         # box4 contains Stop stuff
         box4.Add((-1, -1), 1)

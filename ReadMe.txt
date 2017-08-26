@@ -28,7 +28,7 @@ DEPENDENCIES
 	
 PIP
 ===
-pip install --trusted_host -U --pre -f http://wxpython.org/Phoenix/snapshot-builds/ wxPython_Phoenix
+pip install wxPython
 pip install boto
 pip install selenium
 pip install PyVimeo
