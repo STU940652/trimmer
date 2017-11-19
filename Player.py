@@ -130,6 +130,7 @@ class Player(wx.Panel):
         stop   = wx.Button(ctrlpanel, label="Stop")
         volume = wx.Button(ctrlpanel, label="Volume")
         self.volslider = wx.Slider(ctrlpanel, -1, 0, 0, 100, size=(100, -1))
+        self.volslider.SetValue(50)        
         
         #My Stuff
         StartLabel = wx.StaticText(ctrlpanel, label="Start Time ", size=(100, -1), style = wx.TE_RIGHT)
@@ -448,11 +449,6 @@ class Player(wx.Panel):
 
         if Play:
             self.OnPlay(None)
-
-        # set the volume slider to the current volume
-        #self.player.audio_set_volume(0)
-        self.volslider.SetValue(self.player.audio_get_volume() / 2)
-        
 
         # Reset Video size
         (self.width, self.height) = (0,0)
