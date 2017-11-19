@@ -210,7 +210,7 @@ class FileCopy(wx.Panel):
                     si = os.stat(os.path.join(self.SourcePath,filename))
                     if si.st_size:
                         row=self.FileList.GetItemCount()
-                        self.FileList.InsertStringItem(row, filename) 
+                        self.FileList.InsertItem(row, filename) 
                         self.FileList.SetItem(row, 1, sizeof_fmt(si.st_size)) #si.st_ctime
                         self.FileList.SetItem(row, 2, datetime.datetime.fromtimestamp(si.st_mtime).strftime('%m/%d/%Y %I:%M %p')) #si.st_ctime
                         if (filename == "00000.MTS") and (si.st_size > 4e+9):
