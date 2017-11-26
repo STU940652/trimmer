@@ -21,28 +21,28 @@ with open ("version.py", "wt") as f:
     f.write("VERSION=' %s'" % version)
 
 
-datas = [('Trimmer.ini','Trimmer.ini','DATA'),
-         ('lgpl-2.1.txt','lgpl-2.1.txt','DATA'),
-         ('LICENSES_FFMPEG.zip','LICENSES_FFMPEG.zip','DATA')]
+datas = [('Trimmer.ini','.'),
+         ('lgpl-2.1.txt','.'),
+         ('LICENSES_FFMPEG.zip','.')]
 icon = None
 
 if sys.platform.startswith('win'):
-    datas.append( ('ffmpeg.exe','../Win64/ext/ffmpeg.exe','DATA') )
-    datas.append( ('chromedriver.exe','../Win64/ext/chromedriver.exe','DATA') )
-    # datas.append( ('phantomjs.exe','../Win64/ext/phantomjs.exe','DATA') )
+    datas.append( ('../Win64/ext/ffmpeg.exe','.') )
+    datas.append( ('../Win64/ext/chromedriver.exe','.') )
+    # datas.append( ('../Win64/ext/phantomjs.exe','.') )
     icon='../Win64/ext/icon.ico'
     
 if sys.platform.startswith('darwin'):
-    datas.append( ('ffmpeg','../OSX/ext/ffmpeg','DATA') )
-    datas.append( ('chromedriver.exe','../OSX/ext/chromedriver','DATA') )
-    # datas.append( ('phantomjs.exe','../OSX/ext/phantomjs','DATA') )
+    datas.append( ('../OSX/ext/ffmpeg','.') )
+    datas.append( ('../OSX/ext/chromedriver','.') )
+    # datas.append( ('../OSX/ext/phantomjs','.') )
     icon='../OSX/ext/icon.icns'
 
 
 a = Analysis(['Trimmer.py'],
              pathex=[os.getcwd()],
              binaries=None,
-             datas=None,
+             datas=datas,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -62,7 +62,7 @@ exe = EXE(pyz,
           console=False,
           icon=icon)
 coll = COLLECT(exe,
-               a.binaries + datas,
+               a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
