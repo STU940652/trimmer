@@ -139,7 +139,6 @@ class CmsManager ():
             # Get Audio link for replace
             if include_published:
                 self.driver.find_element_by_link_text('Media').click()
-                self.driver.find_element_by_id('mediaForm').find_element_by_link_text('Basic Uploader').click()
                 self.driver.get(self.driver.find_element_by_id("selectSermonAudioEdit").get_attribute("href"))
                 self.EventInfo["Existing_MP3"] = self.driver.find_element_by_id("urlFile").get_attribute("value").replace("http://media.calvarysc.org/","")
 
