@@ -4,6 +4,8 @@ import datetime
 import time
 import subprocess
 import platform
+import tempfile
+import re
 
 from CheckListCtrl import CheckListCtrl
 from Settings import *
@@ -29,6 +31,7 @@ class FileCopy(wx.Panel):
         self.CopySubProcess = None
         self.DestFilename = ''
         self.DestSize = 0
+        self.input_list_file = None
         
         #Main Sizer
         Sizer=wx.BoxSizer(wx.VERTICAL)
@@ -111,6 +114,21 @@ class FileCopy(wx.Panel):
         self.DestFilename=self.DestName.GetValue()
         self.DestSize = 0
         self.StartTime = None
+        ff_concat = False
+        
+        sources=list()
+        for row in range(self.FileList.GetItemCount()):
+            if self.FileList.IsChecked(row):
+                sources.append('"'+os.path.join(self.PathName.GetValue(),self.FileList.GetItemText(row))+'"')
+                si = os.stat(os.path.join(self.PathName.GetValue(),self.FileList.GetItemText(row)))
+                self.DestSize += si.st_size
+                
+        if len(sources) and sources[0].lower().endswith('.mp4"'):
+            # Fixup output file name
+            self.DestFilename = re.sub(r'\.mts$', r'.mp4', self.DestFilename, flags = re.IGNORECASE)
+            self.DestName.SetValue(self.DestFilename)
+            ff_concat = True
+             
         if (os.path.exists(self.DestFilename)):
             d = wx.MessageDialog(self, "File %s exists.\nDo you want to overwrite?" % self.DestFilename, \
                 caption = "Destination File Exists", style=wx.YES_NO | wx.NO_DEFAULT | wx.ICON_EXCLAMATION)
@@ -122,14 +140,22 @@ class FileCopy(wx.Panel):
                 self.DestName.Enable()
                 return
 
-        sources=list()
-        for row in range(self.FileList.GetItemCount()):
-            if self.FileList.IsChecked(row):
-                sources.append('"'+os.path.join(self.PathName.GetValue(),self.FileList.GetItemText(row))+'"')
-                si = os.stat(os.path.join(self.PathName.GetValue(),self.FileList.GetItemText(row)))
-                self.DestSize += si.st_size
+
         if len(sources) > 0:
-            if platform.system() == 'Windows':
+            if ff_concat:
+                # Use ffmpeg concat demux method
+                self.input_list_file = tempfile.NamedTemporaryFile(delete=False)
+                for source in sources:
+                    self.input_list_file.write(("file %s\n" % source.replace('"',"'")).encode('utf-8'))
+                self.input_list_file.close()
+                if platform.system() == 'Windows':
+                    startupinfo = subprocess.STARTUPINFO()
+                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW # Tell subprocess not to open terminal window                
+                c = 'ffmpeg -nostdin -y -f concat -safe 0 -i %s -c copy %s' % (self.input_list_file.name, self.DestFilename)
+                self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                
+            elif platform.system() == 'Windows':
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW # Tell subprocess not to open terminal window
                 c = 'cmd /c copy /b /y %s "%s"' % ('+'.join(sources), self.DestFilename)
@@ -153,6 +179,9 @@ class FileCopy(wx.Panel):
                 self.StartButton.Enable()        
                 self.DestName.Enable()
                 self.CancelButton.Hide()
+                if self.input_list_file:
+                    os.unlink(self.input_list_file.name)
+                    self.input_list_file = None
                 if (self.CopySubProcess.returncode != 0):
                     # Finished with errors
                     print(self.CopySubProcess.communicate())
