@@ -148,13 +148,17 @@ class FileCopy(wx.Panel):
                 for source in sources:
                     self.input_list_file.write(("file %s\n" % source.replace('"',"'")).encode('utf-8'))
                 self.input_list_file.close()
+                c = 'ffmpeg -nostdin -y -f concat -safe 0 -i %s -c copy %s' % (self.input_list_file.name, self.DestFilename)
                 if platform.system() == 'Windows':
                     startupinfo = subprocess.STARTUPINFO()
                     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW # Tell subprocess not to open terminal window                
-                c = 'ffmpeg -nostdin -y -f concat -safe 0 -i %s -c copy %s' % (self.input_list_file.name, self.DestFilename)
-                self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo,
+                    self.CopySubProcess = subprocess.Popen(c, startupinfo=startupinfo,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                
+                else:
+                    #Mac, Linux
+                    self.CopySubProcess = subprocess.Popen(c, shell = True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
             elif platform.system() == 'Windows':
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW # Tell subprocess not to open terminal window
