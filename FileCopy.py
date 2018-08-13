@@ -110,8 +110,8 @@ class FileCopy(wx.Panel):
     def DoCopy (self, evt=None):
         self.NotificationCheck.Disable()
         self.StartButton.Disable()
-        self.DestName.Disable()
         self.DestFilename=self.DestName.GetValue()
+        self.DestName.Disable()
         self.DestSize = 0
         self.StartTime = None
         ff_concat = False
