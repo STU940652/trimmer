@@ -124,9 +124,9 @@ class TrimmerMain (wx.Frame):
         
         self.JobCounter = 0
         
-    def SubmitJobCallback (self, commandName, command, completion = None):
+    def SubmitJobCallback (self, commandName, command, completion = None, out_file_name = None):
         cName = "%2i: %s" % (self.JobCounter, str(commandName))
-        self.commandQueue.put( (cName, command, completion) )      
+        self.commandQueue.put( (cName, command, completion, out_file_name) )      
         self.jobmessagepanel.AddJob(cName)
         self.StatusBar.SetStatusText("Started job %s" % cName)
         self.JobCounter += 1

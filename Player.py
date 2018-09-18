@@ -407,9 +407,9 @@ class Player(wx.Panel):
                     .replace("$FadeLength$", str(FadeLength))\
                     .replace("$InFile$", self.MediaFileName)\
                     .replace("$InFileName$", os.path.basename(self.MediaFileName).rsplit('.',1)[0])\
-                    .replace("$OutFileName$", self.OutputFileName.GetValue())\
                     .replace("$CurrentDate$", datetime.datetime.now().strftime("%s" % (TrimmerConfig.get('GlobalSettings', 'DateTemplate'))))\
                     .replace("$DateSunday$", time_of_record.strftime("%s" % (TrimmerConfig.get('GlobalSettings', 'DateTemplate'))))
+                    #.replace("$OutFileName$", self.OutputFileName.GetValue())\ # This will happen in the Encode thread
         return s
     
     def OnEncode(self, evt):
@@ -421,7 +421,7 @@ class Player(wx.Panel):
         cmd = self.Substitute(EncodeString)   
         
         completion = self.Substitute(TrimmerConfig.get(section,'Completion', fallback='{}')).replace('\\', "\\\\")
-        self.SubmitJobCallback("Encode %s" % TrimmerConfig.get(section,'Name') , cmd, completion)
+        self.SubmitJobCallback("Encode %s" % TrimmerConfig.get(section,'Name') , cmd, completion, self.OutputFileName.GetValue())
         print(cmd)
         
     def OpenFile (self, MediaFileName, Play = True):

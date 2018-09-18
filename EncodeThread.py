@@ -4,6 +4,7 @@ import subprocess
 import traceback
 import os
 import platform
+import re
 
 from Settings import *
 
@@ -25,12 +26,41 @@ class EncodeThread (threading.Thread):
                 if sp == None:
                     # Check for a new command
                     if not self.commandQueue.empty():
-                        cName, command, completion = self.commandQueue.get()
+                        cName, command, completion, out_file_name = self.commandQueue.get()
                         if cName in self.cancelList:
                             # Cancel job and move on
                             self.responseQueue.put( (cName, "Canceled", None) )
+                            
                         else:
-                            # ok to start this job
+                            fn_prefix = ""
+                            fn_suffix = ""
+                            n = 0
+
+                            if out_file_name:
+                                for file_name_match in re.finditer(r'"([^"\n]*)\$OutFileName\$([^"\n]*)"', command):
+                                    if file_name_match:
+                                        fn_prefix = file_name_match.group(1)
+                                        fn_suffix = file_name_match.group(2)
+                                    full_out_file_name = fn_prefix + out_file_name + ('_'+str(n) if n else '') + fn_suffix
+                                    
+                                    while os.path.isfile(full_out_file_name):
+                                        if n == 10:
+                                            # Give up
+                                            break
+                                            
+                                        # Get a unique filename
+                                        n += 1
+                                        full_out_file_name = fn_prefix + out_file_name + ('_'+str(n) if n else '') + fn_suffix
+                                        if not os.path.isfile(full_out_file_name):
+                                            break
+                                            
+                                out_file_name = out_file_name + ('_'+str(n) if n else '')
+                                        
+                            # Do filename replacement
+                            command = command.replace("$OutFileName$", out_file_name)
+                            completion = completion.replace("$OutFileName$", out_file_name)
+                                  
+                            # Ok to start this job
                             try:
                                 os.environ["FFREPORT"]= "file='" + os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "ffmpeg-%s-%s.log'" % \
                                     (cName.rsplit(":",1)[-1].strip(), time.strftime("%Y%m%d-%H%M%S")))
