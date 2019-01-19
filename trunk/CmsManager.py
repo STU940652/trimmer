@@ -134,7 +134,6 @@ class CmsManager ():
             # More Content Info
             self.driver.find_element_by_link_text('Content').click()
             self.EventInfo["summary"] = self.driver.find_element_by_id("summary").text
-            self.EventInfo["keywords"] = self.driver.find_element_by_id("audio").get_attribute("value")
             
             # Get Audio link for replace
             if include_published:
@@ -174,6 +173,12 @@ class CmsManager ():
                 else:
                     MessageCallback ("Skipping Vimeo Video link because it is not blank\n")
             
+            # Put Vimeo link in Keywords field for RSS feed
+            self.driver.find_element_by_link_text('Content').click()
+            keywords_field = self.driver.find_element_by_id("audio") # Yes, it is called "audio"
+            keywords_field.send_keys("https://vimeo.com/" + Tags["vimeo_number"])
+            keywords_field.submit()
+            
             # Go to media tab
             self.driver.find_element_by_link_text('Media').click()
 
@@ -183,7 +188,6 @@ class CmsManager ():
                 media_form=self.driver.find_element_by_id('mediaForm')
                 media_form.find_element_by_id('name').send_keys("Sermon Audio: %s: %s: %s: %s" % (Tags["Speaker"], Tags["Series"], Tags["Title"], Tags["Date"]))
                 media_form.find_element_by_id('description').send_keys(Tags["Summary"].replace('\n','').replace('\r',''))
-                media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
                 
                 media_form.find_element_by_id("tabExternalLink").click()
                 time.sleep(1)
@@ -196,7 +200,6 @@ class CmsManager ():
                 media_form=self.driver.find_element_by_id('mediaForm')
                 media_form.find_element_by_id('name').send_keys("Sermon Video: %s: %s: %s: %s" % (Tags["Speaker"], Tags["Series"], Tags["Title"], Tags["Date"]))
                 media_form.find_element_by_id('description').send_keys(Tags["Summary"].replace('\n','').replace('\r',''))
-                media_form.find_element_by_id('tags').send_keys(Tags["Keywords"])
 
                 media_form.find_element_by_id("tabEmbedCode").click()
                 time.sleep(1)
