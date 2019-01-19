@@ -217,7 +217,7 @@ class UploadTab(wx.Panel):
 
         # Upload the Site-MP4 immediatly
         if "Custom-MP4"  in CompletionDict:
-            self.Tags.update({"Summary":"","Keywords":""})
+            self.Tags.update({"Summary":""})
             title = ""
             if "Title" in CompletionDict:
                 title = CompletionDict["Title"]
@@ -431,9 +431,6 @@ class UploadTab(wx.Panel):
                 m={}
                 m["privacy"] = {'view': 'unlisted'}
                 w = v.patch(video_uri, data=m)
-                
-            for tag in self.Tags["Keywords"].split(','):
-                w = v.put(video_uri + '/tags/' + tag)
                 
             # Report video URL
             d = v.get(video_uri)
