@@ -84,8 +84,8 @@ class AdditionalInputPanel (wx.Panel):
 class Player(wx.Panel):
     """The main window has to deal with events.
     """
-    TagNames = ["Title", "Series", "Speaker", "Date", "Comment", "Summary"]
-    MultiLineTags = ["Summary"]
+    TagNames = ["Title", "Series", "Speaker", "Date", "Comment", "Summary", "Keywords"]
+    MultiLineTags = ["Summary", "Keywords"]
     UploadPanel = None
     
     def __init__(self, parent, SubmitJobCallback, StatusBar):
