@@ -7,6 +7,7 @@ import html
 import traceback
 import wx
 import sys
+import re
 from Credentials import Credentials
 
 class CmsManager ():
@@ -173,13 +174,20 @@ class CmsManager ():
                     pass
                 else:
                     MessageCallback ("Skipping Vimeo Video link because it is not blank\n")
-            
+                    
             # Put Vimeo link in Keywords field for RSS feed
-            if "https://vimeo.com/" not in Tags["Keywords"]:
+            try:            
+                vimeo_prefix = "https://vimeo.com/"
+                keywords_list = [x.strip() for x in Tags["Keywords"].split(',') if x.strip() and not re.match(r'^https?://vimeo.com/', x.strip().lower())]
+                keywords_list.append(vimeo_prefix + Tags["vimeo_number"])
+
                 self.driver.find_element_by_link_text('Content').click()
                 keywords_field = self.driver.find_element_by_id("audio") # Yes, it is called "audio"
-                keywords_field.send_keys("' ".join(Tags["Keywords"], ["https://vimeo.com/" + Tags["vimeo_number"]]))
+                keywords_field.clear()
+                keywords_field.send_keys(", ".join(keywords_list))
                 keywords_field.submit()
+            except:
+                MessageCallback('\n' + traceback.format_exc() + '\n')
             
             # Go to media tab
             self.driver.find_element_by_link_text('Media').click()
