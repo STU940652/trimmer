@@ -3,6 +3,9 @@
 
 import os
 import traceback
+import smtplib
+
+from email.mime.text import MIMEText
 
 from Credentials import Credentials
 from Settings import *
@@ -18,26 +21,20 @@ class MailClient():
         subject: The subject of the email message.
         message_text: The text of the email message.
         """
-        
-        # Create a new SES resource and specify a region.
-        client = boto.ses.connection.SESConnection(
-            aws_access_key_id=Credentials["AWS_ACCESS_KEY_ID"], 
-            aws_secret_access_key=Credentials["AWS_SECRET_ACCESS_KEY"])
+        msg = MIMEText(message_text)
+        msg['Subject'] = subject
 
-        # Try to send the email.
         try:
-            #Provide the contents of the email.
-            response = client.send_email(
-                to_addresses=to,
-                subject=subject,
-                body=message_text,
-                source=sender
-            )
+            s = smtplib.SMTP(Credentials["SMTP_HOST_PORT"])
+            s.starttls()
+            s.login(Credentials["SMTP_USERNAME"], Credentials["SMTP_PASSWORD"])
+            s.sendmail(sender, to, msg.as_string())
+            s.quit()
         
         except:
-            response = None
+            return False
             
-        return response
+        return True
 
 def ExceptionEmail (s):
     if not len( Credentials["AWS_ACCESS_KEY_ID"]):

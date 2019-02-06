@@ -13,7 +13,9 @@ Credentials["BUCKET_NAME"] = ""
 Credentials["Vimeo_Client_Id"] = ""
 Credentials["Vimeo_Client_Secret"] = ""
 Credentials["Vimeo_User_Token"] = ""
-Credentials["Gmail_Token"]=""
+Credentials["SMTP_HOST_PORT"] = ""
+Credentials["SMTP_USERNAME"] = ""
+Credentials["SMTP_PASSWORD"] = ""
 
 # LoadCredentials ():
 try:
