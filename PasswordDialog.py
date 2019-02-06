@@ -5,7 +5,7 @@ from Settings import *
 import traceback
 import time
 from Credentials import Credentials
-from GmailClient import GmailClient
+from MailClient import MailClient
 
 # Vimeo
 import vimeo
@@ -37,7 +37,7 @@ class PasswordDialog(wx.Dialog):
         Sizer.Add(wx.StaticText(self, -1, "CMS Username"), 0, flag=wx.TOP|wx.LEFT, border = 10)
         self.CMS_Username = wx.TextCtrl(self, size=(400,-1), value=Credentials["CMS_Username"])
         Sizer.Add(self.CMS_Username, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
-        Sizer.Add(wx.StaticText(self, -1, "CMS Password"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        Sizer.Add(wx.StaticText(self, -1, "CMS Password"), 0, flag=wx.LEFT, border = 10)
         self.CMS_Password = wx.TextCtrl(self, style=wx.TE_PASSWORD, value=Credentials["CMS_Password"])
         Sizer.Add(self.CMS_Password, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
         Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
@@ -46,10 +46,10 @@ class PasswordDialog(wx.Dialog):
         Sizer.Add(wx.StaticText(self, -1, "AWS_ACCESS_KEY_ID"), 0, flag=wx.TOP|wx.LEFT, border = 10)
         self.AWS_ACCESS_KEY_ID = wx.TextCtrl(self, value=Credentials["AWS_ACCESS_KEY_ID"])
         Sizer.Add(self.AWS_ACCESS_KEY_ID, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
-        Sizer.Add(wx.StaticText(self, -1, "AWS_SECRET_ACCESS_KEY"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        Sizer.Add(wx.StaticText(self, -1, "AWS_SECRET_ACCESS_KEY"), 0, flag=wx.LEFT, border = 10)
         self.AWS_SECRET_ACCESS_KEY = wx.TextCtrl(self, style=wx.TE_PASSWORD, value=Credentials["AWS_SECRET_ACCESS_KEY"])
         Sizer.Add(self.AWS_SECRET_ACCESS_KEY, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
-        Sizer.Add(wx.StaticText(self, -1, "BUCKET_NAME"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        Sizer.Add(wx.StaticText(self, -1, "BUCKET_NAME"), 0, flag=wx.LEFT, border = 10)
         self.BUCKET_NAME = wx.TextCtrl(self, value=Credentials["BUCKET_NAME"])
         Sizer.Add(self.BUCKET_NAME, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
         Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
@@ -59,11 +59,11 @@ class PasswordDialog(wx.Dialog):
         self.Vimeo_Client_Id = wx.TextCtrl(self, value=Credentials["Vimeo_Client_Id"])
         Sizer.Add(self.Vimeo_Client_Id, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
 
-        Sizer.Add(wx.StaticText(self, -1, "Vimeo Client Secret"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        Sizer.Add(wx.StaticText(self, -1, "Vimeo Client Secret"), 0, flag=wx.LEFT, border = 10)
         self.Vimeo_Client_Secret = wx.TextCtrl(self, style=wx.TE_PASSWORD, value=Credentials["Vimeo_Client_Secret"])
         Sizer.Add(self.Vimeo_Client_Secret, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
 
-        Sizer.Add(wx.StaticText(self, -1, "Vimeo User Token"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        Sizer.Add(wx.StaticText(self, -1, "Vimeo User Token"), 0, flag=wx.LEFT, border = 10)
         
         rowSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.Vimeo_User_Token = wx.TextCtrl(self, value=Credentials["Vimeo_User_Token"])
@@ -75,17 +75,24 @@ class PasswordDialog(wx.Dialog):
 
         Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
         
-        # Gmail
-        Sizer.Add(wx.StaticText(self, -1, "Gmail User Token"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        # Email
+        Sizer.Add(wx.StaticText(self, -1, "SMTP Host:Port"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        self.Smtp_Host_Port = wx.TextCtrl(self, value=Credentials["SMTP_HOST_PORT"])
+        Sizer.Add(self.Smtp_Host_Port, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+
+        Sizer.Add(wx.StaticText(self, -1, "SMTP Username(email)"), 0, flag=wx.LEFT, border = 10)
+        self.Smtp_Username = wx.TextCtrl(self, value=Credentials["SMTP_USERNAME"])
+        Sizer.Add(self.Smtp_Username, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+
+
+        Sizer.Add(wx.StaticText(self, -1, "SMTP Password"), 0, flag=wx.LEFT, border = 10)
         rowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.Gmail_Token = wx.TextCtrl(self, value=Credentials["Gmail_Token"], style=wx.TE_PASSWORD)
-        rowSizer.Add(self.Gmail_Token, 1, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
-        self.GmailAuthenticate = wx.Button (self, -1, "Authenticate")
-        self.Bind(wx.EVT_BUTTON, self.OnGmailAuthenticate, self.GmailAuthenticate)
-        rowSizer.Add(self.GmailAuthenticate, 0)
-        self.GmailTest = wx.Button (self, -1, "Test")
-        self.Bind(wx.EVT_BUTTON, self.OnGmailTest, self.GmailTest)
-        rowSizer.Add(self.GmailTest, 0)
+        self.Smtp_Password = wx.TextCtrl(self, value=Credentials["SMTP_PASSWORD"], style=wx.TE_PASSWORD)
+        rowSizer.Add(self.Smtp_Password, 1, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+
+        self.MailTest = wx.Button (self, -1, "Test")
+        self.Bind(wx.EVT_BUTTON, self.OnMailTest, self.MailTest)
+        rowSizer.Add(self.MailTest, 0)
 
         Sizer.Add(rowSizer, flag=wx.EXPAND)
 
@@ -116,7 +123,10 @@ class PasswordDialog(wx.Dialog):
         Credentials["Vimeo_Client_Id"] = self.Vimeo_Client_Id.GetValue()
         Credentials["Vimeo_Client_Secret"] = self.Vimeo_Client_Secret.GetValue()
         Credentials["Vimeo_User_Token"] = self.Vimeo_User_Token.GetValue()
-        Credentials["Gmail_Token"] = self.Gmail_Token.GetValue()
+        
+        Credentials["SMTP_HOST_PORT"] = self.Smtp_Host_Port.GetValue()
+        Credentials["SMTP_USERNAME"] =  self.Smtp_Username.GetValue()
+        Credentials["SMTP_PASSWORD"] =  self.Smtp_Password.GetValue()
         
         SaveCredentials()
         
@@ -172,18 +182,11 @@ class PasswordDialog(wx.Dialog):
             m = wx.MessageDialog(self, traceback.format_exc(), "Vimeo Authentication Error", wx.OK)
             m.ShowModal()
             
-
-            
-    def OnGmailAuthenticate (self, evt):
-        g = GmailClient()
-        g.authenticate()
-        if g.credentials:
-            self.Gmail_Token.SetValue(g.credentials.to_json()) 
-            
-    def OnGmailTest (self, evt):
+           
+    def OnMailTest (self, evt):
         try:
-            g = GmailClient()
-            g.SendMessage(sender = "me", to = g.credentials.id_token['email'], subject="Test Message", message_text="This is a Trimmer test message.")
+            g = MailClient()
+            g.SendMessage(sender = "me", to = self.Smtp_Username.GetValue(), subject="Test Message", message_text="This is a Trimmer test message.")
             m = wx.MessageDialog(self, "Test email sent.", "Test Email", wx.OK)
             m.ShowModal()
         except:

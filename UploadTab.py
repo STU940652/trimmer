@@ -23,7 +23,7 @@ from Settings import *
 from Credentials import Credentials
 from PasswordDialog import SaveCredentials
 from CmsManager import CmsManager
-import GmailClient
+import MailClient
     
 class MyVimeoClient(vimeo.VimeoClient):
     pass
@@ -162,7 +162,7 @@ class UploadTab(wx.Panel):
                 return            
         except:
             print (traceback.format_exc())
-            GmailClient.ExceptionEmail(traceback.format_exc())
+            MailClient.ExceptionEmail(traceback.format_exc())
             return
             
         if "MP3" in CompletionDict:
@@ -297,13 +297,13 @@ class UploadTab(wx.Panel):
             wx.CallAfter (self.CmsPublish.Enable)
             wx.CallAfter (self.CmsEnable.SetValue, False)
             
-        if "EmailMessage" in CompletionDict and len(Credentials["Gmail_Token"]):
+        if "EmailMessage" in CompletionDict and len(Credentials["SMTP_USERNAME"]):
             EmailMessage = CompletionDict["EmailMessage"]
             try:
                 message = "\n".join(EmailMessage["message"])
                 for t in self.Tags:
                     message = message.replace('$'+str(t)+'$', str(self.Tags[t]))
-                g = GmailClient.GmailClient()
+                g = MailClient.MailClient()
                 sender = "me"
                 if "from" in EmailMessage:
                     sender = EmailMessage["from"]
@@ -314,7 +314,7 @@ class UploadTab(wx.Panel):
 
             except:
                 self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
-                GmailClient.ExceptionEmail(traceback.format_exc())
+                MailClient.ExceptionEmail(traceback.format_exc())
                 
         
     def UploadMP3 (self, Mp3Path, CompletionDict={}):
@@ -355,7 +355,7 @@ class UploadTab(wx.Panel):
                 
             except:
                 self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
-                GmailClient.ExceptionEmail(traceback.format_exc())
+                MailClient.ExceptionEmail(traceback.format_exc())
                 return False
         return True
  
@@ -397,7 +397,7 @@ class UploadTab(wx.Panel):
                         break
                     except vimeo.exceptions.UploadTicketCreationFailure:
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
-                        GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+                        MailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
                         if i == 2:
                             return False
                         continue
@@ -411,7 +411,7 @@ class UploadTab(wx.Panel):
                         break
                     except vimeo.exceptions.UploadTicketCreationFailure:
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
-                        GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+                        MailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
                         if i == 2:
                             return False
                         continue
@@ -453,7 +453,7 @@ class UploadTab(wx.Panel):
                         break
                     except vimeo.exceptions.PictureCreationFailure:
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
-                        GmailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
+                        MailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
                         if i == 2:
                             return False
                         continue
@@ -462,7 +462,7 @@ class UploadTab(wx.Panel):
 
         except:
             self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
-            GmailClient.ExceptionEmail(traceback.format_exc())
+            MailClient.ExceptionEmail(traceback.format_exc())
             return False
 
         return True
