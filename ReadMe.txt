@@ -32,6 +32,5 @@ pip install wxPython
 pip install boto
 pip install selenium
 pip install PyVimeo
-pip install google-api-python-client
 
-pip install cx_freeze
+pip install pyinstaller
