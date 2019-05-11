@@ -6,7 +6,7 @@ import re
 block_cipher = None
 
 # Build version string
-version = '1.12'
+version = '1.13'
 
 svn_info = subprocess.check_output('svn info', shell=True).decode('utf-8')
 svn_match = re.search("Last Changed Rev: *([0-9]+)", svn_info)

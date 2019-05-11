@@ -23,9 +23,9 @@ class CmsManager ():
                 if self.driver == None:
                     for thisDriver in self.drivers:
                         try:
-                            if (thisDriver == webdriver.Chrome) and sys.platform.startswith('darwin'):
-                                self.driver = thisDriver('/usr/local/bin/chromedriver')
-                            else:
+                            #if (thisDriver == webdriver.Chrome) and sys.platform.startswith('darwin'):
+                            #    self.driver = thisDriver('/usr/local/bin/chromedriver')
+                            #else:
                                 self.driver = thisDriver()
                         except:
                             #print(traceback.format_exc())
