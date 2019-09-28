@@ -11,7 +11,7 @@ import re
 from Credentials import Credentials
 
 class CmsManager ():
-    drivers = [webdriver.PhantomJS, webdriver.Chrome, webdriver.Firefox]
+    drivers = [webdriver.Chrome, webdriver.Firefox]
     def __init__ (self):
         self.IsLoggedIn = False
         self.EventInfo = {}
@@ -112,20 +112,20 @@ class CmsManager ():
             
             # Get passage info
             self.EventInfo["comment"] = ""
-            l = self.driver.find_element_by_id("passage")
+            l = self.driver.find_element_by_id("books0")
             for i in l.find_elements_by_tag_name('option'):
                 if i.get_attribute("selected"):
                     self.EventInfo["comment"] = i.text
                     break
-            passage1chapter = self.driver.find_element_by_name("passage1chapter").get_attribute("value")
+            passage1chapter = self.driver.find_element_by_name("fromchapter0").get_attribute("value")
             self.EventInfo["comment"] += " " + passage1chapter
-            self.EventInfo["comment"] += ":" + self.driver.find_element_by_name("passage1verse").get_attribute("value")
-            passage1chapter2 = self.driver.find_element_by_name("passage1chapter2").get_attribute("value")
+            self.EventInfo["comment"] += ":" + self.driver.find_element_by_name("fromverse0").get_attribute("value")
+            passage1chapter2 = self.driver.find_element_by_name("tochapter0").get_attribute("value")
             if passage1chapter2 != "":
                 self.EventInfo["comment"] += "-"
                 if passage1chapter != passage1chapter2:
                     self.EventInfo["comment"] += passage1chapter2 + ":"
-                self.EventInfo["comment"] += self.driver.find_element_by_name("passage1verse2").get_attribute("value")
+                self.EventInfo["comment"] += self.driver.find_element_by_name("toverse0").get_attribute("value")
                 
             # Get Vimeo Number for replace
             if include_published:
