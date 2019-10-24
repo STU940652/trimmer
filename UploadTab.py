@@ -409,7 +409,9 @@ class UploadTab(wx.Panel):
                     try:
                         video_uri = v.upload(sourceFilename)
                         break
-                    except vimeo.exceptions.UploadTicketCreationFailure:
+                    except:
+                        # Have seen several kinds of exceptions here: vimeo.exceptions.UploadTicketCreationFailure, TimeoutError, socket.timeout
+                        # Let's just retry them all...
                         self.ThreadSafeLog ('\n' + traceback.format_exc() + '\nAttempt %i\n' % i)
                         MailClient.ExceptionEmail(traceback.format_exc() + '\nAttempt %i\n' % i)
                         if i == 2:
