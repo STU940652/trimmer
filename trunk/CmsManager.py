@@ -202,7 +202,7 @@ class CmsManager ():
                 
                 media_form.find_element_by_id("tabExternalLink").click()
                 time.sleep(1)
-                media_form.find_element_by_id("urlFile").send_keys("http://media.calvarysc.org/" + Tags["mp3_url"])
+                media_form.find_element_by_id("urlFile").send_keys("https://s3.amazonaws.com/media.calvarysc.org/" + Tags["mp3_url"])
                 media_form.submit()
 
             # Video
