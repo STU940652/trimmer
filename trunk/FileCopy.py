@@ -78,13 +78,13 @@ class FileCopy(wx.Panel):
         # Cancel Button
         self.CancelButton = wx.Button (self, label='Cancel')      
         self.Bind(wx.EVT_BUTTON, self.CancelCopy, self.CancelButton)
-        contrlSizer.Add(self.CancelButton, flag=wx.ALL|wx.ALIGN_RIGHT, border=5)
+        contrlSizer.Add(self.CancelButton, flag=wx.ALL, border=5)
         self.CancelButton.Hide()
         
         # Start Button
         self.StartButton = wx.Button (self, label='Start')      
         self.Bind(wx.EVT_BUTTON, self.DoCopy, self.StartButton)
-        contrlSizer.Add(self.StartButton, flag=wx.ALL|wx.ALIGN_RIGHT, border=5)
+        contrlSizer.Add(self.StartButton, flag=wx.ALL, border=5)
         Sizer.Add(contrlSizer, flag=wx.EXPAND|wx.ALL, border = 5)
         
         self.SetSizer(Sizer)

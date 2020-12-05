@@ -247,7 +247,7 @@ class Player(wx.Panel):
         
         # Import Tags button
         self.import_tag = wx.Button(tagpanel, label="Import from CMS")
-        sizer.Add(self.import_tag, 0, flag=wx.EXPAND | wx.ALIGN_RIGHT)
+        sizer.Add(self.import_tag, 0, flag=wx.EXPAND)
         temp_box.Add(sizer, 0,  flag=wx.EXPAND | wx.BOTTOM | wx.TOP)
         tagpanel.SetSizer(temp_box)
 
