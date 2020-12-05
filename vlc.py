@@ -163,7 +163,7 @@ def find_lib():
                     # Fixup for PyInstaller
                     ctypes.windll.kernel32.SetDllDirectoryW(plugin_path)
                  # if chdir failed, this will raise an exception
-                dll = ctypes.CDLL(libname)
+                dll = ctypes.CDLL(os.path.join(plugin_path, libname))
                 if (getattr(sys, 'frozen', False)):
                     # Fixup for PyInstaller
                     ctypes.windll.kernel32.SetDllDirectoryW(sys._MEIPASS)
