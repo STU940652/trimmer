@@ -133,13 +133,13 @@ class CmsManager ():
 
                 
             # More Content Info
-            self.driver.find_element_by_link_text('Content').click()
+            [n for n in self.driver.find_elements_by_xpath("//div[@class='sectionNavigationSteps-name']") if n.text == 'Content'][0].click()
             self.EventInfo["summary"] = self.driver.find_element_by_id("summary").text
             self.EventInfo["keywords"] = self.driver.find_element_by_id("audio").get_attribute("value")
             
             # Get Audio link for replace
             if include_published:
-                self.driver.find_element_by_link_text('Media').click()
+                [n for n in self.driver.find_elements_by_xpath("//div[@class='sectionNavigationSteps-name']") if n.text == 'Media'][0].click()
                 self.driver.get(self.driver.find_element_by_id("selectSermonAudioEdit").get_attribute("href"))
                 self.EventInfo["Existing_MP3"] = self.driver.find_element_by_id("urlFile").get_attribute("value").replace("http://media.calvarysc.org/","")
 
@@ -181,7 +181,7 @@ class CmsManager ():
                 keywords_list = [x.strip() for x in Tags["Keywords"].split(',') if x.strip() and not re.match(r'^https?://vimeo.com/', x.strip().lower())]
                 keywords_list.append(vimeo_prefix + Tags["vimeo_number"])
 
-                self.driver.find_element_by_link_text('Content').click()
+                [n for n in self.driver.find_elements_by_xpath("//div[@class='sectionNavigationSteps-name']") if n.text == 'Content'][0].click()
                 keywords_field = self.driver.find_element_by_id("audio") # Yes, it is called "audio"
                 keywords_field.clear()
                 keywords_field.send_keys(", ".join(keywords_list))
@@ -190,7 +190,7 @@ class CmsManager ():
                 MessageCallback('\n' + traceback.format_exc() + '\n')
             
             # Go to media tab
-            self.driver.find_element_by_link_text('Media').click()
+            [n for n in self.driver.find_elements_by_xpath("//div[@class='sectionNavigationSteps-name']") if n.text == 'Media'][0].click()
 
             # Audio
             if "mp3_url" in Tags:
@@ -276,7 +276,7 @@ class CmsManager ():
             self.driver.get(EventURL)
             
             # Go to publish tab
-            self.driver.find_element_by_link_text('Publish').click() 
+            [n for n in self.driver.find_elements_by_xpath("//div[@class='sectionNavigationSteps-name']") if n.text == 'Publish'][0].click()
 
             if ('CMS_Groups' in CompletionDict):
                 groupDropdowns = self.driver.find_element_by_id('groupDropdowns')
@@ -311,7 +311,7 @@ class CmsManager ():
                     self.driver.get(this_sermon)
                     
                     # Go to publish tab
-                    self.driver.find_element_by_link_text('Publish').click() 
+                    [n for n in self.driver.find_elements_by_xpath("//div[@class='sectionNavigationSteps-name']") if n.text == 'Publish'][0].click()
                     time.sleep(5.0) # Pause 5 seconds for the groups to populate
                     
                     # Delete homepage tag
