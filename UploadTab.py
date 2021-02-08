@@ -189,6 +189,9 @@ class UploadTab(wx.Panel):
             self.Tags.update(self.GetTags())
             title = "SITE VIDEO: %s - %s (%s)" % (self.Tags["Speaker"], self.Tags["Title"], self.Tags["Date"].replace("/","."))
 
+            if "Title" in CompletionDict:
+                title = CompletionDict["Title"]
+
             self.SiteUploadThread = threading.Thread(target=self.UploadFiles,
                                 kwargs={"Mp4Enable": True,
                                         "Mp4Path": CompletionDict["Site-MP4"],
