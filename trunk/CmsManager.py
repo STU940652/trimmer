@@ -9,6 +9,7 @@ import wx
 import sys
 import re
 from Credentials import Credentials
+from Settings import *
 
 class CmsManager ():
     drivers = [webdriver.Chrome, webdriver.Firefox]
@@ -58,7 +59,7 @@ class CmsManager ():
                 return True
             except:
                 print (traceback.format_exc())
-                self.driver.save_screenshot('screenshot.png')
+                self.driver.save_screenshot(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), 'screenshot.png'))
                 return False
             
     def GetEventInfo (self, event = None, include_published = False):
@@ -147,7 +148,7 @@ class CmsManager ():
             
         except:
             print (traceback.format_exc())
-            self.driver.save_screenshot('screenshot.png')
+            self.driver.save_screenshot(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), 'screenshot.png'))
             return None
         return []
         
@@ -238,7 +239,7 @@ class CmsManager ():
             
         except:
             MessageCallback('\n' + traceback.format_exc() + '\n')
-            self.driver.save_screenshot('screenshot.png')
+            self.driver.save_screenshot(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), 'screenshot.png'))
             return False
             
         finally:
@@ -338,7 +339,7 @@ class CmsManager ():
             
         except:
             MessageCallback('\n' + traceback.format_exc() + '\n')
-            self.driver.save_screenshot('screenshot.png')
+            self.driver.save_screenshot(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), 'screenshot.png'))
             return False
             
         finally:
