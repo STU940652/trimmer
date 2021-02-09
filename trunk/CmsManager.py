@@ -238,6 +238,7 @@ class CmsManager ():
             
         except:
             MessageCallback('\n' + traceback.format_exc() + '\n')
+            self.driver.save_screenshot('screenshot.png')
             return False
             
         finally:
@@ -337,6 +338,7 @@ class CmsManager ():
             
         except:
             MessageCallback('\n' + traceback.format_exc() + '\n')
+            self.driver.save_screenshot('screenshot.png')
             return False
             
         finally:
