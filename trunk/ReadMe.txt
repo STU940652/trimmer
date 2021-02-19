@@ -32,5 +32,6 @@ pip install wxPython
 pip install boto
 pip install selenium
 pip install PyVimeo
+pip install google-api-python-client google-auth-oauthlib
 
 pip install pyinstaller

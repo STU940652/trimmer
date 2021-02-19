@@ -58,7 +58,7 @@ class EncodeThread (threading.Thread):
                                         
                             # Do filename replacement
                             command = command.replace("$OutFileName$", out_file_name)
-                            completion = completion.replace("$OutFileName$", out_file_name)
+                            completion = completion.replace("$OutFileName$", out_file_name.replace("\\","/"))
                                   
                             # Ok to start this job
                             try:
