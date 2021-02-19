@@ -162,6 +162,7 @@ class UploadTab(wx.Panel):
 
         try:
             if completion.lower() != 'none':
+                print (completion)
                 CompletionDict = json.loads(completion)
             else:
                 return            
@@ -520,7 +521,7 @@ class UploadTab(wx.Panel):
                                 "title": Title,
                             },
                             "status": {
-                                "privacyStatus": "private" if CompletionDict.get("Vimeo_Private", True) else "public",
+                                "privacyStatus": "private" if CompletionDict.get("YouTube_Private", True) else "public",
                             },
                         } ,               
                     media_body=MediaFileUpload(sourceFilename, chunksize=1024*1024, resumable=True)
