@@ -18,6 +18,11 @@ import vimeo
 import urllib.parse
 import io
 
+# YouTube
+import googleapiclient.discovery
+import google.oauth2.credentials
+from googleapiclient.http import MediaFileUpload
+
 # Import other classes from this project
 from Settings import *
 from Credentials import Credentials
@@ -218,7 +223,7 @@ class UploadTab(wx.Panel):
             else:
                 self.ThreadSafeLog ("Missing Vimeo Number.  Could not update\n")
 
-        # Upload the Site-MP4 immediatly
+        # Upload the Custom-MP4 immediatly
         if "Custom-MP4"  in CompletionDict:
             self.Tags.update({"Summary":""})
             title = ""
@@ -228,6 +233,21 @@ class UploadTab(wx.Panel):
             self.SiteUploadThread = threading.Thread(target=self.UploadFiles,
                                 kwargs={"Mp4Enable": CompletionDict.get("Mp4Enable", False),
                                         "Mp4Path": CompletionDict["Custom-MP4"],
+                                        "Title": title,
+                                        "CompletionDict": CompletionDict
+                                        })
+            self.SiteUploadThread.start()
+            
+        # Upload to YouTube immediatly
+        if "YouTube-MP4"  in CompletionDict:
+            self.Tags.update({"Summary":""})
+            title = ""
+            if "Title" in CompletionDict:
+                title = CompletionDict["Title"]
+            password = "" 
+            self.SiteUploadThread = threading.Thread(target=self.UploadYouTubeFiles,
+                                kwargs={"Mp4Enable": CompletionDict.get("Mp4Enable", False),
+                                        "Mp4Path": CompletionDict["YouTube-MP4"],
                                         "Title": title,
                                         "CompletionDict": CompletionDict
                                         })
@@ -472,6 +492,74 @@ class UploadTab(wx.Panel):
 
         return True
                   
+    ## This executes in a separate thread
+    def UploadYouTubeFiles (self, Mp4Enable=False, Mp4Path="", Title="", CompletionDict={}): 
+        if Mp4Enable:
+            sourceFilename = os.path.abspath(Mp4Path)
+            self.ThreadSafeLog ("Uploading %s to YouTube\n" %(sourceFilename))
+            if Title:
+                self.ThreadSafeLog ('  with title "%s"\n' % (Title))
+
+            try:
+                api_service_name = "youtube"
+                api_version = "v3"
+                credentials = google.oauth2.credentials.Credentials(
+                    'access_token',
+                    refresh_token=Credentials["YouTube_User_Token"],
+                    token_uri="https://oauth2.googleapis.com/token",
+                    client_id= Credentials["YouTube_Client_Id"],
+                    client_secret=Credentials["YouTube_Client_Secret"])
+                
+                youtube = googleapiclient.discovery.build(
+                    api_service_name, api_version, credentials=credentials)
+
+                request = youtube.videos().insert(
+                    part="snippet,status,contentDetails",
+                    autoLevels=True,
+                    body={  "snippet": {
+                                "title": Title,
+                            },
+                            "status": {
+                                "privacyStatus": "private" if CompletionDict.get("Vimeo_Private", True) else "public",
+                            },
+                        } ,               
+                    media_body=MediaFileUpload(sourceFilename, chunksize=1024*1024, resumable=True)
+                )
+                response = request.execute()
+
+                if "status" in response:
+                    self.ThreadSafeLog (str(response["status"]) + '\n')
+                else:
+                    self.ThreadSafeLog (str(response) + '\n')
+                if "id" in response:
+                    self.ThreadSafeLog ("YouTube URL: https:/youtu.be/" + str(response["id"]) + '\n')
+
+                self.ThreadSafeLog ("Done uploading %s\n\n" %(sourceFilename))
+
+            except:
+                self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+                MailClient.ExceptionEmail(traceback.format_exc())
+                return
+
+        if "EmailMessage" in CompletionDict and len(Credentials["SMTP_USERNAME"]):
+            EmailMessage = CompletionDict["EmailMessage"]
+            try:
+                message = "\n".join(EmailMessage["message"])
+                for t in self.Tags:
+                    message = message.replace('$'+str(t)+'$', str(self.Tags[t]))
+                g = MailClient.MailClient()
+                sender = "me"
+                if "from" in EmailMessage:
+                    sender = EmailMessage["from"]
+                g.SendMessage(sender = sender, 
+                              to = EmailMessage["to"], 
+                              subject = EmailMessage["subject"], 
+                              message_text = message)
+
+            except:
+                self.ThreadSafeLog ('\n' + traceback.format_exc() + '\n')
+                MailClient.ExceptionEmail(traceback.format_exc())
+                
     def ThreadSafeLog(self, s):
         wx.CallAfter (self.Messages.AppendText, s)
          

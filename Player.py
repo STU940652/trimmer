@@ -643,6 +643,9 @@ class Player(wx.Panel):
         if "Vimeo_Title" in t:
             t["Vimeo_Title_For_Filename"] = t["Vimeo_Title"].replace("/","_").replace("\\","_").replace(":","_").replace(".","_")
         
+        if "YouTube_Title" in t:
+            t["YouTube_Title_For_Filename"] = t["YouTube_Title"].replace("/","_").replace("\\","_").replace(":","_").replace(".","_")
+        
         for l in self.Tags:
             t[l] = self.Tags[l].GetValue()
         return t

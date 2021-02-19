@@ -20,6 +20,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import selenium.common.exceptions
 
+# YouTube
+import google_auth_oauthlib.flow
 
 def SaveCredentials ():
     global Credentials
@@ -75,6 +77,27 @@ class PasswordDialog(wx.Dialog):
 
         Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
         
+        # YouTube
+        Sizer.Add(wx.StaticText(self, -1, "YouTube Client ID"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        self.YouTube_Client_Id = wx.TextCtrl(self, value=Credentials["YouTube_Client_Id"])
+        Sizer.Add(self.YouTube_Client_Id, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+
+        Sizer.Add(wx.StaticText(self, -1, "YouTube Client Secret"), 0, flag=wx.LEFT, border = 10)
+        self.YouTube_Client_Secret = wx.TextCtrl(self, style=wx.TE_PASSWORD, value=Credentials["YouTube_Client_Secret"])
+        Sizer.Add(self.YouTube_Client_Secret, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+
+        Sizer.Add(wx.StaticText(self, -1, "YouTube User Token"), 0, flag=wx.LEFT, border = 10)
+        
+        rowSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.YouTube_User_Token = wx.TextCtrl(self, value=Credentials["YouTube_User_Token"])
+        rowSizer.Add(self.YouTube_User_Token, 1, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+        self.YouTubeAuthenticate = wx.Button (self, -1, "Authenticate")
+        rowSizer.Add(self.YouTubeAuthenticate, 0)
+        self.Bind(wx.EVT_BUTTON, self.OnYouTubeAuthenticate, self.YouTubeAuthenticate)        
+        Sizer.Add(rowSizer, flag=wx.EXPAND)
+
+        Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
+        
         # Email
         Sizer.Add(wx.StaticText(self, -1, "SMTP Host:Port"), 0, flag=wx.TOP|wx.LEFT, border = 10)
         self.Smtp_Host_Port = wx.TextCtrl(self, value=Credentials["SMTP_HOST_PORT"])
@@ -117,12 +140,18 @@ class PasswordDialog(wx.Dialog):
         global Credentials
         Credentials["CMS_Username"] = self.CMS_Username.GetValue()
         Credentials["CMS_Password"] = self.CMS_Password.GetValue()
+        
         Credentials["AWS_ACCESS_KEY_ID"] = self.AWS_ACCESS_KEY_ID.GetValue()
         Credentials["AWS_SECRET_ACCESS_KEY"] = self.AWS_SECRET_ACCESS_KEY.GetValue()
         Credentials["BUCKET_NAME"] = self.BUCKET_NAME.GetValue()
+        
         Credentials["Vimeo_Client_Id"] = self.Vimeo_Client_Id.GetValue()
         Credentials["Vimeo_Client_Secret"] = self.Vimeo_Client_Secret.GetValue()
         Credentials["Vimeo_User_Token"] = self.Vimeo_User_Token.GetValue()
+        
+        Credentials["YouTube_Client_Id"] = self.YouTube_Client_Id.GetValue()
+        Credentials["YouTube_Client_Secret"] = self.YouTube_Client_Secret.GetValue()
+        Credentials["YouTube_User_Token"] = self.YouTube_User_Token.GetValue()
         
         Credentials["SMTP_HOST_PORT"] = self.Smtp_Host_Port.GetValue()
         Credentials["SMTP_USERNAME"] =  self.Smtp_Username.GetValue()
@@ -182,7 +211,30 @@ class PasswordDialog(wx.Dialog):
             m = wx.MessageDialog(self, traceback.format_exc(), "Vimeo Authentication Error", wx.OK)
             m.ShowModal()
             
-           
+    def OnYouTubeAuthenticate (self, evt):
+        end_url = "http://sourceforge.net/p/trimmer/wiki/AuthEnd/"
+        try:
+            scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_config(
+                client_config={"installed":
+                    {
+                        "client_id":    self.YouTube_Client_Id.GetValue(),
+                        "project_id":   "trimmer-1137",
+                        "auth_uri":     "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri":    "https://oauth2.googleapis.com/token",
+                        "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+                        "client_secret": self.YouTube_Client_Secret.GetValue(),
+                        "redirect_uris":["urn:ietf:wg:oauth:2.0:oob","http://localhost"]
+                    }},
+                scopes=scopes)            
+            credentials = flow.run_local_server(port=8085)
+            
+            self.YouTube_User_Token.SetValue(credentials.refresh_token)
+
+        except:
+            m = wx.MessageDialog(self, traceback.format_exc(), "YouTube Authentication Error", wx.OK)
+            m.ShowModal()
+                       
     def OnMailTest (self, evt):
         try:
             g = MailClient()
