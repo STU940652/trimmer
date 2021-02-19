@@ -33,6 +33,8 @@ class PasswordDialog(wx.Dialog):
     def __init__ (self):
         wx.Dialog.__init__(self, None, title="Update Passwords", style=wx.DEFAULT_DIALOG_STYLE)
         
+        self.SetLayoutAdaptationMode (wx.DIALOG_ADAPTATION_MODE_ENABLED)
+        
         Sizer=wx.BoxSizer(wx.VERTICAL)
         
         # CMS
