@@ -3,6 +3,8 @@ import sys
 import subprocess
 import re
 
+from PyInstaller.utils.hooks import copy_metadata
+
 block_cipher = None
 
 # Build version string
@@ -24,6 +26,8 @@ with open ("version.py", "wt") as f:
 datas = [('Trimmer.ini','.'),
          ('lgpl-2.1.txt','.'),
          ('LICENSES_FFMPEG.zip','.')]
+datas += copy_metadata('google-api-python-client')
+
 icon = None
 
 if sys.platform.startswith('win'):
