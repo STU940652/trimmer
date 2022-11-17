@@ -10,10 +10,11 @@ block_cipher = None
 # Build version string
 version = '1.23'
 
-svn_info = subprocess.check_output('svn info', shell=True).decode('utf-8')
-svn_match = re.search("Last Changed Rev: *([0-9]+)", svn_info)
-if svn_match:
-    version += '.'+svn_match.group(1)
+# TODO
+# svn_info = subprocess.check_output('svn info', shell=True).decode('utf-8')
+# svn_match = re.search("Last Changed Rev: *([0-9]+)", svn_info)
+# if svn_match:
+#     version += '.'+svn_match.group(1)
 
 with open ("version.iss", "wt") as f:
     f.write('#define MyAppVersion "%s"\n' % version)
