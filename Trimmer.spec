@@ -32,16 +32,14 @@ datas += copy_metadata('google-api-python-client')
 icon = None
 
 if sys.platform.startswith('win'):
-    datas.append( ('../Win64/ext/ffmpeg.exe','.') )
-    datas.append( ('../Win64/ext/chromedriver.exe','.') )
-    # datas.append( ('../Win64/ext/phantomjs.exe','.') )
-    icon='../Win64/ext/icon.ico'
+    datas.append( ('ext/Win64/ffmpeg.exe','.') )
+    datas.append( ('ext/Win64/chromedriver.exe','.') )
+    icon='ext/Win64/icon.ico'
     
 if sys.platform.startswith('darwin'):
-    datas.append( ('../OSX/ext/ffmpeg','.') )
-    datas.append( ('../OSX/ext/chromedriver','.') )
-    # datas.append( ('../OSX/ext/phantomjs','.') )
-    icon='../OSX/ext/icon.icns'
+    datas.append( ('ext/OSX/ffmpeg','.') )
+    datas.append( ('ext/OSX/chromedriver','.') )
+    icon='ext/OSX/icon.icns'
 
 
 a = Analysis(['Trimmer.py'],
