@@ -43,7 +43,7 @@ jobs:
                 pyinstaller Trimmer.spec --clean -y &&
                 cd dist/ &&
                 zip -r9 Trimmer Trimmer.app/
-            OUT_FILE_NAME: clipster.zip
+            OUT_FILE_NAME: Trimmer.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
