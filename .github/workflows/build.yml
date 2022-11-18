@@ -5,12 +5,17 @@ on: [push,workflow_dispatch]
   #  tags:
   #    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
+env: 
+  version_number: 1.${{ github.ref }}.${{ github.run_attempt}}
+
 jobs:
 
   createrelease:
     name: Create Release
-    runs-on: [ubuntu-latest]
+    runs-on: [ubuntu-latest] 
     steps:
+    - name: Build Number
+      run: echo "Version number: ${{version_number}}" 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -40,18 +45,22 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: >
+                echo "Version number: ${{version_number}}" &&
                 pyinstaller Trimmer.spec --clean -y &&
                 cd dist/ &&
                 zip -r9 Trimmer Trimmer.app/
-            OUT_FILE_NAME: ./dist/Trimmer.zip
+            OUT_FILE_DIR: ./dist/
+            OUT_FILE_NAME: Trimmer.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
+                echo "Version number: ${{version_number}}" &&
                 pyinstaller Trimmer.spec --clean -y &&
                 cd inno/ &&
                 & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
-            OUT_FILE_NAME: ./inno/Output/Trimmer-1.23-Win64.exe
+            OUT_FILE_DIR: ./inno/Output/
+            OUT_FILE_NAME: Trimmer-1.23-Win64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v1
@@ -82,6 +91,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ${{ matrix.OUT_FILE_NAME}}
+        asset_path: ${{ matrix.OUT_FILE_DIR}}${{ matrix.OUT_FILE_NAME}}
         asset_name: ${{ matrix.OUT_FILE_NAME}}
         asset_content_type: ${{ matrix.ASSET_MIME}}
