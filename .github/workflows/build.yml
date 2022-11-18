@@ -51,7 +51,7 @@ jobs:
                 pyinstaller Trimmer.spec --clean -y &&
                 cd inno/ &&
                 & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
-            OUT_FILE_NAME: ./inno/Output/Trimmer-*-Win64.exe
+            OUT_FILE_NAME: ./inno/Output/Trimmer-1.23-Win64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v1
