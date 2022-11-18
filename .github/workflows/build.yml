@@ -18,8 +18,8 @@ jobs:
       id: version_number_step
       run: |
         ref_id=$(echo ${{ github.ref_name }} | | tr -dc '0-9')
-        echo "1.${{ $ref_id }}.${{ github.run_number}}"
-        echo "::set-output name=id::1.${{ $ref_id }}.${{ github.run_number}}"
+        echo "1.$ref_id.${{ github.run_number}}"
+        echo "::set-output name=id::1.$ref_id.${{ github.run_number}}"
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
