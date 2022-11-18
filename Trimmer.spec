@@ -2,26 +2,28 @@
 import sys
 import subprocess
 import re
+import os
 
 from PyInstaller.utils.hooks import copy_metadata
 
 block_cipher = None
 
 # Build version string
-version = '1.23'
+version = os.environ["version_number"]
+print ("Version number:", version)
 
 # TODO
 # svn_info = subprocess.check_output('svn info', shell=True).decode('utf-8')
 # svn_match = re.search("Last Changed Rev: *([0-9]+)", svn_info)
 # if svn_match:
 #     version += '.'+svn_match.group(1)
-
-with open ("version.iss", "wt") as f:
-    f.write('#define MyAppVersion "%s"\n' % version)
-with open ("version", "wt") as f:
-    f.write(version)
-with open ("version.py", "wt") as f:
-    f.write("VERSION=' %s'" % version)
+# 
+# with open ("version.iss", "wt") as f:
+#     f.write('#define MyAppVersion "%s"\n' % version)
+# with open ("version", "wt") as f:
+#     f.write(version)
+# with open ("version.py", "wt") as f:
+#     f.write("VERSION=' %s'" % version)
 
 
 datas = [('Trimmer.ini','.'),
