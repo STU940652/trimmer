@@ -43,7 +43,7 @@ jobs:
                 pyinstaller Trimmer.spec --clean -y &&
                 cd dist/ &&
                 zip -r9 Trimmer Trimmer.app/
-            OUT_FILE_NAME: Trimmer.zip
+            OUT_FILE_NAME: ./dist/Trimmer.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
@@ -51,7 +51,7 @@ jobs:
                 pyinstaller Trimmer.spec --clean -y &&
                 cd inno/ &&
                 & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
-            OUT_FILE_NAME: inno/Trimmer-*-Win64.exe
+            OUT_FILE_NAME: ./inno/Output/Trimmer-*-Win64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v1
@@ -82,6 +82,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./dist/${{ matrix.OUT_FILE_NAME}}
+        asset_path: ${{ matrix.OUT_FILE_NAME}}
         asset_name: ${{ matrix.OUT_FILE_NAME}}
         asset_content_type: ${{ matrix.ASSET_MIME}}
