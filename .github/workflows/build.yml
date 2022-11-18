@@ -55,6 +55,7 @@ jobs:
                 echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
                 pushd ext/OSX
                 curl -O https://chromedriver.storage.googleapis.com/$(cat chromedriver_version/chromedriver_version.txt)/chromedriver_mac64.zip &&
+                ls -l &&
                 unzip chromedriver_mac64.zip &&
                 ls -l &&
                 popd &&
@@ -70,7 +71,7 @@ jobs:
                 echo "Version number: $env:version_number " &&
                 echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
                 pushd ext/OSX
-                curl -O https://chromedriver.storage.googleapis.com/$(cat chromedriver_version/chromedriver_version.txt)/chromedriver_win32.zip -o chromedriver_win32.zip &&
+                curl https://chromedriver.storage.googleapis.com/$(cat chromedriver_version/chromedriver_version.txt)/chromedriver_win32.zip -o chromedriver_win32.zip &&
                 Expand-Archive .\chromedriver_win32.zip -DestinationPath . &&
                 ls &&
                 popd && 
