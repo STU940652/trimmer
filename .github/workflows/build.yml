@@ -21,7 +21,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: Release ${{ env.version_number }}
         draft: false
         prerelease: false
     - name: Output Release URL File
@@ -46,9 +46,7 @@ jobs:
                 echo "Version number: $version_number" &&
                 pyinstaller Trimmer.spec --clean -y &&
                 cd dist/ &&
-                zip -r9 Trimmer-$version_number-OSX Trimmer.app/ &&
-                pwd &&
-                ls -l 
+                zip -r9 Trimmer-$version_number-OSX.zip Trimmer.app/
             OUT_FILE_DIR: ./dist/
             OUT_FILE_NAME: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-OSX.zip
             ASSET_MIME: application/zip
