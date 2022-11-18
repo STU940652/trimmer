@@ -13,7 +13,9 @@ jobs:
   createrelease:
     name: Create Release
     runs-on: [ubuntu-latest] 
-    steps: 
+    steps:
+    - name: Build Number
+      run: echo 'Version number: ${{ version_number }}' 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -53,7 +55,7 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
-                echo "Version number: ${{ version_number }}" &&
+                echo "Version number: $env:version_number " &&
                 pyinstaller Trimmer.spec --clean -y &&
                 cd inno/ &&
                 & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
