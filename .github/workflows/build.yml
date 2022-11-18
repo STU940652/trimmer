@@ -50,6 +50,7 @@ jobs:
         include:
           - os: macos-latest
             TARGET: macos
+            SHELL: bash
             CMD_BUILD: >
                 echo "Version number: $version_number" &&
                 echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
@@ -65,20 +66,20 @@ jobs:
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
+            SHELL: cmd
             CMD_BUILD: >
-                $global:progressPreference = 'silentlyContinue';
-                echo "Version number: $env:version_number " &&
-                echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
+                echo "Version number: %version_number% " &&
+                set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt
+                echo "Chromedriver version: %chromedriver_version%" &&
                 pushd ext/OSX &&
-                echo "curl -Uri https://chromedriver.storage.googleapis.com/$(cat ../../chromedriver_version/chromedriver_version.txt)/chromedriver_win32.zip -OutFile chromedriver_win32.zip" &&
-                curl -Uri https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip -OutFile chromedriver_win32.zip &&
-                ls &&
-                Expand-Archive .\chromedriver_win32.zip -DestinationPath . &&
-                ls &&
+                curl -O https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip &&
+                dir &&
+                7z e .\chromedriver_win32.zip &&
+                dir &&
                 popd && 
                 pyinstaller Trimmer.spec --clean -y &&
                 cd inno/ &&
-                & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
+                "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" Trimmer.iss
             OUT_FILE_DIR: ./inno/Output/
             OUT_FILE_NAME: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-Win64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
@@ -100,6 +101,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Build with pyinstaller for ${{matrix.TARGET}}
+      shell: ${{matrix.SHELL}}
       run: ${{matrix.CMD_BUILD}}
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v1
