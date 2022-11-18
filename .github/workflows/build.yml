@@ -43,7 +43,7 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: >
-                echo "Version number: ${{ version_number }}" &&
+                echo "Version number: $version_number" &&
                 pyinstaller Trimmer.spec --clean -y &&
                 cd dist/ &&
                 zip -r9 Trimmer Trimmer.app/
