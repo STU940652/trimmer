@@ -18,8 +18,8 @@ print ("Version number:", version)
 # if svn_match:
 #     version += '.'+svn_match.group(1)
 # 
-# with open ("version.iss", "wt") as f:
-#     f.write('#define MyAppVersion "%s"\n' % version)
+with open ("version.iss", "wt") as f:
+    f.write('#define MyAppVersion "%s"\n' % version)
 # with open ("version", "wt") as f:
 #     f.write(version)
 # with open ("version.py", "wt") as f:
