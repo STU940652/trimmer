@@ -62,6 +62,10 @@ class CmsManager ():
                 self.driver.save_screenshot(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), 'screenshot.png'))
                 return False
             
+    def Logout (self):
+        self.driver.get("https://my.ekklesia360.com/Logout/")
+        self.IsLoggedIn = False
+    
     def GetEventInfo (self, event = None, include_published = False):
         self.EventInfo = {}
         if not self.IsLoggedIn:
@@ -357,6 +361,10 @@ class CmsManager ():
         
     def __exit__(self, exc_type, exc_value, traceback):
         if self.driver != None:
+            try:
+                self.Logout()
+            except:
+                pass
             self.driver.quit()
             
         self.IsLoggedIn = False

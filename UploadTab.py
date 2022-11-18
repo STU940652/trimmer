@@ -315,8 +315,8 @@ class UploadTab(wx.Panel):
             wx.CallAfter (self.Mp4Enable.SetValue, False)
             
         if CmsEnable:
-            c = CmsManager()
-            c.SetMedia (self.Tags, self.ThreadSafeLog, CmsPublish, CompletionDict)
+            with CmsManager() as c:
+                c.SetMedia (self.Tags, self.ThreadSafeLog, CmsPublish, CompletionDict)
             wx.CallAfter (self.CmsEnable.Enable)
             wx.CallAfter (self.CmsPublish.Enable)
             wx.CallAfter (self.CmsEnable.SetValue, False)
