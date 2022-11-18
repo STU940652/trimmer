@@ -49,7 +49,7 @@ jobs:
             TARGET: windows
             CMD_BUILD: >
                 pyinstaller Trimmer.spec --clean -y &&
-                dir /B /S &&
+                ls -r &&
                 cd inno &&
                 & "%ProgramFiles(x86)%\Inno Setup 5\Compil32.exe" /cc Trimmer.iss
             OUT_FILE_NAME: inno/Trimmer-*-Win64.exe
