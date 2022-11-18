@@ -17,7 +17,7 @@ jobs:
     - name: Set Version Number
       id: version_number_step
       run: |
-        ref_id=$(echo ${{ github.ref_name }} | | tr -dc '0-9')
+        ref_id=$(echo ${{ github.ref_name }} |  sed s/^v//)
         echo "1.$ref_id.${{ github.run_number}}"
         echo "::set-output name=id::1.$ref_id.${{ github.run_number}}"
     - name: Create Release
@@ -62,8 +62,7 @@ jobs:
                 echo "Version number: $env:version_number " &&
                 pyinstaller Trimmer.spec --clean -y &&
                 cd inno/ &&
-                & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss &&
-                echo "${{ steps.version_number_step.id }}"
+                & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
             OUT_FILE_DIR: ./inno/Output/
             OUT_FILE_NAME: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-Win64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
@@ -75,6 +74,7 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
+        echo "${{ steps.version_number_step.id }}"
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Build with pyinstaller for ${{matrix.TARGET}}
