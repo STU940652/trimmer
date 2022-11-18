@@ -49,9 +49,10 @@ jobs:
             TARGET: windows
             CMD_BUILD: >
                 pyinstaller Trimmer.spec --clean -y &&
-                cd dist/ &&
-                tar -cf Trimmer.tar Trimmer/
-            OUT_FILE_NAME: Trimmer.tar
+                dir /B /S &&
+                cd inno &&
+                "%ProgramFiles(x86)%\Inno Setup 5\Compil32.exe" /cc Trimmer.iss
+            OUT_FILE_NAME: inno/Trimmer-*-Win64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v1
