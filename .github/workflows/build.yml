@@ -14,12 +14,6 @@ jobs:
     name: Create Release
     runs-on: [ubuntu-latest] 
     steps:
-    - name: Set Version Number
-      id: version_number_step
-      run: |
-        ref_id=$(echo ${{ github.ref_name }} |  sed s/^v//)
-        echo "1.$ref_id.${{ github.run_number}}"
-        echo "::set-output name=id::1.$ref_id.${{ github.run_number}}"
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -37,7 +31,15 @@ jobs:
       with:
         name: release_url
         path: release_url.txt
-
+    - name: Get Chromedriver Version
+      id: chromedriver_version
+      run: curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE -o chromedriver_version.txt
+    - name: Save Chromedriver Version
+      uses: actions/upload-artifact@v1
+      with:
+        name: chromedriver_version
+        path: chromedriver_version.txt
+        
   build:
     name: Build packages
     needs: createrelease
@@ -50,6 +52,12 @@ jobs:
             TARGET: macos
             CMD_BUILD: >
                 echo "Version number: $version_number" &&
+                echo "Chromedriver version: $(cat chromedriver_version.txt)" &&
+                pushd ext/OSX
+                curl -O https://chromedriver.storage.googleapis.com/$(cat chromedriver_version.txt)/chromedriver_mac64.zip &&
+                unzip chromedriver_mac64.zip &&
+                ls -l &&
+                popd &&
                 pyinstaller Trimmer.spec --clean -y &&
                 cd dist/ &&
                 zip -r9 Trimmer-$version_number-OSX.zip Trimmer.app/
@@ -60,6 +68,12 @@ jobs:
             TARGET: windows
             CMD_BUILD: >
                 echo "Version number: $env:version_number " &&
+                echo "Chromedriver version: $(cat chromedriver_version.txt)" &&
+                pushd ext/OSX
+                curl -O https://chromedriver.storage.googleapis.com/$(cat chromedriver_version.txt)/chromedriver_win32.zip -o chromedriver_win32.zip &&
+                Expand-Archive .\chromedriver_win32.zip -DestinationPath . &&
+                ls &&
+                popd && 
                 pyinstaller Trimmer.spec --clean -y &&
                 cd inno/ &&
                 & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
@@ -68,13 +82,19 @@ jobs:
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v1
+    
+    - name: Get Chromedriver Version
+      uses: actions/download-artifact@v1
+      with:
+        name: chromedriver_version 
+        
+    
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
     - name: Install dependencies
       run: |
-        echo "${{ steps.version_number_step.id }}"
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Build with pyinstaller for ${{matrix.TARGET}}
