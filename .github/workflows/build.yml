@@ -15,7 +15,7 @@ jobs:
     runs-on: [ubuntu-latest] 
     steps:
     - name: Build Number
-      run: echo "Version number: ${{version_number}}" 
+      run: echo "Version number: ${{ version_number }}" 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
