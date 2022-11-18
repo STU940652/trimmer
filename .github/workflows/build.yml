@@ -69,6 +69,7 @@ jobs:
                 echo "Version number: $env:version_number " &&
                 echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
                 pushd ext/OSX &&
+                $global:progressPreference = 'silentlyContinue' &&
                 echo "curl -Uri https://chromedriver.storage.googleapis.com/$(cat ../../chromedriver_version/chromedriver_version.txt)/chromedriver_win32.zip -OutFile chromedriver_win32.zip" &&
                 curl -Uri https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip -OutFile chromedriver_win32.zip &&
                 ls &&
