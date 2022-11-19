@@ -89,8 +89,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./dist/Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-OSX.zip
-        asset_name: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-OSX.zip
+        asset_path: ./dist/Trimmer-${{ env.version_number }}-OSX.zip
+        asset_name: Trimmer-1.${{ env.version_number }}-OSX.zip
         asset_content_type: application/zip
         
         
@@ -122,12 +122,10 @@ jobs:
       shell: cmd
       run: |
         echo "Version number: %version_number% "
-        dir
-        type chromedriver_version/chromedriver_version.txt
         set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt
         echo "Chromedriver version: %chromedriver_version%"
         pushd ext/OSX
-        curl -O https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip
+        curl -O https://chromedriver.storage.googleapis.com/%chromedriver_version%/chromedriver_win32.zip
         dir
         7z e .\chromedriver_win32.zip
         dir
@@ -152,6 +150,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./inno/Output/Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-Win64.exe
-        asset_name: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-Win64.exe
+        asset_path: ./inno/Output/Trimmer-1.${{ env.version_number }}-Win64.exe
+        asset_name: Trimmer-${{ env.version_number }}-Win64.exe
         asset_content_type: application/vnd.microsoft.portable-executable
