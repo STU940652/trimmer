@@ -120,19 +120,20 @@ jobs:
         pip install -r requirements.txt
     - name: Build with pyinstaller
       shell: cmd
-      run: >
-        echo "Version number: %version_number% " &&
-        type chromedriver_version/chromedriver_version.txt &&
-        set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt &&
-        echo "Chromedriver version: %chromedriver_version%" &&
-        pushd ext/OSX &&
-        curl -O https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip &&
-        dir &&
-        7z e .\chromedriver_win32.zip &&
-        dir &&
-        popd && 
-        pyinstaller Trimmer.spec --clean -y &&
-        cd inno/ &&
+      run: |
+        echo "Version number: %version_number% "
+        dir
+        type chromedriver_version/chromedriver_version.txt
+        set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt
+        echo "Chromedriver version: %chromedriver_version%"
+        pushd ext/OSX
+        curl -O https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip
+        dir
+        7z e .\chromedriver_win32.zip
+        dir
+        popd
+        pyinstaller Trimmer.spec --clean -y
+        cd inno/
         "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" Trimmer.iss
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v1
