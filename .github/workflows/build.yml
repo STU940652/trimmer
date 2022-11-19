@@ -40,50 +40,11 @@ jobs:
         name: chromedriver_version
         path: chromedriver_version.txt
         
-  build:
-    name: Build packages
+  build_osx:
+    name: Build OSX
     needs: createrelease
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-latest
-            TARGET: macos
-            SHELL: bash
-            CMD_BUILD: >
-                echo "Version number: $version_number" &&
-                echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
-                pushd ext/OSX &&
-                curl -O https://chromedriver.storage.googleapis.com/$(cat ../../chromedriver_version/chromedriver_version.txt)/chromedriver_mac64.zip &&
-                unzip chromedriver_mac64.zip &&
-                popd &&
-                pyinstaller Trimmer.spec --clean -y &&
-                cd dist/ &&
-                zip -r9 Trimmer-$version_number-OSX.zip Trimmer.app/
-            OUT_FILE_DIR: ./dist/
-            OUT_FILE_NAME: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-OSX.zip
-            ASSET_MIME: application/zip
-          - os: windows-latest
-            TARGET: windows
-            SHELL: cmd
-            CMD_BUILD: >
-                echo "Version number: %version_number% " &&
-                type chromedriver_version/chromedriver_version.txt &&
-                set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt &&
-                echo "Chromedriver version: %chromedriver_version%" &&
-                pushd ext/OSX &&
-                curl -O https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip &&
-                dir &&
-                7z e .\chromedriver_win32.zip &&
-                dir &&
-                popd && 
-                pyinstaller Trimmer.spec --clean -y &&
-                cd inno/ &&
-                "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" Trimmer.iss
-            OUT_FILE_DIR: ./inno/Output/
-            OUT_FILE_NAME: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-Win64.exe
-            ASSET_MIME: application/vnd.microsoft.portable-executable
+    runs-on: macos-latest
+    
     steps:
     - uses: actions/checkout@v1
     
@@ -92,7 +53,6 @@ jobs:
       with:
         name: chromedriver_version 
         
-    
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
@@ -101,9 +61,17 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Build with pyinstaller for ${{matrix.TARGET}}
-      shell: ${{matrix.SHELL}}
-      run: ${{matrix.CMD_BUILD}}
+    - name: Build with pyinstaller
+      run: >
+        echo "Version number: $version_number" &&
+        echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
+        pushd ext/OSX &&
+        curl -O https://chromedriver.storage.googleapis.com/$(cat ../../chromedriver_version/chromedriver_version.txt)/chromedriver_mac64.zip &&
+        unzip chromedriver_mac64.zip &&
+        popd &&
+        pyinstaller Trimmer.spec --clean -y &&
+        cd dist/ &&
+        zip -r9 Trimmer-$version_number-OSX.zip Trimmer.app/
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v1
       with:
@@ -121,6 +89,68 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ${{ matrix.OUT_FILE_DIR}}${{ matrix.OUT_FILE_NAME}}
-        asset_name: ${{ matrix.OUT_FILE_NAME}}
-        asset_content_type: ${{ matrix.ASSET_MIME}}
+        asset_path: ./dist/Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-OSX.zip
+        asset_name: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-OSX.zip
+        asset_content_type: application/zip
+        
+        
+        
+        
+  build_win:
+    name: Build Win-64
+    needs: createrelease
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Get Chromedriver Version
+      uses: actions/download-artifact@v1
+      with:
+        name: chromedriver_version 
+        
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Build with pyinstaller
+      shell: cmd
+      run: >
+        echo "Version number: %version_number% " &&
+        type chromedriver_version/chromedriver_version.txt &&
+        set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt &&
+        echo "Chromedriver version: %chromedriver_version%" &&
+        pushd ext/OSX &&
+        curl -O https://chromedriver.storage.googleapis.com/107.0.5304.62/chromedriver_win32.zip &&
+        dir &&
+        7z e .\chromedriver_win32.zip &&
+        dir &&
+        popd && 
+        pyinstaller Trimmer.spec --clean -y &&
+        cd inno/ &&
+        "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" Trimmer.iss
+    - name: Load Release URL File from release job
+      uses: actions/download-artifact@v1
+      with:
+        name: release_url
+    - name: Get Release File Name & Upload URL
+      id: get_release_info
+      shell: bash
+      run: |
+        value=`cat release_url/release_url.txt`
+        echo ::set-output name=upload_url::$value
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        asset_path: ./inno/Output/Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-Win64.exe
+        asset_name: Trimmer-1.${{ github.ref_name }}.${{ github.run_number}}-Win64.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
