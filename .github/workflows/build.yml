@@ -91,7 +91,7 @@ jobs:
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
         asset_path: ./dist/Trimmer-${{ env.version_number }}-OSX.zip
-        asset_name: Trimmer-1.${{ env.version_number }}-OSX.zip
+        asset_name: Trimmer-${{ env.version_number }}-OSX.zip
         asset_content_type: application/zip
         
         
