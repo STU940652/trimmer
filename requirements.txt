@@ -1,6 +1,6 @@
 wxPython
 boto
-selenium
+selenium==3.141.0
 PyVimeo
 google-api-python-client
 google-auth-oauthlib
