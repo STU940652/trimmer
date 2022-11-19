@@ -150,6 +150,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./inno/Output/Trimmer-1.${{ env.version_number }}-Win64.exe
+        asset_path: ./inno/Output/Trimmer-${{ env.version_number }}-Win64.exe
         asset_name: Trimmer-${{ env.version_number }}-Win64.exe
         asset_content_type: application/vnd.microsoft.portable-executable
