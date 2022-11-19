@@ -124,7 +124,7 @@ jobs:
         echo "Version number: %version_number% "
         set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt
         echo "Chromedriver version: %chromedriver_version%"
-        pushd ext\OSX
+        pushd ext\Win64
         curl -O https://chromedriver.storage.googleapis.com/%chromedriver_version%/chromedriver_win32.zip
         dir
         7z e .\chromedriver_win32.zip
