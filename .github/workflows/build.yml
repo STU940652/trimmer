@@ -72,7 +72,7 @@ jobs:
         popd &&
         pyinstaller Trimmer.spec --clean -y &&
         cd dist/ &&
-        zip -r9 Trimmer-$version_number-OSX.zip Trimmer.app/
+        hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 200M
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v1
       with:
@@ -90,9 +90,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./dist/Trimmer-${{ env.version_number }}-OSX.zip
-        asset_name: Trimmer-${{ env.version_number }}-OSX.zip
-        asset_content_type: application/zip
+        asset_path: ./dist/Trimmer-${{ env.version_number }}-Mac64.dmg
+        asset_name: Trimmer-${{ env.version_number }}-Mac64.dmg
+        asset_content_type: application/octet-stream
         
         
         
