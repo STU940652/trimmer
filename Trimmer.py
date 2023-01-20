@@ -33,6 +33,7 @@ import os
 import os.path
 import queue
 import subprocess
+import certifi
 
 # Make sure we are in the correct directory
 application_path = ''
@@ -197,6 +198,10 @@ if __name__ == "__main__":
         sys.stderr = log
     except:
         pass
+    # Print SSL certificate location to the log. This is mostly to ensure certifi is included
+    # in the frozen bundle.
+    print(certifi.where())
+    
     # Create a wx.App(), which handles the windowing system event loop
     app = wx.App(redirect=False)
     # Create the window containing our small media player

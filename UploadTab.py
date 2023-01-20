@@ -9,6 +9,7 @@ import os.path
 import datetime
 import threading
 import time
+import certifi
 
 # Boto = Amazon S3
 from boto.s3.key import Key
@@ -136,6 +137,10 @@ class UploadTab(wx.Panel):
         # Messages
         self.Messages = wx.TextCtrl (self, style=wx.TE_MULTILINE|wx.TE_READONLY)
         Sizer.Add(self.Messages, 1, flag=wx.ALL|wx.EXPAND, border = 5)
+        
+        # Print SSL certificate location to the log. This is mostly to ensure certifi is included
+        # in the frozen bundle.
+        self.ThreadSafeLog(certifi.where()+'\n')
         
         self.SetSizer(Sizer)
         
