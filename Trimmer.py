@@ -53,7 +53,6 @@ if application_path:
 
 # import external libraries
 from FileCopy import FileCopy
-from CheckListCtrl import CheckListCtrl
 from EncodeThread import EncodeThread
 from Player import Player
 from JobList import JobList

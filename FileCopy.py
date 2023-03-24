@@ -7,7 +7,6 @@ import platform
 import tempfile
 import re
 
-from CheckListCtrl import CheckListCtrl
 from Settings import *
 
 def sizeof_fmt(num):
@@ -50,8 +49,9 @@ class FileCopy(wx.Panel):
         Sizer.Add(pathSizer, flag=wx.EXPAND|wx.ALL, border = 5)
         
         # File List
-        self.FileList = CheckListCtrl(self)
-        self.FileList.InsertColumn(0,'File Name')
+        self.FileList = wx.ListCtrl(self, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+        self.FileList.EnableCheckBoxes()
+        self.FileList.InsertColumn(0,'File Name', width = 200)
         self.FileList.InsertColumn(1,'Size', format = wx.LIST_FORMAT_RIGHT)
         self.FileList.InsertColumn(2,'Date', width = 125)
         Sizer.Add(self.FileList, 1, flag=wx.EXPAND|wx.ALL, border = 5)
@@ -118,7 +118,7 @@ class FileCopy(wx.Panel):
         
         sources=list()
         for row in range(self.FileList.GetItemCount()):
-            if self.FileList.IsChecked(row):
+            if self.FileList.IsItemChecked(row):
                 sources.append('"'+os.path.join(self.PathName.GetValue(),self.FileList.GetItemText(row))+'"')
                 si = os.stat(os.path.join(self.PathName.GetValue(),self.FileList.GetItemText(row)))
                 self.DestSize += si.st_size
