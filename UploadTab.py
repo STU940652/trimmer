@@ -28,7 +28,7 @@ from googleapiclient.http import MediaFileUpload
 from Settings import *
 from Credentials import Credentials
 from PasswordDialog import SaveCredentials
-from CmsManager import CmsManager
+from RockCmsManager import CmsManager
 import MailClient
     
 class MyVimeoClient(vimeo.VimeoClient):
