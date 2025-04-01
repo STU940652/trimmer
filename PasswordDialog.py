@@ -38,12 +38,9 @@ class PasswordDialog(wx.Dialog):
         Sizer=wx.BoxSizer(wx.VERTICAL)
         
         # CMS
-        Sizer.Add(wx.StaticText(self, -1, "CMS Username"), 0, flag=wx.TOP|wx.LEFT, border = 10)
-        self.CMS_Username = wx.TextCtrl(self, size=(400,-1), value=Credentials["CMS_Username"])
-        Sizer.Add(self.CMS_Username, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
-        Sizer.Add(wx.StaticText(self, -1, "CMS Password"), 0, flag=wx.LEFT, border = 10)
-        self.CMS_Password = wx.TextCtrl(self, style=wx.TE_PASSWORD, value=Credentials["CMS_Password"])
-        Sizer.Add(self.CMS_Password, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
+        Sizer.Add(wx.StaticText(self, -1, "CMS Token"), 0, flag=wx.TOP|wx.LEFT, border = 10)
+        self.CMS_Token = wx.TextCtrl(self, size=(400,-1), value=Credentials["CMS_TOKEN"])
+        Sizer.Add(self.CMS_Token, 0, flag=wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, border = 10)
         Sizer.Add(wx.StaticLine(self), 0, flag=wx.EXPAND)
         
         #Amazon S3 
@@ -140,8 +137,7 @@ class PasswordDialog(wx.Dialog):
         
     def OnOK (self, evt):
         global Credentials
-        Credentials["CMS_Username"] = self.CMS_Username.GetValue()
-        Credentials["CMS_Password"] = self.CMS_Password.GetValue()
+        Credentials["CMS_TOKEN"] = self.CMS_Token.GetValue()
         
         Credentials["AWS_ACCESS_KEY_ID"] = self.AWS_ACCESS_KEY_ID.GetValue()
         Credentials["AWS_SECRET_ACCESS_KEY"] = self.AWS_SECRET_ACCESS_KEY.GetValue()

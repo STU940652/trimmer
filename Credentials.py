@@ -5,8 +5,7 @@ import pickle
 import codecs
 
 Credentials = {}
-Credentials["CMS_Username"] = ""
-Credentials["CMS_Password"] = ""
+Credentials["CMS_TOKEN"] = ""
 Credentials["AWS_ACCESS_KEY_ID"] = ""
 Credentials["AWS_SECRET_ACCESS_KEY"] = ""
 Credentials["BUCKET_NAME"] = ""

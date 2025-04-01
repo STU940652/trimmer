@@ -12,43 +12,17 @@ from Settings import *
 
 class CmsManager ():
     def __init__ (self):
-        self.IsLoggedIn = False
         self.EventInfo = {}
-        self.cookies = None
         self.rest_base_url = 'https://rock.calvarysc.org/api'
-
-    def Login(self):
-        if not self.IsLoggedIn:
-            try:
-                # Login
-                r = requests.post(f"{self.rest_base_url}/Auth/Login", data={"Username": Credentials["CMS_Username"], "Password": Credentials["CMS_Password"]})
-                if r.ok:
-                    # We have succeeded to log in
-                    self.IsLoggedIn = True
-                    self.cookies = r.cookies
-                    return True
-
-                # Login Failed
-                print("CMS Login failed", r.ok, r.status_code, r.reason)
-                return False
-
-            except:
-                print (traceback.format_exc())
-                return False
-
-    def Logout (self):
-        self.cookies = None
-        self.IsLoggedIn = False
 
     def GetEventInfo (self, event = None, include_published = False):
         self.EventInfo = {}
-        if not self.IsLoggedIn:
-            if not self.Login():
-                return None
-        try:
 
+        try:
             # Find Message Content Channel
-            r = requests.get(f"{self.rest_base_url}/ContentChannels", headers={'Accept': 'application/json'}, params={'$filter': "Name eq 'Messages'"}, cookies=self.cookies)
+            r = requests.get(f"{self.rest_base_url}/ContentChannels", 
+                    headers={'Accept': 'application/json', 'Authorization-Token': Credentials["CMS_TOKEN"]}, 
+                    params={'$filter': "Name eq 'Messages'"})
             if not r.ok:
                 print(r.ok, r.status_code, r.reason)
                 return []
@@ -60,14 +34,13 @@ class CmsManager ():
 
             # Get Messages
             r = requests.get(f"{self.rest_base_url}/ContentChannelItems",
-                headers={'Accept': 'application/json'},
+                headers={'Accept': 'application/json', 'Authorization-Token': Credentials["CMS_TOKEN"]},
                 params={
                     '$filter': f"ContentChannelTypeId eq {message_content_channel_type_id}",
                     '$top': 10,
                     #'$orderby': 'Id desc',
                     '$orderby': 'StartDateTime desc',
-                },
-                cookies=self.cookies
+                }
             )
             if not r.ok:
                 print(r.ok, r.status_code, r.reason)
@@ -90,11 +63,10 @@ class CmsManager ():
 
             # Get Attributes of this message
             a = requests.get(f"{self.rest_base_url}/ContentChannelItems/{event}",
-                headers={'Accept': 'application/json'},
+                headers={'Accept': 'application/json', 'Authorization-Token': Credentials["CMS_TOKEN"]},
                 params={
                     'loadAttributes': 'simple',
-                },
-                cookies=self.cookies
+                }
             )
             if not a.ok:
                 print(a.ok, a.status_code, a.reason)
@@ -121,9 +93,8 @@ class CmsManager ():
             # Get Sermon Series
             # TODO Filter for Sermon Series
             a = requests.get(f"https://rock.calvarysc.org/api/ContentChannelItems/GetParents/{c['Id']}",
-                headers={'Accept': 'application/json'},
-                params={},
-                cookies=self.cookies
+                headers={'Accept': 'application/json', 'Authorization-Token': Credentials["CMS_TOKEN"]},
+                params={}
             )
             attr = a.json()
             if not a.ok:
@@ -140,14 +111,6 @@ class CmsManager ():
         return []
 
     def SetMedia (self, Tags, MessageCallback, CmsPublish, CompletionDict={}):
-        if not self.IsLoggedIn:
-            MessageCallback("Logging-in to Rock.\n")
-            if not self.Login():
-                MessageCallback("Rock Log-in failed.\n")
-                return False
-
-            MessageCallback("Rock Log-in OK.\n")
-
         MessageCallback("Updating website.\n")
 
         try:
@@ -170,12 +133,11 @@ class CmsManager ():
             if "mp3_url" in Tags:
                 MessageCallback("...adding Audio\n")
                 a = requests.post(f"{self.rest_base_url}/ContentChannelItems/AttributeValue/{event}",
-                    headers={'Accept': 'application/json'},
+                    headers={'Accept': 'application/json', 'Authorization-Token': Credentials["CMS_TOKEN"]},
                     params={
                         'attributeKey': 'AudioLink',
                         'attributeValue': "https://s3.amazonaws.com/media.calvarysc.org/" + Tags["mp3_url"],
-                    },
-                    cookies=self.cookies
+                    }
                 )
                 if not a.ok:
                     MessageCallback(f"ERROR adding Audio: {a.status_code} {a.reason}\n")
@@ -186,19 +148,18 @@ class CmsManager ():
             if "vimeo_number" in Tags:
                 MessageCallback("...adding Video\n")
                 a = requests.post(f"{self.rest_base_url}/ContentChannelItems/AttributeValue/{event}",
-                    headers={'Accept': 'application/json'},
+                    headers={'Accept': 'application/json', 'Authorization-Token': Credentials["CMS_TOKEN"]},
                     params={
                         'attributeKey': 'VideoLink',
                         'attributeValue': "https://vimeo.com/" + Tags["vimeo_number"],
-                    },
-                    cookies=self.cookies
+                    }
                 )
                 if not a.ok:
                     MessageCallback(f"ERROR adding Video: {a.status_code} {a.reason}\n")
                     return False
 
                 a = requests.post(f"{self.rest_base_url}/ContentChannelItems/AttributeValue/{event}",
-                    headers={'Accept': 'application/json'},
+                    headers={'Accept': 'application/json', 'Authorization-Token': Credentials["CMS_TOKEN"]},
                     params={
                         'attributeKey': 'VideoEmbed',
                         'attributeValue': f"""
@@ -209,8 +170,7 @@ class CmsManager ():
                                 </iframe>
                             </div>
                         """
-                    },
-                    cookies=self.cookies
+                    }
                 )
                 if not a.ok:
                     MessageCallback(f"ERROR adding Video Embed: {a.status_code} {a.reason}\n")
@@ -233,14 +193,6 @@ class CmsManager ():
         return True
 
     def PublishWebsite (self, Tags, MessageCallback, EventId, CompletionDict={}):
-        if not self.IsLoggedIn:
-            MessageCallback("Logging-in to CMS.\n")
-            if not self.Login():
-                MessageCallback("CMS Log-in failed.\n")
-                return False
-
-            MessageCallback("CMS Log-in OK.\n")
-
         MessageCallback("Publishing website.\n")
 
         # TODO
@@ -341,10 +293,7 @@ class CmsManager ():
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.IsLoggedIn = False
         self.EventInfo = {}
-        self.cookies = None
-
         return False
 
 class ImportFromCMSThread(threading.Thread):
