@@ -166,7 +166,7 @@ if __name__ == "__main__":
         os.makedirs(TrimmerConfig.get('FilePaths', 'LogPath'))
         # Put a temp init file in
         with open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'),'Trimmer.ini'),'wt') as f:
-            f.write("""
+            f.write(r"""
 #Trimmer Ini File
 #
 #[FilePaths]
@@ -193,8 +193,8 @@ if __name__ == "__main__":
     log = None
     try:
         log = open(os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'), "stdout_log.txt"), "w")
-        sys.stdout = log
-        sys.stderr = log
+        # sys.stdout = log
+        # sys.stderr = log
     except:
         pass
     # Print SSL certificate location to the log. This is mostly to ensure certifi is included

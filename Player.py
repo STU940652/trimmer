@@ -4,7 +4,7 @@ import os.path
 import platform
 import datetime
 from Settings import *
-from RockCmsManager import ImportFromCMSThread
+from NucleusCmsManager import ImportFromCMSThread
 try:
     import vlc
     HAVE_VLC = True

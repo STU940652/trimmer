@@ -2349,7 +2349,7 @@ class Instance(_Ctype):
 
 
     def audio_output_device_count(self, psz_audio_output):
-        '''Backward compatibility stub. Do not use in new code.
+        r'''Backward compatibility stub. Do not use in new code.
         \deprecated Use L{audio_output_device_list_get}() instead.
         @return: always 0.
         '''
@@ -2357,7 +2357,7 @@ class Instance(_Ctype):
 
 
     def audio_output_device_longname(self, psz_output, i_device):
-        '''Backward compatibility stub. Do not use in new code.
+        r'''Backward compatibility stub. Do not use in new code.
         \deprecated Use L{audio_output_device_list_get}() instead.
         @return: always None.
         '''
@@ -2365,7 +2365,7 @@ class Instance(_Ctype):
 
 
     def audio_output_device_id(self, psz_audio_output, i_device):
-        '''Backward compatibility stub. Do not use in new code.
+        r'''Backward compatibility stub. Do not use in new code.
         \deprecated Use L{audio_output_device_list_get}() instead.
         @return: always None.
         '''
@@ -2373,7 +2373,7 @@ class Instance(_Ctype):
 
 
     def media_discoverer_new_from_name(self, psz_name):
-        '''\deprecated Use L{media_discoverer_new}() and L{media_discoverer_start}().
+        r'''\deprecated Use L{media_discoverer_new}() and L{media_discoverer_start}().
         '''
         return libvlc_media_discoverer_new_from_name(self, str_to_bytes(psz_name))
 
@@ -2779,7 +2779,7 @@ class Media(_Ctype):
 
 
     def parse(self):
-        '''Parse a media.
+        r'''Parse a media.
         This fetches (local) art, meta data and tracks information.
         The method is synchronous.
         \deprecated This function could block indefinitely.
@@ -2792,7 +2792,7 @@ class Media(_Ctype):
 
 
     def parse_async(self):
-        '''Parse a media.
+        r'''Parse a media.
         This fetches (local) art, meta data and tracks information.
         The method is the asynchronous of L{parse}().
         To track when this is over you can listen to libvlc_MediaParsedChanged
@@ -2810,7 +2810,7 @@ class Media(_Ctype):
 
 
     def is_parsed(self):
-        '''Return true is the media descriptor object is parsed
+        r'''Return true is the media descriptor object is parsed
         \deprecated This can return true in case of failure.
                     Use L{get_parsed_status}() instead
         See libvlc_MediaParsedChanged.
@@ -2820,7 +2820,7 @@ class Media(_Ctype):
 
 
     def get_tracks_info(self):
-        '''Get media descriptor's elementary streams description
+        r'''Get media descriptor's elementary streams description
         Note, you need to call L{parse}() or play the media at least once
         before calling this function.
         Not doing this will result in an empty array.
@@ -2887,7 +2887,7 @@ class MediaDiscoverer(_Ctype):
 
 
     def localized_name(self):
-        '''Get media service discover object its localized name.
+        r'''Get media service discover object its localized name.
         \deprecated Useless, use L{list_get}() to get the
         longname of the service discovery.
         @return: localized name or None if the media_discoverer is not started.
@@ -2896,7 +2896,7 @@ class MediaDiscoverer(_Ctype):
 
     @memoize_parameterless
     def event_manager(self):
-        '''Get event manager from media service discover object.
+        r'''Get event manager from media service discover object.
         \deprecated Useless, media_discoverer events are only triggered when calling
         L{start}() and L{stop}().
         @return: event manager object.
@@ -3403,7 +3403,7 @@ class MediaPlayer(_Ctype):
 
 
     def get_fps(self):
-        '''Get movie fps rate
+        r'''Get movie fps rate
         This function is provided for backward compatibility. It cannot deal with
         multiple video tracks. In LibVLC versions prior to 3.0, it would also fail
         if the file format did not convey the frame rate explicitly.
@@ -3414,13 +3414,13 @@ class MediaPlayer(_Ctype):
 
 
     def set_agl(self, drawable):
-        '''\deprecated Use L{set_nsobject}() instead.
+        r'''\deprecated Use L{set_nsobject}() instead.
         '''
         return libvlc_media_player_set_agl(self, drawable)
 
 
     def get_agl(self):
-        '''\deprecated Use L{get_nsobject}() instead.
+        r'''\deprecated Use L{get_nsobject}() instead.
         '''
         return libvlc_media_player_get_agl(self)
 
@@ -3441,7 +3441,7 @@ class MediaPlayer(_Ctype):
 
 
     def video_set_subtitle_file(self, psz_subtitle):
-        '''Set new video subtitle file.
+        r'''Set new video subtitle file.
         \deprecated Use L{add_slave}() instead.
         @param psz_subtitle: new video subtitle file.
         @return: the success status (boolean).
@@ -3450,7 +3450,7 @@ class MediaPlayer(_Ctype):
 
 
     def toggle_teletext(self):
-        '''Toggle teletext transparent status on video output.
+        r'''Toggle teletext transparent status on video output.
         \deprecated use L{video_set_teletext}() instead.
         '''
         return libvlc_toggle_teletext(self)
@@ -6157,7 +6157,7 @@ def libvlc_media_list_event_manager(p_ml):
     return f(p_ml)
 
 def libvlc_media_player_get_fps(p_mi):
-    '''Get movie fps rate
+    r'''Get movie fps rate
     This function is provided for backward compatibility. It cannot deal with
     multiple video tracks. In LibVLC versions prior to 3.0, it would also fail
     if the file format did not convey the frame rate explicitly.
@@ -6171,7 +6171,7 @@ def libvlc_media_player_get_fps(p_mi):
     return f(p_mi)
 
 def libvlc_media_player_set_agl(p_mi, drawable):
-    '''\deprecated Use L{libvlc_media_player_set_nsobject}() instead.
+    r'''\deprecated Use L{libvlc_media_player_set_nsobject}() instead.
     '''
     f = _Cfunctions.get('libvlc_media_player_set_agl', None) or \
         _Cfunction('libvlc_media_player_set_agl', ((1,), (1,),), None,
@@ -6179,7 +6179,7 @@ def libvlc_media_player_set_agl(p_mi, drawable):
     return f(p_mi, drawable)
 
 def libvlc_media_player_get_agl(p_mi):
-    '''\deprecated Use L{libvlc_media_player_get_nsobject}() instead.
+    r'''\deprecated Use L{libvlc_media_player_get_nsobject}() instead.
     '''
     f = _Cfunctions.get('libvlc_media_player_get_agl', None) or \
         _Cfunction('libvlc_media_player_get_agl', ((1,),), None,
@@ -6187,7 +6187,7 @@ def libvlc_media_player_get_agl(p_mi):
     return f(p_mi)
 
 def libvlc_track_description_release(p_track_description):
-    '''\deprecated Use L{libvlc_track_description_list_release}() instead.
+    r'''\deprecated Use L{libvlc_track_description_list_release}() instead.
     '''
     f = _Cfunctions.get('libvlc_track_description_release', None) or \
         _Cfunction('libvlc_track_description_release', ((1,),), None,
@@ -6195,7 +6195,7 @@ def libvlc_track_description_release(p_track_description):
     return f(p_track_description)
 
 def libvlc_video_get_height(p_mi):
-    '''Get current video height.
+    r'''Get current video height.
     \deprecated Use L{libvlc_video_get_size}() instead.
     @param p_mi: the media player.
     @return: the video pixel height or 0 if not applicable.
@@ -6206,7 +6206,7 @@ def libvlc_video_get_height(p_mi):
     return f(p_mi)
 
 def libvlc_video_get_width(p_mi):
-    '''Get current video width.
+    r'''Get current video width.
     \deprecated Use L{libvlc_video_get_size}() instead.
     @param p_mi: the media player.
     @return: the video pixel width or 0 if not applicable.
@@ -6238,7 +6238,7 @@ def libvlc_video_get_chapter_description(p_mi, i_title):
     return f(p_mi, i_title)
 
 def libvlc_video_set_subtitle_file(p_mi, psz_subtitle):
-    '''Set new video subtitle file.
+    r'''Set new video subtitle file.
     \deprecated Use L{libvlc_media_player_add_slave}() instead.
     @param p_mi: the media player.
     @param psz_subtitle: new video subtitle file.
@@ -6250,7 +6250,7 @@ def libvlc_video_set_subtitle_file(p_mi, psz_subtitle):
     return f(p_mi, psz_subtitle)
 
 def libvlc_toggle_teletext(p_mi):
-    '''Toggle teletext transparent status on video output.
+    r'''Toggle teletext transparent status on video output.
     \deprecated use L{libvlc_video_set_teletext}() instead.
     @param p_mi: the media player.
     '''
@@ -6260,7 +6260,7 @@ def libvlc_toggle_teletext(p_mi):
     return f(p_mi)
 
 def libvlc_audio_output_device_count(p_instance, psz_audio_output):
-    '''Backward compatibility stub. Do not use in new code.
+    r'''Backward compatibility stub. Do not use in new code.
     \deprecated Use L{libvlc_audio_output_device_list_get}() instead.
     @return: always 0.
     '''
@@ -6270,7 +6270,7 @@ def libvlc_audio_output_device_count(p_instance, psz_audio_output):
     return f(p_instance, psz_audio_output)
 
 def libvlc_audio_output_device_longname(p_instance, psz_output, i_device):
-    '''Backward compatibility stub. Do not use in new code.
+    r'''Backward compatibility stub. Do not use in new code.
     \deprecated Use L{libvlc_audio_output_device_list_get}() instead.
     @return: always None.
     '''
@@ -6280,7 +6280,7 @@ def libvlc_audio_output_device_longname(p_instance, psz_output, i_device):
     return f(p_instance, psz_output, i_device)
 
 def libvlc_audio_output_device_id(p_instance, psz_audio_output, i_device):
-    '''Backward compatibility stub. Do not use in new code.
+    r'''Backward compatibility stub. Do not use in new code.
     \deprecated Use L{libvlc_audio_output_device_list_get}() instead.
     @return: always None.
     '''
@@ -6290,7 +6290,7 @@ def libvlc_audio_output_device_id(p_instance, psz_audio_output, i_device):
     return f(p_instance, psz_audio_output, i_device)
 
 def libvlc_media_parse(p_md):
-    '''Parse a media.
+    r'''Parse a media.
     This fetches (local) art, meta data and tracks information.
     The method is synchronous.
     \deprecated This function could block indefinitely.
@@ -6306,7 +6306,7 @@ def libvlc_media_parse(p_md):
     return f(p_md)
 
 def libvlc_media_parse_async(p_md):
-    '''Parse a media.
+    r'''Parse a media.
     This fetches (local) art, meta data and tracks information.
     The method is the asynchronous of L{libvlc_media_parse}().
     To track when this is over you can listen to libvlc_MediaParsedChanged
@@ -6327,7 +6327,7 @@ def libvlc_media_parse_async(p_md):
     return f(p_md)
 
 def libvlc_media_is_parsed(p_md):
-    '''Return true is the media descriptor object is parsed
+    r'''Return true is the media descriptor object is parsed
     \deprecated This can return true in case of failure.
                 Use L{libvlc_media_get_parsed_status}() instead
     See libvlc_MediaParsedChanged.
@@ -6339,7 +6339,7 @@ def libvlc_media_is_parsed(p_md):
                     ctypes.c_int, Media)
     return f(p_md)
 
-def libvlc_media_get_tracks_info(p_md):
+def rlibvlc_media_get_tracks_info(p_md):
     '''Get media descriptor's elementary streams description
     Note, you need to call L{libvlc_media_parse}() or play the media at least once
     before calling this function.
@@ -6355,7 +6355,7 @@ def libvlc_media_get_tracks_info(p_md):
     return f(p_md)
 
 def libvlc_media_discoverer_new_from_name(p_inst, psz_name):
-    '''\deprecated Use L{libvlc_media_discoverer_new}() and L{libvlc_media_discoverer_start}().
+    r'''\deprecated Use L{libvlc_media_discoverer_new}() and L{libvlc_media_discoverer_start}().
     '''
     f = _Cfunctions.get('libvlc_media_discoverer_new_from_name', None) or \
         _Cfunction('libvlc_media_discoverer_new_from_name', ((1,), (1,),), class_result(MediaDiscoverer),
@@ -6363,7 +6363,7 @@ def libvlc_media_discoverer_new_from_name(p_inst, psz_name):
     return f(p_inst, psz_name)
 
 def libvlc_media_discoverer_localized_name(p_mdis):
-    '''Get media service discover object its localized name.
+    r'''Get media service discover object its localized name.
     \deprecated Useless, use L{libvlc_media_discoverer_list_get}() to get the
     longname of the service discovery.
     @param p_mdis: media discover object.
@@ -6375,7 +6375,7 @@ def libvlc_media_discoverer_localized_name(p_mdis):
     return f(p_mdis)
 
 def libvlc_media_discoverer_event_manager(p_mdis):
-    '''Get event manager from media service discover object.
+    r'''Get event manager from media service discover object.
     \deprecated Useless, media_discoverer events are only triggered when calling
     L{libvlc_media_discoverer_start}() and L{libvlc_media_discoverer_stop}().
     @param p_mdis: media service discover object.

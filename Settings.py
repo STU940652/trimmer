@@ -22,7 +22,7 @@ import datetime
 # Seg2_EncodeString = 'ffmpeg ....'
 # Seg2_Completion = "VimeoUpload();AudioFTP()"
 
-TrimmerConfig=configparser.SafeConfigParser()
+TrimmerConfig=configparser.ConfigParser()
 
 # Put in some default values
 TrimmerConfig.add_section('FilePaths')
