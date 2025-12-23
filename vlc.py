@@ -163,6 +163,8 @@ def find_lib():
         d = "/Applications/VLC.app/Contents/MacOS/"
         c = d + "lib/libvlccore.dylib"
         p = d + "lib/libvlc.dylib"
+        print(p, os.path.exists(p))
+        print(c, os.path.exists(c))
         if os.path.exists(p) and os.path.exists(c):
             # pre-load libvlccore VLC 2.2.8+
             ctypes.CDLL(c)
@@ -189,7 +191,7 @@ def find_lib():
                 dll = ctypes.CDLL("libvlc.so.5")
             except:
                 raise NotImplementedError("Cannot find libvlc lib")
-
+    print (dll, plugin_path)
     return (dll, plugin_path)
 
 
