@@ -33,13 +33,13 @@ jobs:
         name: release_url
         path: release_url.txt
     - name: Get Chromedriver Version
-      id: chromedriver_version
-      run: curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE -o chromedriver_version.txt
+      id: chromedriver_win64_url
+      run: curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url > chromedriver_win64_url
     - name: Save Chromedriver Version
       uses: actions/upload-artifact@v4
       with:
-        name: chromedriver_version
-        path: chromedriver_version.txt
+        name: chromedriver_win64_url
+        path: chromedriver_win64_url.txt
         
   build_osx:
     name: Build OSX
@@ -49,14 +49,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Get Chromedriver
-      run: >
-        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "mac-arm64") | .url') &&
-        echo $url &&
-        pushd ext/OSX &&
-        curl $url -o chromedriver-mac-arm64.zip &&
-        unzip chromedriver-mac-arm64.zip &&
-        popd
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
@@ -68,6 +60,12 @@ jobs:
     - name: Build with pyinstaller
       run: >
         echo "Version number: $version_number" &&
+        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "mac-arm64") | .url') &&
+        echo $url &&
+        pushd ext/OSX &&
+        curl $url -o chromedriver-mac-arm64.zip &&
+        unzip chromedriver-mac-arm64.zip &&
+        popd &&
         pyinstaller Trimmer.spec --clean -y &&
         cd dist/ &&
         hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 200M
@@ -91,10 +89,7 @@ jobs:
         asset_path: ./dist/Trimmer-${{ env.version_number }}-Mac64.dmg
         asset_name: Trimmer-${{ env.version_number }}-Mac64.dmg
         asset_content_type: application/octet-stream
-        
-        
-        
-        
+
   build_win:
     name: Build Win-64
     needs: createrelease
@@ -106,9 +101,8 @@ jobs:
     - name: Get Chromedriver Version
       uses: actions/download-artifact@v4
       with:
-        name: chromedriver_version 
-        
-    
+        name: chromedriver_win64_url 
+
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
@@ -121,10 +115,10 @@ jobs:
       shell: cmd
       run: |
         echo "Version number: %version_number% "
-        set /p chromedriver_version= < chromedriver_version/chromedriver_version.txt
+        set /p chromedriver_win64_url= < chromedriver_win64_url/chromedriver_win64_url.txt
         echo "Chromedriver version: %chromedriver_version%"
         pushd ext\Win64
-        curl -O https://chromedriver.storage.googleapis.com/%chromedriver_version%/chromedriver_win32.zip
+        curl -O %chromedriver_win64_url%
         dir
         7z e .\chromedriver_win32.zip
         dir
