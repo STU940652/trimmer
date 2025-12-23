@@ -34,7 +34,7 @@ jobs:
         path: release_url.txt
     - name: Get Chromedriver Version
       id: chromedriver_win64_url
-      run: curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url' > chromedriver_win64_url
+      run: curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url' > chromedriver_win64_url.txt
     - name: Save Chromedriver Version
       uses: actions/upload-artifact@v4
       with:
@@ -64,7 +64,7 @@ jobs:
         echo $url &&
         pushd ext/OSX &&
         curl $url -o chromedriver-mac-arm64.zip &&
-        unzip chromedriver-mac-arm64.zip &&
+        unzip -j chromedriver-mac-arm64.zip &&
         popd &&
         pyinstaller Trimmer.spec --clean -y &&
         cd dist/ &&
