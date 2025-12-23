@@ -51,7 +51,7 @@ jobs:
 
     - name: Get Chromedriver
       run: >
-        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "mac-arm64") | .url') &&
+        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "mac-arm64") | .url') &&
         echo $url &&
         pushd ext/OSX &&
         curl $url -o chromedriver-mac-arm64.zip &&
