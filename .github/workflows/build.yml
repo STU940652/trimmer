@@ -15,16 +15,6 @@ jobs:
     name: Create Release
     runs-on: [ubuntu-latest] 
     steps:
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.version_number }}
-        release_name: Release ${{ env.version_number }}
-        draft: false
-        prerelease: false
     - name: Get Chromedriver Version
       id: chromedriver_win64_url
       run: |
@@ -85,20 +75,20 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Build with pyinstaller
-      shell: cmd
+      shell: bash
       run: |
         echo "Version number: %version_number% "
-        dir
+        echo "${{ env.version_number }}"
         echo "${{ env.chromedriver_win64_url }}"
         pushd ext\Win64
         curl -O ${{ env.chromedriver_win64_url }}
-        dir
+        ls
         7z e .\chromedriver_win32.zip
-        dir
+        ls
         popd
         pyinstaller Trimmer.spec --clean -y
         cd inno/
-        "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" Trimmer.iss
+        "${ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
     - name: Upload Release Asset
       id: upload-release-asset
       uses: softprops/action-gh-release@v2
