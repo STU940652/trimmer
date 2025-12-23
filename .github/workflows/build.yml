@@ -9,22 +9,9 @@ on:
 env: 
   version_number: 1.${{ github.ref_name }}.${{ github.run_number}}
 
-jobs:
-
-  createrelease:
-    name: Create Release
-    runs-on: [ubuntu-latest] 
-    steps:
-    - name: Get Chromedriver Version
-      id: chromedriver_win64_url
-      run: |
-        chromedriver_win64_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url')
-        echo "chromedriver_win64_url=$chromedriver_win64_url" >> $GITHUB_OUTPUT
-        cat $GITHUB_OUTPUT
-        
+jobs:       
   build_osx:
     name: Build OSX
-    needs: createrelease
     runs-on: macos-latest
     
     steps:
@@ -60,7 +47,6 @@ jobs:
 
   build_win:
     name: Build Win-64
-    needs: [createrelease]
     runs-on: windows-latest
 
     steps:
@@ -72,6 +58,7 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
+        curl -L -o /usr/bin/jq.exe https://github.com/jqlang/jq/releases/latest/download/jq-win64.exe
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Build with pyinstaller
@@ -79,14 +66,11 @@ jobs:
       run: |
         echo "Version number: ${{ env.version_number }} "
         ls "/c/Program Files (x86)/"
-        curl -L -o /usr/bin/jq.exe https://github.com/jqlang/jq/releases/latest/download/jq-win64.exe
         url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url')
         echo $url
         pushd ext/Win64
         curl $url -o chromedriver_win64.zip
-        ls
         7z e ./chromedriver_win64.zip
-        ls
         popd
         pyinstaller Trimmer.spec --clean -y
         cd inno/
