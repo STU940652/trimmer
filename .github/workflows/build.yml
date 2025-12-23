@@ -78,17 +78,18 @@ jobs:
       shell: bash
       run: |
         echo "Version number: %version_number% "
+        ls /
         echo "${{ env.version_number }}"
         echo "${{ env.chromedriver_win64_url }}"
-        pushd ext\Win64
+        pushd ext/Win64
         curl -O ${{ env.chromedriver_win64_url }}
         ls
-        7z e .\chromedriver_win32.zip
+        7z e ./chromedriver_win32.zip
         ls
         popd
         pyinstaller Trimmer.spec --clean -y
         cd inno/
-        "${ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" Trimmer.iss
+        "/c/Program Files (x86)/Inno Setup 6/ISCC.exe" Trimmer.iss
     - name: Upload Release Asset
       id: upload-release-asset
       uses: softprops/action-gh-release@v2
