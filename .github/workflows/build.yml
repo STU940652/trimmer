@@ -54,7 +54,7 @@ jobs:
         url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "mac-arm64") | .url') &&
         echo $url &&
         pushd ext/OSX &&
-        curl -O $url &&
+        curl -o chromedriver-mac-arm64.zip $url &&
         unzip chromedriver-mac-arm64.zip &&
         popd
     - name: Set up Python 3.9
