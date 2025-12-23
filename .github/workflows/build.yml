@@ -25,16 +25,12 @@ jobs:
         release_name: Release ${{ env.version_number }}
         draft: false
         prerelease: false
-    - name: Output Release URL File
-      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
-    - name: Save Release URL File for publish
-      uses: actions/upload-artifact@v4
-      with:
-        name: release_url
-        path: release_url.txt
     - name: Get Chromedriver Version
       id: chromedriver_win64_url
-      run: curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url' > chromedriver_win64_url.txt
+      run: |
+        chromedriver_win64_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url')
+        echo "chromedriver_win64_url=$chromedriver_win64_url" >> $GITHUB_OUTPUT
+        cat $GITHUB_OUTPUT
     - name: Save Chromedriver Version
       uses: actions/upload-artifact@v4
       with:
@@ -83,11 +79,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    
-    - name: Get Chromedriver Version
-      uses: actions/download-artifact@v4
-      with:
-        name: chromedriver_win64_url 
 
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
@@ -101,8 +92,8 @@ jobs:
       shell: cmd
       run: |
         echo "Version number: %version_number% "
-        set /p chromedriver_win64_url= < chromedriver_win64_url/chromedriver_win64_url.txt
-        echo "Chromedriver version: %chromedriver_version%"
+        dir
+        echo "%chromedriver_win64_url%"
         pushd ext\Win64
         curl -O %chromedriver_win64_url%
         dir
