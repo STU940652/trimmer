@@ -70,26 +70,11 @@ jobs:
         cd dist/ &&
         df -h &&
         hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 400M
-    - name: Load Release URL File from release job
-      uses: actions/download-artifact@v4
-      with:
-        name: release_url
-    - name: Get Release File Name & Upload URL
-      id: get_release_info
-      shell: bash
-      run: |
-        value=`cat release_url/release_url.txt`
-        echo ::set-output name=upload_url::$value
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./dist/Trimmer-${{ env.version_number }}-Mac64.dmg
-        asset_name: Trimmer-${{ env.version_number }}-Mac64.dmg
-        asset_content_type: application/octet-stream
+        files: ./dist/Trimmer-${{ env.version_number }}-Mac64.dmg
 
   build_win:
     name: Build Win-64
@@ -127,23 +112,8 @@ jobs:
         pyinstaller Trimmer.spec --clean -y
         cd inno/
         "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" Trimmer.iss
-    - name: Load Release URL File from release job
-      uses: actions/download-artifact@v4
-      with:
-        name: release_url
-    - name: Get Release File Name & Upload URL
-      id: get_release_info
-      shell: bash
-      run: |
-        value=`cat release_url/release_url.txt`
-        echo ::set-output name=upload_url::$value
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
         asset_path: ./inno/Output/Trimmer-${{ env.version_number }}-Win64.exe
-        asset_name: Trimmer-${{ env.version_number }}-Win64.exe
-        asset_content_type: application/vnd.microsoft.portable-executable
