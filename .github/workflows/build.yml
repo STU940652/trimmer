@@ -31,11 +31,6 @@ jobs:
         chromedriver_win64_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url')
         echo "chromedriver_win64_url=$chromedriver_win64_url" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
-    - name: Save Chromedriver Version
-      uses: actions/upload-artifact@v4
-      with:
-        name: chromedriver_win64_url
-        path: chromedriver_win64_url.txt
         
   build_osx:
     name: Build OSX
@@ -71,10 +66,11 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: ./dist/Trimmer-${{ env.version_number }}-Mac64.dmg
+        name: Release ${{ env.version_number }}
 
   build_win:
     name: Build Win-64
-    needs: createrelease
+    needs: [createrelease]
     runs-on: windows-latest
 
     steps:
@@ -93,9 +89,9 @@ jobs:
       run: |
         echo "Version number: %version_number% "
         dir
-        echo "%chromedriver_win64_url%"
+        echo "${{ env.chromedriver_win64_url }}"
         pushd ext\Win64
-        curl -O %chromedriver_win64_url%
+        curl -O ${{ env.chromedriver_win64_url }}
         dir
         7z e .\chromedriver_win32.zip
         dir
@@ -107,4 +103,5 @@ jobs:
       id: upload-release-asset
       uses: softprops/action-gh-release@v2
       with:
-        asset_path: ./inno/Output/Trimmer-${{ env.version_number }}-Win64.exe
+        files: ./inno/Output/Trimmer-${{ env.version_number }}-Win64.exe
+        name: Release ${{ env.version_number }}
