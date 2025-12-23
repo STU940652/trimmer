@@ -65,10 +65,11 @@ jobs:
     - name: Build with pyinstaller
       run: >
         echo "Version number: $version_number" &&
-        echo "Chromedriver version: $(cat chromedriver_version/chromedriver_version.txt)" &&
+        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "mac-arm64") | .url) &&
+        echo $url &&
         pushd ext/OSX &&
-        curl -O https://chromedriver.storage.googleapis.com/$(cat ../../chromedriver_version/chromedriver_version.txt)/chromedriver_mac64.zip &&
-        unzip chromedriver_mac64.zip &&
+        curl -O $url &&
+        unzip chromedriver-mac-arm64.zip &&
         popd &&
         pyinstaller Trimmer.spec --clean -y &&
         cd dist/ &&
