@@ -77,14 +77,15 @@ jobs:
     - name: Build with pyinstaller
       shell: bash
       run: |
-        echo "Version number: %version_number% "
-        ls /
-        echo "${{ env.version_number }}"
-        echo "${{ env.chromedriver_win64_url }}"
+        echo "Version number: ${{ env.version_number }} "
+        ls "/c/Program Files (x86)/"
+        curl -L -o /usr/bin/jq.exe https://github.com/jqlang/jq/releases/latest/download/jq-win64.exe
+        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "win64") | .url')
+        echo $url
         pushd ext/Win64
-        curl -O ${{ env.chromedriver_win64_url }}
+        curl $url -o chromedriver_win64.zip
         ls
-        7z e ./chromedriver_win32.zip
+        7z e ./chromedriver_win64.zip
         ls
         popd
         pyinstaller Trimmer.spec --clean -y
