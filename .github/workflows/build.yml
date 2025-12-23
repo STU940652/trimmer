@@ -68,7 +68,8 @@ jobs:
         popd &&
         pyinstaller Trimmer.spec --clean -y &&
         cd dist/ &&
-        hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 200M
+        df -h &&
+        hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 400M
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v4
       with:

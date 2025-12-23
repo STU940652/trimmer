@@ -14,7 +14,7 @@
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 ArchitecturesAllowed=x64compatible
-ArchitecturesInstallIn64BitMode=x64 ia64
+ArchitecturesInstallIn64BitMode=x64compatible
 AppId={{F7183CE7-FAFC-48E2-8557-6BE507202FE7}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
