@@ -51,6 +51,11 @@ if application_path:
     os.chdir( application_path)
     os.environ["PATH"] = application_path + ":" + os.environ["PATH"]
 
+# For MacOS
+resource_path = os.path.realpath(os.path.join(application_path, '..', 'Resources'))
+if os.path.isdir(resource_path):
+    os.environ["PATH"] = resource_path + ":" + os.environ["PATH"]
+
 # import external libraries
 from FileCopy import FileCopy
 from EncodeThread import EncodeThread
