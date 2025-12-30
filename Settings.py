@@ -58,7 +58,7 @@ TrimmerConfig.set('Segment1', 'EncodeString', 'ffmpeg -report -nostdin -i "$InFi
 
 # And read from the ini file
 try:
-    TrimmerConfig.read(['Trimmer.ini', os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'),'Trimmer.ini')])
+    TrimmerConfig.read(['Trimmer.ini', '../Resources/Trimmer.ini', os.path.join(TrimmerConfig.get('FilePaths', 'LogPath'),'Trimmer.ini')])
 except:
     pass
     
