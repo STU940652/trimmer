@@ -11,9 +11,18 @@ env:
 
 jobs:       
   build_osx:
-    name: Build OSX
-    runs-on: macos-latest
-    
+    name: Build OSX (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-14
+            chromedriver_platform: mac-arm64
+          - arch: x86_64
+            runner: macos-13
+            chromedriver_platform: mac-x64
+
     steps:
     - uses: actions/checkout@v1
 
@@ -28,16 +37,74 @@ jobs:
     - name: Build with pyinstaller
       run: >
         echo "Version number: $version_number" &&
-        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "mac-arm64") | .url') &&
+        url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.["channels"]["Stable"]["downloads"]["chromedriver"][] | select(.platform == "${{ matrix.chromedriver_platform }}") | .url') &&
         echo $url &&
         pushd ext/OSX &&
-        curl $url -o chromedriver-mac-arm64.zip &&
-        unzip -j chromedriver-mac-arm64.zip &&
+        curl $url -o chromedriver-${{ matrix.arch }}.zip &&
+        unzip -j chromedriver-${{ matrix.arch }}.zip &&
         popd &&
         pyinstaller Trimmer.spec --clean -y &&
         cd dist/ &&
-        df -h &&
+        df -h
+    - name: Upload app bundle artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Trimmer-app-${{ matrix.arch }}
+        path: dist/Trimmer.app
+
+  build_osx_universal:
+    name: Build OSX Universal DMG
+    needs: build_osx
+    runs-on: macos-latest
+
+    steps:
+    - name: Download arm64 app
+      uses: actions/download-artifact@v4
+      with:
+        name: Trimmer-app-arm64
+        path: arm64
+
+    - name: Download x86_64 app
+      uses: actions/download-artifact@v4
+      with:
+        name: Trimmer-app-x86_64
+        path: x86_64
+
+    - name: Merge into universal app bundle
+      run: |
+        set -e
+        echo "Version number: $version_number"
+
+        # Start from a full copy of one bundle, then merge in Mach-O binaries
+        # from the other architecture using lipo so the result runs natively
+        # on both Intel and Apple Silicon.
+        mkdir -p universal
+        rsync -a arm64/Trimmer.app/ universal/Trimmer.app/
+
+        find x86_64/Trimmer.app -type f | while read -r f; do
+          rel="${f#x86_64/Trimmer.app/}"
+          target="universal/Trimmer.app/$rel"
+
+          if [ -f "$target" ] && file "$f" | grep -q "Mach-O"; then
+            if ! cmp -s "$f" "$target"; then
+              lipo -create "$f" "$target" -output "$target.universal"
+              mv "$target.universal" "$target"
+              chmod +x "$target"
+              echo "Merged: $rel"
+            fi
+          fi
+        done
+
+        echo "Verifying main executable architectures:"
+        lipo -info universal/Trimmer.app/Contents/MacOS/Trimmer
+
+    - name: Create DMG
+      run: |
+        mkdir -p dist
+        cp -R universal/Trimmer.app dist/
+        cd dist
         hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 400M
+
     - name: Upload Release Asset
       id: upload-release-asset
       uses: softprops/action-gh-release@v2
