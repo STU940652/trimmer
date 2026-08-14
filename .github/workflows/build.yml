@@ -75,14 +75,18 @@ jobs:
         set -e
         echo "Version number: $version_number"
 
+        # actions/download-artifact restores the *contents* of the uploaded
+        # Trimmer.app folder directly into arm64/ and x86_64/ (no nested
+        # Trimmer.app subfolder), so treat those directories as the bundle root.
+        #
         # Start from a full copy of one bundle, then merge in Mach-O binaries
         # from the other architecture using lipo so the result runs natively
         # on both Intel and Apple Silicon.
-        mkdir -p universal
-        rsync -a arm64/Trimmer.app/ universal/Trimmer.app/
+        mkdir -p universal/Trimmer.app
+        rsync -a arm64/ universal/Trimmer.app/
 
-        find x86_64/Trimmer.app -type f | while read -r f; do
-          rel="${f#x86_64/Trimmer.app/}"
+        find x86_64 -type f | while read -r f; do
+          rel="${f#x86_64/}"
           target="universal/Trimmer.app/$rel"
 
           if [ -f "$target" ] && file "$f" | grep -q "Mach-O"; then
