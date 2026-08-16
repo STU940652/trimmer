@@ -107,7 +107,7 @@ jobs:
         mkdir -p dist
         cp -R universal/Trimmer.app dist/
         cd dist
-        hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 400M
+        hdiutil create ./Trimmer-$version_number-Mac64.dmg -srcfolder Trimmer.app -ov -size 1000M
 
     - name: Upload Release Asset
       id: upload-release-asset
